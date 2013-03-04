@@ -22,3 +22,8 @@ type NeoServiceRoot struct {
 	Cypher            UrlTemplate `json:"cypher"`
 	Neo4jVersion      string      `json:"neo4j_version"`
 }
+
+type CypherResponse struct {
+	Columns []string
+	Data    []interface{}
+}

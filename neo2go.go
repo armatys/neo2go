@@ -1,6 +1,7 @@
 package neo2go
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -8,16 +9,16 @@ import (
 )
 
 type GraphDatabaseService struct {
-	*NeoServiceRoot
 	client  *http.Client
+	root    *NeoServiceRoot
 	selfURL string
 }
 
 func NewGraphDatabaseService(url string) *GraphDatabaseService {
 	service := &GraphDatabaseService{
-		NeoServiceRoot: new(NeoServiceRoot),
-		client:         &http.Client{},
-		selfURL:        url,
+		client:  &http.Client{},
+		root:    new(NeoServiceRoot),
+		selfURL: url,
 	}
 	return service
 }
@@ -28,12 +29,40 @@ func (self *GraphDatabaseService) Connect() (*NeoResponse, error) {
 		return nil, err
 	}
 
-	neoResponse, err := self.execute(req, self.NeoServiceRoot)
+	neoResponse, err := self.execute(req, self.root)
 	if err != nil {
 		return nil, err
 	}
 
 	return neoResponse, nil
+}
+
+func (self *GraphDatabaseService) Cypher(cql string, params []NeoProperty) (*CypherResponse, error) {
+	bodyMap := map[string]interface{}{
+		"query":  cql,
+		"params": params,
+	}
+	bodyData, err := json.Marshal(bodyMap)
+	if err != nil {
+		return nil, err
+	}
+	buf := bytes.NewBuffer(bodyData)
+	req, err := NewNeoRequest("POST", self.root.Cypher.Render(), buf)
+	if err != nil {
+		return nil, err
+	}
+
+	cypherResp := new(CypherResponse)
+	neoResponse, err := self.execute(req, cypherResp)
+	if err != nil {
+		return nil, err
+	}
+
+	if neoResponse.StatusCode != 200 {
+		return nil, fmt.Errorf(neoResponse.NeoError.Message)
+	}
+
+	return cypherResp, nil
 }
 
 func (self *GraphDatabaseService) execute(neoRequest *NeoRequest, v interface{}) (*NeoResponse, error) {
