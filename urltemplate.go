@@ -1,7 +1,9 @@
 package neo2go
 
 import (
+	"bytes"
 	"fmt"
+	"net/url"
 	"regexp"
 	"strings"
 )
@@ -18,13 +20,24 @@ type urlParameter struct {
 }
 
 type UrlTemplate struct {
-	parameters []urlParameter
-	template   string
+	// Contains the string as passed by the server.
+	template string
+	// Contains either a 2-element int array of indices that correspond
+	// to sections of the template which do not need to be rendered;
+	// or a urlParameter.
+	sections []interface{}
 }
 
 func (u *UrlTemplate) parse() error {
 	indices := u.paramIndices()
+	prevIndex := 0
+
 	for _, indexPair := range indices {
+		if indexPair[0] > prevIndex {
+			u.sections = append(u.sections, [2]int{prevIndex, indexPair[0]})
+		}
+		prevIndex = indexPair[1]
+
 		paramString := u.template[indexPair[0]:indexPair[1]]
 		s := strings.Trim(paramString, "{}")
 
@@ -56,7 +69,7 @@ func (u *UrlTemplate) parseList(s string) error {
 	var param urlParameter
 	param.Delimiter = matches[1]
 	param.Name = matches[2]
-	u.parameters = append(u.parameters, param)
+	u.sections = append(u.sections, param)
 
 	return nil
 }
@@ -74,14 +87,63 @@ func (u *UrlTemplate) parseNamedParams(s string) error {
 		var param urlParameter
 		param.Queried = queried
 		param.Name = name
-		u.parameters = append(u.parameters, param)
+		u.sections = append(u.sections, param)
 	}
 
 	return nil
 }
 
-func (u *UrlTemplate) Render(params ...string) string {
-	return ""
+func (u *UrlTemplate) Render(params map[string]interface{}) (string, error) {
+	var buf bytes.Buffer
+	questionMarkInserted := false
+	wasLastSectionQueried := false
+
+	for _, section := range u.sections {
+		if indices, ok := section.([2]int); ok {
+			buf.WriteString(u.template[indices[0]:indices[1]])
+		} else if urlparam, ok := section.(urlParameter); ok {
+			if params[urlparam.Name] == nil && !urlparam.Queried {
+				return "", fmt.Errorf("The value for key '%v' is required.", urlparam.Name)
+			}
+			if s, ok := params[urlparam.Name].(string); ok {
+				if len(urlparam.Delimiter) > 0 {
+					return "", fmt.Errorf("The type of the value for key '%v' is a `string`, but `[]string` was expected.")
+				}
+				if urlparam.Queried {
+					if !questionMarkInserted {
+						buf.WriteString("?")
+						questionMarkInserted = true
+					}
+					if wasLastSectionQueried {
+						buf.WriteString("&")
+					}
+					buf.WriteString(url.QueryEscape(urlparam.Name))
+					buf.WriteString("=")
+					buf.WriteString(url.QueryEscape(s))
+					wasLastSectionQueried = true
+				} else {
+					buf.WriteString(s)
+				}
+			} else if arr, ok := params[urlparam.Name].([]string); ok {
+				if len(urlparam.Delimiter) == 0 {
+					return "", fmt.Errorf("The type of the value for key '%v' is a `[]string`, but `string` was expected.")
+				}
+
+				maxIndexForPlacingDelimiter := len(arr) - 2
+				escapedDelimiter := url.QueryEscape(urlparam.Delimiter)
+				for i, s := range arr {
+					buf.WriteString(url.QueryEscape(s))
+					if i <= maxIndexForPlacingDelimiter {
+						buf.WriteString(escapedDelimiter)
+					}
+				}
+			} else if params[urlparam.Name] != nil {
+				return "", fmt.Errorf("The type of the value for key '%v' is not supported (use `string` or `[]string`).", urlparam.Name)
+			}
+		}
+	}
+
+	return buf.String(), nil
 }
 
 func (u *UrlTemplate) String() string {

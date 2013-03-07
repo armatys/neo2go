@@ -47,7 +47,8 @@ func (self *GraphDatabaseService) Cypher(cql string, params []NeoProperty) (*Cyp
 		return nil, err
 	}
 	buf := bytes.NewBuffer(bodyData)
-	req, err := NewNeoRequest("POST", self.root.Cypher.Render(), buf)
+	url := self.root.Cypher.String()
+	req, err := NewNeoRequest("POST", url, buf)
 	if err != nil {
 		return nil, err
 	}
