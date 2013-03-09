@@ -28,6 +28,12 @@ type UrlTemplate struct {
 	sections []interface{}
 }
 
+func NewUrlTemplate(url string) (*UrlTemplate, error) {
+	u := new(UrlTemplate)
+	u.template = url
+	return u, u.parse()
+}
+
 func (u *UrlTemplate) parse() error {
 	indices := u.paramIndices()
 	prevIndex := 0
@@ -93,6 +99,52 @@ func (u *UrlTemplate) parseNamedParams(s string) error {
 	return nil
 }
 
+func (u *UrlTemplate) renderUrlParameterIntoBuffer(urlparam *urlParameter, buf *bytes.Buffer, paramValue interface{}, questionMarkInserted *bool, wasLastSectionQueried *bool) error {
+	if paramValue == nil && !urlparam.Queried {
+		return fmt.Errorf("The value for key '%v' is required.", urlparam.Name)
+	}
+
+	if s, ok := paramValue.(string); ok {
+		if len(urlparam.Delimiter) > 0 {
+			return fmt.Errorf("The type of the value for key '%v' is a `string`, but `[]string` was expected.")
+		}
+
+		if urlparam.Queried {
+			if !*questionMarkInserted {
+				buf.WriteString("?")
+				*questionMarkInserted = true
+			}
+			if *wasLastSectionQueried {
+				buf.WriteString("&")
+			}
+
+			buf.WriteString(url.QueryEscape(urlparam.Name))
+			buf.WriteString("=")
+			buf.WriteString(url.QueryEscape(s))
+			*wasLastSectionQueried = true
+		} else {
+			buf.WriteString(s)
+		}
+	} else if arr, ok := paramValue.([]string); ok {
+		if len(urlparam.Delimiter) == 0 {
+			return fmt.Errorf("The type of the value for key '%v' is a `[]string`, but `string` was expected.")
+		}
+
+		maxIndexForPlacingDelimiter := len(arr) - 2
+		escapedDelimiter := url.QueryEscape(urlparam.Delimiter)
+		for i, s := range arr {
+			buf.WriteString(url.QueryEscape(s))
+			if i <= maxIndexForPlacingDelimiter {
+				buf.WriteString(escapedDelimiter)
+			}
+		}
+	} else if paramValue != nil {
+		return fmt.Errorf("The type of the value for key '%v' is not supported (use `string` or `[]string`).", urlparam.Name)
+	}
+
+	return nil
+}
+
 func (u *UrlTemplate) Render(params map[string]interface{}) (string, error) {
 	var buf bytes.Buffer
 	questionMarkInserted := false
@@ -102,43 +154,9 @@ func (u *UrlTemplate) Render(params map[string]interface{}) (string, error) {
 		if indices, ok := section.([2]int); ok {
 			buf.WriteString(u.template[indices[0]:indices[1]])
 		} else if urlparam, ok := section.(urlParameter); ok {
-			if params[urlparam.Name] == nil && !urlparam.Queried {
-				return "", fmt.Errorf("The value for key '%v' is required.", urlparam.Name)
-			}
-			if s, ok := params[urlparam.Name].(string); ok {
-				if len(urlparam.Delimiter) > 0 {
-					return "", fmt.Errorf("The type of the value for key '%v' is a `string`, but `[]string` was expected.")
-				}
-				if urlparam.Queried {
-					if !questionMarkInserted {
-						buf.WriteString("?")
-						questionMarkInserted = true
-					}
-					if wasLastSectionQueried {
-						buf.WriteString("&")
-					}
-					buf.WriteString(url.QueryEscape(urlparam.Name))
-					buf.WriteString("=")
-					buf.WriteString(url.QueryEscape(s))
-					wasLastSectionQueried = true
-				} else {
-					buf.WriteString(s)
-				}
-			} else if arr, ok := params[urlparam.Name].([]string); ok {
-				if len(urlparam.Delimiter) == 0 {
-					return "", fmt.Errorf("The type of the value for key '%v' is a `[]string`, but `string` was expected.")
-				}
-
-				maxIndexForPlacingDelimiter := len(arr) - 2
-				escapedDelimiter := url.QueryEscape(urlparam.Delimiter)
-				for i, s := range arr {
-					buf.WriteString(url.QueryEscape(s))
-					if i <= maxIndexForPlacingDelimiter {
-						buf.WriteString(escapedDelimiter)
-					}
-				}
-			} else if params[urlparam.Name] != nil {
-				return "", fmt.Errorf("The type of the value for key '%v' is not supported (use `string` or `[]string`).", urlparam.Name)
+			err := u.renderUrlParameterIntoBuffer(&urlparam, &buf, params[urlparam.Name], &questionMarkInserted, &wasLastSectionQueried)
+			if err != nil {
+				return "", err
 			}
 		}
 	}

@@ -6,21 +6,25 @@ type NeoError struct {
 	Stacktrace []string `json:"stacktrace"`
 }
 
+func (n *NeoError) Error() string {
+	return n.Message
+}
+
 type NeoResponse struct {
 	StatusCode int
-	NeoError   *NeoError
+	NeoError   error
 }
 
 type NeoServiceRoot struct {
-	Node              UrlTemplate `json:"node"`
-	ReferenceNode     UrlTemplate `json:"reference_node,omitempty"`
-	NodeIndex         UrlTemplate `json:"node_index"`
-	RelationshipIndex UrlTemplate `json:"relationship_index"`
-	ExtensionsInfo    UrlTemplate `json:"extensions_info"`
-	RelationshipTypes UrlTemplate `json:"relationship_types"`
-	Batch             UrlTemplate `json:"batch"`
-	Cypher            UrlTemplate `json:"cypher"`
-	Neo4jVersion      string      `json:"neo4j_version"`
+	Node              *UrlTemplate `json:"node"`
+	ReferenceNode     *UrlTemplate `json:"reference_node,omitempty"`
+	NodeIndex         *UrlTemplate `json:"node_index"`
+	RelationshipIndex *UrlTemplate `json:"relationship_index"`
+	ExtensionsInfo    *UrlTemplate `json:"extensions_info"`
+	RelationshipTypes *UrlTemplate `json:"relationship_types"`
+	Batch             *UrlTemplate `json:"batch"`
+	Cypher            *UrlTemplate `json:"cypher"`
+	Neo4jVersion      string       `json:"neo4j_version"`
 }
 
 type CypherResponse struct {

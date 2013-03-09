@@ -26,10 +26,42 @@ String  sequence of Unicode characters
 */
 
 type NeoPropertyValue struct {
-	Value interface{}
+	Value   interface{}
+	batchId NeoBatchId
 }
 
 type NeoProperty struct {
-	Key   string
-	Value NeoPropertyValue
+	Key     string
+	Value   *NeoPropertyValue
+	batchId NeoBatchId
+}
+
+type NeoNode struct {
+	AllRelationships           *UrlTemplate
+	AllTypedRelationships      *UrlTemplate
+	CreateRelationship         *UrlTemplate
+	Data                       []NeoProperty
+	Extensions                 []*UrlTemplate
+	IncomingRelationships      *UrlTemplate
+	IncomingTypedRelationships *UrlTemplate
+	OutgoingRelationships      *UrlTemplate
+	OutgoingTypedRelationships *UrlTemplate
+	PagedTraverse              *UrlTemplate
+	Properties                 *UrlTemplate
+	Property                   *UrlTemplate
+	Self                       *UrlTemplate
+	Traverse                   *UrlTemplate
+	batchId                    NeoBatchId
+}
+
+type NeoRelationship struct {
+	Data       []NeoProperty
+	Extensions []*UrlTemplate
+	Start      *UrlTemplate
+	Property   *UrlTemplate
+	Self       *UrlTemplate
+	Properties *UrlTemplate
+	Type       string
+	End        *UrlTemplate
+	batchId    NeoBatchId
 }
