@@ -37,11 +37,11 @@ type NeoProperty struct {
 }
 
 type NeoNode struct {
-	AllRelationships           *UrlTemplate
-	AllTypedRelationships      *UrlTemplate
-	CreateRelationship         *UrlTemplate
-	Data                       []NeoProperty
-	Extensions                 []*UrlTemplate
+	AllRelationships      *UrlTemplate
+	AllTypedRelationships *UrlTemplate
+	CreateRelationship    *UrlTemplate
+	//Data                       []*NeoProperty
+	//Extensions                 []*UrlTemplate `json:"extensions,omitempty"`
 	IncomingRelationships      *UrlTemplate
 	IncomingTypedRelationships *UrlTemplate
 	OutgoingRelationships      *UrlTemplate

@@ -120,7 +120,7 @@ func TestParsingNamedParams(t *testing.T) {
 
 func TestRenderingWithNoParameters(t *testing.T) {
 	tpl := new(UrlTemplate)
-	tpl.UnmarshalJSON([]byte("http://localhost:7474/db/data/node/1/paged/traverse/{returnType}{?pageSize,leaseTime}"))
+	tpl.UnmarshalJSON([]byte(`"http://localhost:7474/db/data/node/1/paged/traverse/{returnType}{?pageSize,leaseTime}"`))
 	s, err := tpl.Render(nil)
 	if err == nil {
 		t.Fatalf("Error was expected, but rendered a string: '%v'", s)
@@ -142,7 +142,7 @@ func TestRenderingWithNoParameters(t *testing.T) {
 
 func TestRenderingSimpleParam(t *testing.T) {
 	tpl := new(UrlTemplate)
-	tpl.UnmarshalJSON([]byte("http://localhost:7474/db/data/node/1/paged/traverse/{returnType}{?pageSize,leaseTime}"))
+	tpl.UnmarshalJSON([]byte(`"http://localhost:7474/db/data/node/1/paged/traverse/{returnType}{?pageSize,leaseTime}"`))
 
 	params := map[string]interface{}{
 		"returnType": "node",
@@ -160,7 +160,7 @@ func TestRenderingSimpleParam(t *testing.T) {
 
 func TestRenderingSimpleParamAndQueried(t *testing.T) {
 	tpl := new(UrlTemplate)
-	tpl.UnmarshalJSON([]byte("http://localhost:7474/db/data/node/1/paged/traverse/{returnType}{?pageSize,leaseTime}"))
+	tpl.UnmarshalJSON([]byte(`"http://localhost:7474/db/data/node/1/paged/traverse/{returnType}{?pageSize,leaseTime}"`))
 
 	params := map[string]interface{}{
 		"leaseTime":  "100",
@@ -181,7 +181,7 @@ func TestRenderingSimpleParamAndQueried(t *testing.T) {
 
 func TestRenderingArray(t *testing.T) {
 	tpl := new(UrlTemplate)
-	tpl.UnmarshalJSON([]byte("http://localhost:7474/db/data/node/9/relationships/all/{-list|&|types}"))
+	tpl.UnmarshalJSON([]byte(`"http://localhost:7474/db/data/node/9/relationships/all/{-list|&|types}"`))
 
 	params := map[string]interface{}{
 		"types": []string{"T1", "T2", "T3"},

@@ -169,7 +169,8 @@ func (u *UrlTemplate) String() string {
 }
 
 func (u *UrlTemplate) UnmarshalJSON(data []byte) error {
-	u.template = string(data)
+	s := string(data)
+	u.template = s[1 : len(s)-1]
 	return u.parse()
 }
 

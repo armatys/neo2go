@@ -10,11 +10,7 @@ var _ = fmt.Println
 func TestConnecting(t *testing.T) {
 	service, err := NewGraphDatabaseService("http://localhost:7474/db/data")
 	if err != nil {
-		t.Fatal(err)
-	}
-	neoResp := service.Connect()
-	if neoResp.StatusCode != 200 {
-		t.Fatalf("Server returned status code %d, but 200 was expected.", neoResp.StatusCode)
+		t.Fatalf("Error while connecting: %v", err.Error())
 	}
 	if len(service.builder.root.Neo4jVersion) == 0 {
 		t.Fatalf("Expected to receive neo4j version identifier.")
@@ -22,24 +18,35 @@ func TestConnecting(t *testing.T) {
 }
 
 func TestConnectingConnectionRefused(t *testing.T) {
-	service, err := NewGraphDatabaseService("http://localhost:38479/db/data")
-	if err != nil {
-		t.Fatal(err)
-	}
-	neoResp := service.Connect()
-	if neoResp.NeoError == nil {
+	_, err := NewGraphDatabaseService("http://localhost:38479/db/data")
+	if err == nil {
 		t.Fatalf("Connection succeeded, but should not.")
 	}
 }
 
-func TestConnectingGetNodeWithNoConnection(t *testing.T) {
+func TestCreateGetDeleteNode(t *testing.T) {
 	service, err := NewGraphDatabaseService("http://localhost:7474/db/data")
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("Error while connecting: %v", err.Error())
 	}
 
-	_, resp := service.GetNode("http://localhost:38479/db/data/node/1")
-	if resp.StatusCode != 600 {
-		t.Fatal(resp.NeoError)
+	node, resp := service.CreateNode()
+	if resp.StatusCode != 201 {
+		t.Fatalf("Server returned unexpected response: %v", resp.NeoError.Error())
+	}
+
+	node2, resp := service.GetNode(node.Self.String())
+	if resp.StatusCode != 200 {
+		t.Fatalf("Server returned unexpected response: %v", resp.NeoError.Error())
+	}
+
+	resp = service.DeleteNode(node2)
+	if resp.StatusCode != 204 {
+		t.Fatalf("Server returned unexpected response: %v", resp.NeoError.Error())
+	}
+
+	_, resp = service.GetNode(node.Self.String())
+	if resp.StatusCode != 404 {
+		t.Fatalf("Server returned unexpected response: %v", resp.NeoError.Error())
 	}
 }

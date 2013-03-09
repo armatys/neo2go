@@ -11,9 +11,7 @@ import (
 //var _ GraphIndexer = (*GraphDatabaseService)(nil)
 
 type GraphDatabaseService struct {
-	client *http.Client
-	//root   *NeoServiceRoot
-	//Self   *UrlTemplate
+	client  *http.Client
 	builder *NeoRequestBuilder
 }
 
@@ -23,17 +21,29 @@ type neoExecutor interface {
 }
 
 func NewGraphDatabaseService(url string) (*GraphDatabaseService, error) {
-	tmpl, err := NewUrlTemplate(url)
+	service := GraphDatabaseService{
+		client:  &http.Client{},
+		builder: &NeoRequestBuilder{new(NeoServiceRoot), &UrlTemplate{}},
+	}
+
+	selfTemplate, err := NewUrlTemplate(url)
 	if err != nil {
 		return nil, err
 	}
-	service := &GraphDatabaseService{
-		client: &http.Client{},
-		//root:   new(NeoServiceRoot),
-		//Self:   tmpl,
-		builder: &NeoRequestBuilder{new(NeoServiceRoot), tmpl},
+	service.builder.self = selfTemplate
+
+	// TODO actual connect could be postponed to `execute` method
+	// instead of `builder` there could be `map[string]*NeoRequestBuilder
+	// which would be a map from database url to a builder
+	// that way multiple databases could be supported?
+	req, err := service.builder.Connect()
+	resp := service.execute(req, err)
+
+	if resp.StatusCode != 200 {
+		return nil, resp.NeoError
 	}
-	return service, nil
+
+	return &service, nil
 }
 
 func (g *GraphDatabaseService) Batch() *NeoBatch {
@@ -54,11 +64,6 @@ func (g *GraphDatabaseService) Batch() *NeoBatch {
 	batch := new(NeoBatch)
 	batch.service = g
 	return batch
-}
-
-func (g *GraphDatabaseService) Connect() *NeoResponse {
-	req, err := g.builder.Connect()
-	return g.execute(req, err)
 }
 
 func (g *GraphDatabaseService) Cypher(cql string, params []*NeoProperty) (*CypherResponse, *NeoResponse) {
