@@ -11,8 +11,13 @@ func (n *NeoError) Error() string {
 }
 
 type NeoResponse struct {
-	StatusCode int
-	NeoError   error
+	ExpectedCode int
+	StatusCode   int
+	NeoError     error
+}
+
+func (n *NeoResponse) Ok() bool {
+	return n.ExpectedCode == n.StatusCode
 }
 
 type NeoServiceRoot struct {

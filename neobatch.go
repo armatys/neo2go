@@ -38,20 +38,21 @@ func (n *NeoBatch) CreateNode() (*NeoNode, *NeoResponse) {
 
 	if err != nil {
 		n.requestBuilderErrors = append(n.requestBuilderErrors, err)
-		return result, &NeoResponse{600, err}
+		return result, &NeoResponse{201, 600, err}
 	}
 
 	return result, nil
 }
 
 func (n *NeoBatch) Commit() *NeoResponse {
+	expectedStatus := 200
 	if n.currentBatchId == 0 {
-		return &NeoResponse{600, fmt.Errorf("This batch does not contain any operations.")}
+		return &NeoResponse{expectedStatus, 600, fmt.Errorf("This batch does not contain any operations.")}
 	}
 
 	if len(n.requestBuilderErrors) > 0 {
 		firstError := n.requestBuilderErrors[0]
-		return &NeoResponse{600, fmt.Errorf("Errors during construction of requests: %v", firstError.Error())}
+		return &NeoResponse{expectedStatus, 600, fmt.Errorf("Errors during construction of requests: %v", firstError.Error())}
 	}
 
 	elements := make([]*neoBatchElement, len(n.requests))
@@ -67,7 +68,7 @@ func (n *NeoBatch) Commit() *NeoResponse {
 
 	bodyData, err := json.Marshal(elements)
 	if n.currentBatchId == 0 {
-		return &NeoResponse{600, fmt.Errorf("Could not serialize batch element: %v", err.Error())}
+		return &NeoResponse{expectedStatus, 600, fmt.Errorf("Could not serialize batch element: %v", err.Error())}
 	}
 
 	results := make([]interface{}, len(n.requests))
@@ -75,7 +76,7 @@ func (n *NeoBatch) Commit() *NeoResponse {
 		results[i] = req.result
 	}
 	neoRequest, err := NewNeoRequest("POST", n.service.builder.root.Batch.String(), bodyData, results)
-	neoResponse := n.service.execute(neoRequest, err)
+	neoResponse := n.service.execute(neoRequest, expectedStatus, err)
 
 	return neoResponse
 }
