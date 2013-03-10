@@ -6,14 +6,14 @@ type Grapher interface {
 	// 17.5.1
 	CreateNode() (*NeoNode, *NeoResponse)
 	// 17.5.2
-	CreateNodeWithProperties([]*NeoProperty) (*NeoNode, *NeoResponse)
+	CreateNodeWithProperties(map[string]interface{}) (*NeoNode, *NeoResponse)
 
 	// 17.11 Unique indexes (for nodes and relationships); a separate interface?
 	//CreateNodeOrFail() (*NeoNode, *NeoResponse)
-	//CreateNodeWithPropertiesOrFail([]NeoProperty) (*NeoNode, *NeoResponse)
+	//CreateNodeWithPropertiesOrFail(map[string]interface{}) (*NeoNode, *NeoResponse)
 
 	//GetOrCreateNode() (*NeoNode, *NeoResponse)
-	//GetOrCreateNodeWithProperties([]NeoProperty) (*NeoNode, *NeoResponse)
+	//GetOrCreateNodeWithProperties(map[string]interface{}) (*NeoNode, *NeoResponse)
 
 	// 17.5.5
 	DeleteNode(node *NeoNode) *NeoResponse
@@ -28,21 +28,21 @@ type Grapher interface {
 	// 17.6.2
 	CreateRelationshipWithType(source *NeoNode, target *NeoNode, relType string) (*NeoRelationship, *NeoResponse)
 	// 17.6.3
-	CreateRelationshipWithProperties(source *NeoNode, target *NeoNode, properties []*NeoProperty) (*NeoRelationship, *NeoResponse)
+	CreateRelationshipWithProperties(source *NeoNode, target *NeoNode, properties map[string]interface{}) (*NeoRelationship, *NeoResponse)
 	// 17.6.3
-	CreateRelationshipWithPropertiesAndType(source *NeoNode, target *NeoNode, properties []*NeoProperty, relType string) (*NeoRelationship, *NeoResponse)
+	CreateRelationshipWithPropertiesAndType(source *NeoNode, target *NeoNode, properties map[string]interface{}, relType string) (*NeoRelationship, *NeoResponse)
 
 	// 17.6.4
 	DeleteRelationship(*NeoRelationship) *NeoResponse
 
 	// 17.6.5
-	GetRelationshipProperties(*NeoRelationship) ([]*NeoProperty, *NeoResponse)
+	GetRelationshipProperties(*NeoRelationship) (map[string]interface{}, *NeoResponse)
 	// 17.6.6
-	ReplaceRelationshipProperties(*NeoRelationship, []*NeoProperty) *NeoResponse
+	ReplaceRelationshipProperties(*NeoRelationship, map[string]interface{}) *NeoResponse
 	// 17.6.7
-	GetRelationshipProperty(relationship *NeoRelationship, propertyKey string) (*NeoPropertyValue, *NeoResponse)
+	GetRelationshipProperty(relationship *NeoRelationship, propertyKey string) (interface{}, *NeoResponse)
 	// 17.6.8
-	SetRelationshipProperty(*NeoRelationship, *NeoProperty) *NeoResponse
+	SetRelationshipProperty(rel *NeoRelationship, propertyKey string, propertyValue interface{}) *NeoResponse
 
 	// 17.6.9
 	GetAllNodeRelationships(*NeoNode) ([]*NeoRelationship, *NeoResponse)
@@ -60,18 +60,18 @@ type Grapher interface {
 	GetRelationshipTypes() ([]string, *NeoResponse)
 
 	// 17.8.1
-	SetNodeProperty(*NeoNode, *NeoProperty) *NeoResponse
+	SetNodeProperty(node *NeoNode, properyyKey string, propertyValue interface{}) *NeoResponse
 	// 17.8.2
-	ReplaceNodeProperties(*NeoNode, []*NeoProperty) *NeoResponse
+	ReplaceNodeProperties(*NeoNode, map[string]interface{}) *NeoResponse
 	// 17.8.3
-	GetNodeProperties(*NeoNode) ([]*NeoProperty, *NeoResponse)
+	GetNodeProperties(*NeoNode) (map[string]interface{}, *NeoResponse)
 	// 17.8.6
 	DeleteNodeProperties(*NeoNode) *NeoResponse
 	// 17.8.7
 	DeleteNodePropertyForKeyName(node *NeoNode, keyName string) *NeoResponse
 
 	// 17.9.1
-	UpdateRelationshipProperty(*NeoRelationship, []*NeoProperty) *NeoResponse
+	UpdateRelationshipProperty(*NeoRelationship, map[string]interface{}) *NeoResponse
 	// 17.9.2
 	DeleteRelationshipProperties(*NeoRelationship) *NeoResponse
 	// 17.9.3

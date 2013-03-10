@@ -4,16 +4,16 @@ import (
 	"encoding/json"
 )
 
-type NeoRequestBuilder struct {
+type neoRequestBuilder struct {
 	root *NeoServiceRoot
 	self *UrlTemplate
 }
 
-func (n *NeoRequestBuilder) Connect() (*NeoRequest, error) {
-	return n.prepareRequest("GET", n.self.String(), nil, n.root)
+func (n *neoRequestBuilder) Connect() (*NeoRequest, error) {
+	return n.prepareRequest("GET", n.self.String(), nil, n.root, 200)
 }
 
-func (n *NeoRequestBuilder) Cypher(cql string, params []*NeoProperty) (*CypherResponse, *NeoRequest, error) {
+func (n *neoRequestBuilder) Cypher(cql string, params map[string]interface{}) (*CypherResponse, *NeoRequest, error) {
 	bodyMap := map[string]interface{}{
 		"query":  cql,
 		"params": params,
@@ -21,32 +21,32 @@ func (n *NeoRequestBuilder) Cypher(cql string, params []*NeoProperty) (*CypherRe
 
 	url := n.root.Cypher.String()
 	cypherResp := new(CypherResponse)
-	req, err := n.prepareRequest("POST", url, &bodyMap, cypherResp)
+	req, err := n.prepareRequest("POST", url, &bodyMap, cypherResp, 200)
 	return cypherResp, req, err
 }
 
-func (n *NeoRequestBuilder) CreateNode() (*NeoNode, *NeoRequest, error) {
+func (n *neoRequestBuilder) CreateNode() (*NeoNode, *NeoRequest, error) {
 	return n.CreateNodeWithProperties(nil)
 }
 
-func (n *NeoRequestBuilder) CreateNodeWithProperties(properties []*NeoProperty) (*NeoNode, *NeoRequest, error) {
+func (n *neoRequestBuilder) CreateNodeWithProperties(properties map[string]interface{}) (*NeoNode, *NeoRequest, error) {
 	node := new(NeoNode)
-	req, err := n.prepareRequest("POST", n.root.Node.String(), properties, node)
+	req, err := n.prepareRequest("POST", n.root.Node.String(), properties, node, 201)
 	return node, req, err
 }
 
-func (n *NeoRequestBuilder) DeleteNode(node *NeoNode) (*NeoRequest, error) {
-	req, err := n.prepareRequest("DELETE", node.Self.String(), nil, nil)
+func (n *neoRequestBuilder) DeleteNode(node *NeoNode) (*NeoRequest, error) {
+	req, err := n.prepareRequest("DELETE", node.Self.String(), nil, nil, 204)
 	return req, err
 }
 
-func (n *NeoRequestBuilder) GetNode(uri string) (*NeoNode, *NeoRequest, error) {
+func (n *neoRequestBuilder) GetNode(uri string) (*NeoNode, *NeoRequest, error) {
 	node := new(NeoNode)
-	req, err := n.prepareRequest("GET", uri, nil, node)
+	req, err := n.prepareRequest("GET", uri, nil, node, 200)
 	return node, req, err
 }
 
-func (n *NeoRequestBuilder) prepareRequest(method string, url string, body interface{}, result interface{}) (*NeoRequest, error) {
+func (n *neoRequestBuilder) prepareRequest(method string, url string, body interface{}, result interface{}, expectedStatus int) (*NeoRequest, error) {
 	var (
 		bodyData []byte
 		err      error
@@ -59,7 +59,7 @@ func (n *NeoRequestBuilder) prepareRequest(method string, url string, body inter
 		}
 	}
 
-	req, err := NewNeoRequest(method, url, bodyData, result)
+	req, err := NewNeoRequest(method, url, bodyData, result, expectedStatus)
 
 	if err != nil {
 		return nil, err

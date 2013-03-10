@@ -3,6 +3,7 @@ package neo2go
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 )
 
 //var _ Grapher = (*NeoBatch)(nil)
@@ -10,10 +11,22 @@ import (
 type NeoBatchId uint32
 
 type neoBatchElement struct {
-	body   interface{}
-	id     NeoBatchId
-	method string
-	to     string
+	Body   interface{} `json:"body"`
+	Id     NeoBatchId  `json:"id"`
+	Method string      `json:"method"`
+	To     string      `json:"to"`
+}
+
+func (n *neoBatchElement) String() string {
+	return fmt.Sprintf("<neoBatchElement[%d] %v %v>", n.Id, n.Method, n.To)
+}
+
+type NeoBatchResultElement struct {
+	From     string
+	Id       NeoBatchId
+	Location string
+	Body     interface{}
+	Status   int
 }
 
 type NeoBatch struct {
@@ -21,7 +34,7 @@ type NeoBatch struct {
 	service              *GraphDatabaseService
 	requests             []*NeoRequest
 	requestBuilderErrors []error
-	responses            []interface{}
+	responses            []*NeoResponse
 }
 
 func (n *NeoBatch) nextBatchId() NeoBatchId {
@@ -32,16 +45,78 @@ func (n *NeoBatch) nextBatchId() NeoBatchId {
 func (n *NeoBatch) CreateNode() (*NeoNode, *NeoResponse) {
 	result, req, err := n.service.builder.CreateNode()
 	batchId := n.nextBatchId()
-	result.batchId = batchId
 	req.batchId = batchId
 	n.requests = append(n.requests, req)
+	resp := &NeoResponse{req.expectedStatus, 0, nil}
+	n.responses = append(n.responses, resp)
+
+	result.batchId = batchId
+	result.Self = NewPlainUrlTemplate(fmt.Sprintf("{%d}", batchId))
 
 	if err != nil {
 		n.requestBuilderErrors = append(n.requestBuilderErrors, err)
-		return result, &NeoResponse{201, 600, err}
+		resp.StatusCode = 600
+		resp.NeoError = err
+		return result, resp
 	}
 
-	return result, nil
+	return result, resp
+}
+
+func (n *NeoBatch) CreateNodeWithProperties(properties map[string]interface{}) (*NeoNode, *NeoResponse) {
+	result, req, err := n.service.builder.CreateNodeWithProperties(properties)
+	batchId := n.nextBatchId()
+	result.batchId = batchId
+	req.batchId = batchId
+	n.requests = append(n.requests, req)
+	resp := &NeoResponse{req.expectedStatus, 0, nil}
+	n.responses = append(n.responses, resp)
+
+	if err != nil {
+		n.requestBuilderErrors = append(n.requestBuilderErrors, err)
+		resp.StatusCode = 600
+		resp.NeoError = err
+		return result, resp
+	}
+
+	return result, resp
+}
+
+func (n *NeoBatch) DeleteNode(node *NeoNode) *NeoResponse {
+	req, err := n.service.builder.DeleteNode(node)
+	batchId := n.nextBatchId()
+	req.batchId = batchId
+	n.requests = append(n.requests, req)
+	resp := &NeoResponse{req.expectedStatus, 0, nil}
+	n.responses = append(n.responses, resp)
+
+	if err != nil {
+		n.requestBuilderErrors = append(n.requestBuilderErrors, err)
+		resp.StatusCode = 600
+		resp.NeoError = err
+		return resp
+	}
+
+	return resp
+}
+
+func (n *NeoBatch) GetNode(uri string) (*NeoNode, *NeoResponse) {
+	result, req, err := n.service.builder.GetNode(uri)
+	batchId := n.nextBatchId()
+	req.batchId = batchId
+	result.batchId = batchId
+	n.requests = append(n.requests, req)
+	resp := &NeoResponse{req.expectedStatus, 0, nil}
+	n.responses = append(n.responses, resp)
+
+	if err != nil {
+		n.requestBuilderErrors = append(n.requestBuilderErrors, err)
+		resp.StatusCode = 600
+		resp.NeoError = err
+		return nil, resp
+	}
+
+	return result, resp
 }
 
 func (n *NeoBatch) Commit() *NeoResponse {
@@ -57,13 +132,19 @@ func (n *NeoBatch) Commit() *NeoResponse {
 
 	elements := make([]*neoBatchElement, len(n.requests))
 	baseUrlLength := len(n.service.builder.self.String()) - 1
-	for _, req := range n.requests {
+	for i, req := range n.requests {
 		batchElem := new(neoBatchElement)
-		batchElem.body = nil
-		batchElem.id = req.batchId
-		batchElem.method = req.Method
-		batchElem.to = req.RequestURI[baseUrlLength:]
-		elements = append(elements, batchElem)
+		//batchElem.Body = ""
+		batchElem.Id = req.batchId
+		batchElem.Method = req.Method
+
+		re := regexp.MustCompile(`^%7B([0-9]+)%7D$`)
+		if match := re.FindStringSubmatch(req.URL.String()); len(match) > 1 {
+			batchElem.To = fmt.Sprintf("{%s}", match[1])
+		} else {
+			batchElem.To = req.URL.String()[baseUrlLength:]
+		}
+		elements[i] = batchElem
 	}
 
 	bodyData, err := json.Marshal(elements)
@@ -71,12 +152,23 @@ func (n *NeoBatch) Commit() *NeoResponse {
 		return &NeoResponse{expectedStatus, 600, fmt.Errorf("Could not serialize batch element: %v", err.Error())}
 	}
 
-	results := make([]interface{}, len(n.requests))
+	results := make([]*NeoBatchResultElement, len(n.requests))
 	for i, req := range n.requests {
-		results[i] = req.result
+		resultElem := new(NeoBatchResultElement)
+		resultElem.Body = req.result
+		results[i] = resultElem
 	}
-	neoRequest, err := NewNeoRequest("POST", n.service.builder.root.Batch.String(), bodyData, results)
-	neoResponse := n.service.execute(neoRequest, expectedStatus, err)
+
+	neoRequest, err := NewNeoRequest("POST", n.service.builder.root.Batch.String(), bodyData, &results, 200)
+	neoResponse := n.service.execute(neoRequest, err)
+
+	// It is possible, (if neoResponse.Status is 200) to populate the responses
+	// n.responses; with status codes, maybe errors
+
+	for i, resultElem := range results {
+		n.responses[i].StatusCode = resultElem.Status
+		n.responses[i].ExpectedCode = n.requests[i].expectedStatus
+	}
 
 	return neoResponse
 }

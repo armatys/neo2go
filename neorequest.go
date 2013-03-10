@@ -7,11 +7,12 @@ import (
 
 type NeoRequest struct {
 	*http.Request
-	batchId NeoBatchId
-	result  interface{}
+	batchId        NeoBatchId
+	expectedStatus int
+	result         interface{}
 }
 
-func NewNeoRequest(method, urlStr string, bodyData []byte, result interface{}) (*NeoRequest, error) {
+func NewNeoRequest(method, urlStr string, bodyData []byte, result interface{}, expectedStatus int) (*NeoRequest, error) {
 	var (
 		req *http.Request
 		err error
@@ -33,5 +34,6 @@ func NewNeoRequest(method, urlStr string, bodyData []byte, result interface{}) (
 	neoRequest := new(NeoRequest)
 	neoRequest.Request = req
 	neoRequest.result = result
+	neoRequest.expectedStatus = expectedStatus
 	return neoRequest, nil
 }

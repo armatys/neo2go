@@ -12,18 +12,13 @@ import (
 
 type GraphDatabaseService struct {
 	client  *http.Client
-	builder *NeoRequestBuilder
-}
-
-type neoExecutor interface {
-	Execute(method string, url string, body interface{}, result interface{}) *NeoResponse
-	Commit() *NeoResponse
+	builder *neoRequestBuilder
 }
 
 func NewGraphDatabaseService() *GraphDatabaseService {
 	service := GraphDatabaseService{
 		client:  &http.Client{},
-		builder: &NeoRequestBuilder{new(NeoServiceRoot), &UrlTemplate{}},
+		builder: &neoRequestBuilder{new(NeoServiceRoot), &UrlTemplate{}},
 	}
 	return &service
 }
@@ -32,66 +27,58 @@ func (g *GraphDatabaseService) Connect(url string) *NeoResponse {
 	g.builder.self.template = url
 	err := g.builder.self.parse()
 	if err != nil {
-		return &NeoResponse{200, 600, err}
+		return &NeoResponse{0, 600, err}
 	}
 
 	req, err := g.builder.Connect()
-	return g.execute(req, 200, err)
+	return g.execute_(req, err, false)
 }
 
 func (g *GraphDatabaseService) Batch() *NeoBatch {
-	// Creates a struct Batch object, with a Commit method
-	// The batch object contains methods similar to GraphDatabaseService
-	// Example usage:
-	/*
-		batch := graphService.Batch()
-		node1 := batch.CreateNode() // node1 gets id == 0
-		node2 := batch.CreateNodeWithProperties(...) // node2 gets id == 1
-		batch.CreateRelationship(node1, node2) // there can be variations of this method: CreateRelationship(WithProperties(AndType)?)?
-		responses, err := batch.Commit() // after this call, the batch cannot be modified or executed; it's in 'destroyed' state
-	*/
-	// Where responses is an array of interfaces?
-	// where possible value types are NeoNode, NeoProperty, NeoRelationship
-	// If error, then probably? there are no responses at all, since the service is transactional
-	// (Unless error ocurred after received valid answer from server?)
 	batch := new(NeoBatch)
 	batch.service = g
 	return batch
 }
 
-func (g *GraphDatabaseService) Cypher(cql string, params []*NeoProperty) (*CypherResponse, *NeoResponse) {
+func (g *GraphDatabaseService) Cypher(cql string, params map[string]interface{}) (*CypherResponse, *NeoResponse) {
 	result, req, err := g.builder.Cypher(cql, params)
-	return result, g.execute(req, 200, err)
+	return result, g.execute(req, err)
 }
 
 // Grapher interface
 
 func (g *GraphDatabaseService) CreateNode() (*NeoNode, *NeoResponse) {
 	result, req, err := g.builder.CreateNode()
-	return result, g.execute(req, 201, err)
+	return result, g.execute(req, err)
 }
 
-func (g *GraphDatabaseService) CreateNodeWithProperties(properties []*NeoProperty) (*NeoNode, *NeoResponse) {
+func (g *GraphDatabaseService) CreateNodeWithProperties(properties map[string]interface{}) (*NeoNode, *NeoResponse) {
 	result, req, err := g.builder.CreateNodeWithProperties(properties)
-	return result, g.execute(req, 201, err)
+	return result, g.execute(req, err)
 }
 
 func (g *GraphDatabaseService) DeleteNode(node *NeoNode) *NeoResponse {
 	req, err := g.builder.DeleteNode(node)
-	return g.execute(req, 204, err)
+	return g.execute(req, err)
 }
 
 func (g *GraphDatabaseService) GetNode(uri string) (*NeoNode, *NeoResponse) {
 	result, req, err := g.builder.GetNode(uri)
-	return result, g.execute(req, 200, err)
+	return result, g.execute(req, err)
+}
+
+func (g *GraphDatabaseService) execute(neoRequest *NeoRequest, err error) *NeoResponse {
+	return g.execute_(neoRequest, err, true)
 }
 
 // Execute given request. If passed err is not nil, returns immediately with that error
 // embedded inside NeoResponse.
 // If the returned NeoResponse.StatuCode contains a 6xx, it means there was a local error
 // while processing the request or response.
-func (g *GraphDatabaseService) execute(neoRequest *NeoRequest, expectedStatusCode int, err error) *NeoResponse {
-	if g.builder.self == nil {
+func (g *GraphDatabaseService) execute_(neoRequest *NeoRequest, err error, connRequired bool) *NeoResponse {
+	expectedStatusCode := neoRequest.expectedStatus
+
+	if connRequired && len(g.builder.root.Neo4jVersion) == 0 {
 		return &NeoResponse{expectedStatusCode, 600, fmt.Errorf("Cannot execute the request because the client is not connected.")}
 	}
 

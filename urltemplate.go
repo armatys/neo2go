@@ -34,6 +34,13 @@ func NewUrlTemplate(url string) (*UrlTemplate, error) {
 	return u, u.parse()
 }
 
+func NewPlainUrlTemplate(url string) *UrlTemplate {
+	u := new(UrlTemplate)
+	u.template = url
+	u.sections = append(u.sections, [2]int{0, len(url)})
+	return u
+}
+
 func (u *UrlTemplate) parse() error {
 	indices := u.paramIndices()
 	prevIndex := 0

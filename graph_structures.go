@@ -1,5 +1,10 @@
 package neo2go
 
+import (
+	"path"
+	"strconv"
+)
+
 // http://docs.neo4j.org/chunked/milestone/graphdb-neo4j-properties.html
 /*
 Type    Description       Value range
@@ -25,23 +30,12 @@ char    16-bit unsigned   u0000 to uffff (0 to 65535)
 String  sequence of Unicode characters
 */
 
-type NeoPropertyValue struct {
-	Value   interface{}
-	batchId NeoBatchId
-}
-
-type NeoProperty struct {
-	Key     string
-	Value   *NeoPropertyValue
-	batchId NeoBatchId
-}
-
 type NeoNode struct {
-	AllRelationships      *UrlTemplate
-	AllTypedRelationships *UrlTemplate
-	CreateRelationship    *UrlTemplate
-	//Data                       []*NeoProperty
-	//Extensions                 []*UrlTemplate `json:"extensions,omitempty"`
+	AllRelationships           *UrlTemplate
+	AllTypedRelationships      *UrlTemplate
+	CreateRelationship         *UrlTemplate
+	Data                       map[string]interface{}
+	Extensions                 map[string]interface{}
 	IncomingRelationships      *UrlTemplate
 	IncomingTypedRelationships *UrlTemplate
 	OutgoingRelationships      *UrlTemplate
@@ -54,8 +48,18 @@ type NeoNode struct {
 	batchId                    NeoBatchId
 }
 
+func (n *NeoNode) Id() int64 {
+	selfUri := n.Self.String()
+	_, file := path.Split(selfUri)
+	id, err := strconv.ParseInt(file, 10, 64)
+	if err != nil {
+		return 0
+	}
+	return id
+}
+
 type NeoRelationship struct {
-	Data       []NeoProperty
+	Data       map[string]interface{}
 	Extensions []*UrlTemplate
 	Start      *UrlTemplate
 	Property   *UrlTemplate

@@ -34,5 +34,5 @@ type NeoServiceRoot struct {
 
 type CypherResponse struct {
 	Columns []string
-	Data    []interface{}
+	Data    [][]interface{}
 }
