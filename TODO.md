@@ -1,0 +1,8 @@
+- better error reporting
+- exported types cleanup
+- general code cleanup
+- file names
+- error reporting for failed batches
+- implement grapher
+- implement graph indexer
+- documentation

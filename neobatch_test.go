@@ -105,12 +105,7 @@ func TestBatchDeleteNonExistentAndCreate(t *testing.T) {
 
 	resp = batch.Commit()
 
-	if !responseHasSucceededWithCode(resp, 200) {
+	if !responseHasFailedWithCode(resp, 600) {
 		t.Fatalf("Batch did return an error: %v", resp.NeoError)
-	}
-
-	_, resp = service.GetNode(node.Self.String())
-	if !responseHasFailedWithCode(resp, 404) {
-		t.Fatalf("Server returned unexpected response: %v", resp.NeoError.Error())
 	}
 }

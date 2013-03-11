@@ -1,6 +1,7 @@
 package neo2go
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -30,8 +31,9 @@ func (g *GraphDatabaseService) Connect(url string) *NeoResponse {
 		return &NeoResponse{0, 600, err}
 	}
 
-	req, err := g.builder.Connect()
-	return g.execute_(req, err, false)
+	reqData := g.builder.Connect()
+	req, err := g.httpRequestFromData(reqData)
+	return g.execute_(req, err, reqData.expectedStatus, reqData.result, false)
 }
 
 func (g *GraphDatabaseService) Batch() *NeoBatch {
@@ -41,49 +43,69 @@ func (g *GraphDatabaseService) Batch() *NeoBatch {
 }
 
 func (g *GraphDatabaseService) Cypher(cql string, params map[string]interface{}) (*CypherResponse, *NeoResponse) {
-	result, req, err := g.builder.Cypher(cql, params)
-	return result, g.execute(req, err)
+	result, req := g.builder.Cypher(cql, params)
+	return result, g.executeFromRequestData(req)
 }
 
 // Grapher interface
 
 func (g *GraphDatabaseService) CreateNode() (*NeoNode, *NeoResponse) {
-	result, req, err := g.builder.CreateNode()
-	return result, g.execute(req, err)
+	result, req := g.builder.CreateNode()
+	return result, g.executeFromRequestData(req)
 }
 
 func (g *GraphDatabaseService) CreateNodeWithProperties(properties map[string]interface{}) (*NeoNode, *NeoResponse) {
-	result, req, err := g.builder.CreateNodeWithProperties(properties)
-	return result, g.execute(req, err)
+	result, req := g.builder.CreateNodeWithProperties(properties)
+	return result, g.executeFromRequestData(req)
 }
 
 func (g *GraphDatabaseService) DeleteNode(node *NeoNode) *NeoResponse {
-	req, err := g.builder.DeleteNode(node)
-	return g.execute(req, err)
+	req := g.builder.DeleteNode(node)
+	return g.executeFromRequestData(req)
 }
 
 func (g *GraphDatabaseService) GetNode(uri string) (*NeoNode, *NeoResponse) {
-	result, req, err := g.builder.GetNode(uri)
-	return result, g.execute(req, err)
+	result, req := g.builder.GetNode(uri)
+	return result, g.executeFromRequestData(req)
 }
 
-func (g *GraphDatabaseService) execute(neoRequest *NeoRequest, err error) *NeoResponse {
-	return g.execute_(neoRequest, err, true)
+func (g *GraphDatabaseService) httpRequestFromData(reqData *neoRequestData) (*NeoHttpRequest, error) {
+	var bodyBuffer *bytes.Buffer = nil
+
+	if reqData.body != nil {
+		bodyData, err := json.Marshal(reqData.body)
+		if err != nil {
+			return nil, err
+		}
+		bodyBuffer = bytes.NewBuffer(bodyData)
+	} else {
+		bodyBuffer = nil
+	}
+
+	req, err := NewNeoHttpRequest(reqData.method, reqData.requestUrl, bodyBuffer)
+	return req, err
+}
+
+func (g *GraphDatabaseService) executeFromRequestData(reqData *neoRequestData) *NeoResponse {
+	req, err := g.httpRequestFromData(reqData)
+	return g.execute(req, err, reqData.expectedStatus, reqData.result)
+}
+
+func (g *GraphDatabaseService) execute(neoRequest *NeoHttpRequest, neoRequestErr error, expectedStatus int, result interface{}) *NeoResponse {
+	return g.execute_(neoRequest, neoRequestErr, expectedStatus, result, true)
 }
 
 // Execute given request. If passed err is not nil, returns immediately with that error
 // embedded inside NeoResponse.
 // If the returned NeoResponse.StatuCode contains a 6xx, it means there was a local error
 // while processing the request or response.
-func (g *GraphDatabaseService) execute_(neoRequest *NeoRequest, err error, connRequired bool) *NeoResponse {
-	expectedStatusCode := neoRequest.expectedStatus
-
+func (g *GraphDatabaseService) execute_(neoRequest *NeoHttpRequest, neoRequestErr error, expectedStatusCode int, result interface{}, connRequired bool) *NeoResponse {
 	if connRequired && len(g.builder.root.Neo4jVersion) == 0 {
 		return &NeoResponse{expectedStatusCode, 600, fmt.Errorf("Cannot execute the request because the client is not connected.")}
 	}
 
-	if err != nil {
-		return &NeoResponse{expectedStatusCode, 600, err}
+	if neoRequestErr != nil {
+		return &NeoResponse{expectedStatusCode, 600, neoRequestErr}
 	}
 
 	resp, err := g.client.Do(neoRequest.Request)
@@ -102,7 +124,7 @@ func (g *GraphDatabaseService) execute_(neoRequest *NeoRequest, err error, connR
 		container = neoErr
 		neoResponse.NeoError = neoErr
 	} else {
-		container = neoRequest.result
+		container = result
 	}
 
 	if container != nil {

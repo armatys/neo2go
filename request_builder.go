@@ -1,19 +1,24 @@
 package neo2go
 
-import (
-	"encoding/json"
-)
-
 type neoRequestBuilder struct {
 	root *NeoServiceRoot
 	self *UrlTemplate
 }
 
-func (n *neoRequestBuilder) Connect() (*NeoRequest, error) {
-	return n.prepareRequest("GET", n.self.String(), nil, n.root, 200)
+type neoRequestData struct {
+	batchId        NeoBatchId
+	body           interface{}
+	expectedStatus int
+	method         string
+	result         interface{}
+	requestUrl     string
 }
 
-func (n *neoRequestBuilder) Cypher(cql string, params map[string]interface{}) (*CypherResponse, *NeoRequest, error) {
+func (n *neoRequestBuilder) Connect() *neoRequestData {
+	return &neoRequestData{expectedStatus: 200, method: "GET", result: n.root, requestUrl: n.self.String()}
+}
+
+func (n *neoRequestBuilder) Cypher(cql string, params map[string]interface{}) (*CypherResponse, *neoRequestData) {
 	bodyMap := map[string]interface{}{
 		"query":  cql,
 		"params": params,
@@ -21,49 +26,27 @@ func (n *neoRequestBuilder) Cypher(cql string, params map[string]interface{}) (*
 
 	url := n.root.Cypher.String()
 	cypherResp := new(CypherResponse)
-	req, err := n.prepareRequest("POST", url, &bodyMap, cypherResp, 200)
-	return cypherResp, req, err
+	requestData := neoRequestData{body: &bodyMap, expectedStatus: 200, method: "POST", result: cypherResp, requestUrl: url}
+	return cypherResp, &requestData
 }
 
-func (n *neoRequestBuilder) CreateNode() (*NeoNode, *NeoRequest, error) {
+func (n *neoRequestBuilder) CreateNode() (*NeoNode, *neoRequestData) {
 	return n.CreateNodeWithProperties(nil)
 }
 
-func (n *neoRequestBuilder) CreateNodeWithProperties(properties map[string]interface{}) (*NeoNode, *NeoRequest, error) {
+func (n *neoRequestBuilder) CreateNodeWithProperties(properties map[string]interface{}) (*NeoNode, *neoRequestData) {
 	node := new(NeoNode)
-	req, err := n.prepareRequest("POST", n.root.Node.String(), properties, node, 201)
-	return node, req, err
+	url := n.root.Node.String()
+	requestData := neoRequestData{body: &properties, expectedStatus: 201, method: "POST", result: node, requestUrl: url}
+	return node, &requestData
 }
 
-func (n *neoRequestBuilder) DeleteNode(node *NeoNode) (*NeoRequest, error) {
-	req, err := n.prepareRequest("DELETE", node.Self.String(), nil, nil, 204)
-	return req, err
+func (n *neoRequestBuilder) DeleteNode(node *NeoNode) *neoRequestData {
+	return &neoRequestData{expectedStatus: 204, method: "DELETE", requestUrl: node.Self.String()}
 }
 
-func (n *neoRequestBuilder) GetNode(uri string) (*NeoNode, *NeoRequest, error) {
+func (n *neoRequestBuilder) GetNode(nodeUrl string) (*NeoNode, *neoRequestData) {
 	node := new(NeoNode)
-	req, err := n.prepareRequest("GET", uri, nil, node, 200)
-	return node, req, err
-}
-
-func (n *neoRequestBuilder) prepareRequest(method string, url string, body interface{}, result interface{}, expectedStatus int) (*NeoRequest, error) {
-	var (
-		bodyData []byte
-		err      error
-	)
-
-	if body != nil {
-		bodyData, err = json.Marshal(body)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	req, err := NewNeoRequest(method, url, bodyData, result, expectedStatus)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
+	requestData := neoRequestData{expectedStatus: 200, method: "GET", result: node, requestUrl: nodeUrl}
+	return node, &requestData
 }

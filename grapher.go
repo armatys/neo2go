@@ -8,13 +8,6 @@ type Grapher interface {
 	// 17.5.2
 	CreateNodeWithProperties(map[string]interface{}) (*NeoNode, *NeoResponse)
 
-	// 17.11 Unique indexes (for nodes and relationships); a separate interface?
-	//CreateNodeOrFail() (*NeoNode, *NeoResponse)
-	//CreateNodeWithPropertiesOrFail(map[string]interface{}) (*NeoNode, *NeoResponse)
-
-	//GetOrCreateNode() (*NeoNode, *NeoResponse)
-	//GetOrCreateNodeWithProperties(map[string]interface{}) (*NeoNode, *NeoResponse)
-
 	// 17.5.5
 	DeleteNode(node *NeoNode) *NeoResponse
 	// 17.5.3

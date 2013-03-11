@@ -22,7 +22,7 @@ func (n *NeoResponse) Ok() bool {
 
 type NeoServiceRoot struct {
 	Node              *UrlTemplate `json:"node"`
-	ReferenceNode     *UrlTemplate `json:"reference_node,omitempty"`
+	ReferenceNode     *UrlTemplate `json:"reference_node"`
 	NodeIndex         *UrlTemplate `json:"node_index"`
 	RelationshipIndex *UrlTemplate `json:"relationship_index"`
 	ExtensionsInfo    *UrlTemplate `json:"extensions_info"`
