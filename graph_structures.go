@@ -1,6 +1,7 @@
 package neo2go
 
 import (
+	"fmt"
 	"path"
 	"strconv"
 )
@@ -58,6 +59,20 @@ func (n *NeoNode) Id() int64 {
 	return id
 }
 
+func (n *NeoNode) SelfReference() string {
+	if n.Self != nil {
+		return n.Self.String()
+	}
+	if n.batchId > 0 {
+		return fmt.Sprintf(`{%d}`, n.batchId)
+	}
+	return ""
+}
+
+func (n *NeoNode) setBatchId(bid NeoBatchId) {
+	n.batchId = bid
+}
+
 type NeoRelationship struct {
 	Data       map[string]interface{}
 	Extensions []*UrlTemplate
@@ -68,4 +83,128 @@ type NeoRelationship struct {
 	Type       string
 	End        *UrlTemplate
 	batchId    NeoBatchId
+}
+
+func (n *NeoRelationship) SelfReference() string {
+	if n.Self != nil {
+		return n.Self.String()
+	}
+	if n.batchId > 0 {
+		return fmt.Sprintf(`{%d}`, n.batchId)
+	}
+	return ""
+}
+
+func (n *NeoRelationship) setBatchId(bid NeoBatchId) {
+	n.batchId = bid
+}
+
+type NeoIndex struct {
+	Provider string
+	Template *UrlTemplate
+	Type     string
+	batchId  NeoBatchId
+}
+
+func (n *NeoIndex) SelfReference() string {
+	if n.Template != nil {
+		url, err := n.Template.Render(nil)
+		if err == nil {
+			return url
+		}
+	}
+	if n.batchId > 0 {
+		return fmt.Sprintf(`{%d}`, n.batchId)
+	}
+	return ""
+}
+
+func (n *NeoIndex) setBatchId(bid NeoBatchId) {
+	n.batchId = bid
+}
+
+type NeoCodeSnippet struct {
+	Body     string
+	Language string
+}
+
+type NeoTraversalOrder uint8
+
+const (
+	NeoTraversalBreadthFirst NeoTraversalOrder = iota
+	NeoTraversalDepthFirst
+)
+
+type NeoTraversalDirection uint8
+
+const (
+	NeoTraversalAll NeoTraversalDirection = iota
+	NeoTraversalIn
+	NeoTraversalOut
+)
+
+type NeoTraversalUniqueness uint8
+
+const (
+	NeoTraversalNodeGlobal NeoTraversalUniqueness = iota
+	NeoTraversalNone
+	NeoTraversalRelationhipGlobal
+	NeoTraversalNodePath
+	NeoTraversalRelationshipPath
+)
+
+type NeoTraversalRelationship struct {
+	Direction NeoTraversalDirection
+	Type      string
+}
+
+type NeoTraversal struct {
+	LeaseTime      uint32
+	PageSize       uint32
+	Order          NeoTraversalOrder
+	Relationships  []*NeoTraversalRelationship
+	Uniqueness     NeoTraversalUniqueness
+	PruneEvaluator *NeoCodeSnippet
+	ReturnFilter   *NeoCodeSnippet
+	MaxDepth       uint32
+}
+
+type NeoPath struct {
+	Weight        float64
+	Start         string
+	Nodes         []string
+	Length        uint32
+	Relationships []string
+	End           string
+}
+
+type NeoFullPath struct {
+	Start         *NeoNode
+	Nodes         []*NeoNode
+	Length        uint32
+	Relationships []*NeoRelationship
+	End           *NeoNode
+}
+
+type NeoPagedTraverser struct {
+	LeaseTime uint32
+	PageSize  uint32
+	url       string
+}
+
+type NeoGraphAlgorithm uint8
+
+const (
+	NeoShortestPath NeoGraphAlgorithm = iota
+	NeoAllSimplePaths
+	NeoAllPaths
+	NeoDijkstra
+)
+
+type NeoPathFinderSpec struct {
+	CostProperty  string
+	DefaultCost   float64
+	MaxDepth      uint32
+	Relationships *NeoTraversalRelationship
+	Algorithm     NeoGraphAlgorithm
 }

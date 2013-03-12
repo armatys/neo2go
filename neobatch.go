@@ -9,7 +9,17 @@ import (
 
 //var _ Grapher = (*NeoBatch)(nil)
 
+var batchIdRegExp *regexp.Regexp
+
+func init() {
+	batchIdRegExp = regexp.MustCompile(`^{([0-9]+)}$`)
+}
+
 type NeoBatchId uint32
+
+type batchIdSetter interface {
+	setBatchId(batchId NeoBatchId)
+}
 
 type neoBatchElement struct {
 	Body   interface{} `json:"body"`
@@ -43,52 +53,81 @@ func (n *NeoBatch) nextBatchId() NeoBatchId {
 	return n.currentBatchId
 }
 
-func (n *NeoBatch) CreateNode() (*NeoNode, *NeoResponse) {
-	result, req := n.service.builder.CreateNode()
+func (n *NeoBatch) queueRequestData(reqData *neoRequestData) *NeoResponse {
 	batchId := n.nextBatchId()
-	req.batchId = batchId
-	n.requests = append(n.requests, req)
-	resp := &NeoResponse{req.expectedStatus, 0, nil}
+	reqData.setBatchId(batchId)
+
+	resp := &NeoResponse{reqData.expectedStatus, 0, nil}
 	n.responses = append(n.responses, resp)
-
-	result.batchId = batchId
-	result.Self = NewPlainUrlTemplate(fmt.Sprintf("{%d}", batchId))
-
-	return result, resp
-}
-
-func (n *NeoBatch) CreateNodeWithProperties(properties map[string]interface{}) (*NeoNode, *NeoResponse) {
-	result, req := n.service.builder.CreateNodeWithProperties(properties)
-	batchId := n.nextBatchId()
-	result.batchId = batchId
-	req.batchId = batchId
-	n.requests = append(n.requests, req)
-	resp := &NeoResponse{req.expectedStatus, 0, nil}
-	n.responses = append(n.responses, resp)
-
-	return result, resp
-}
-
-func (n *NeoBatch) DeleteNode(node *NeoNode) *NeoResponse {
-	req := n.service.builder.DeleteNode(node)
-	batchId := n.nextBatchId()
-	req.batchId = batchId
-	n.requests = append(n.requests, req)
-	resp := &NeoResponse{req.expectedStatus, 0, nil}
-	n.responses = append(n.responses, resp)
+	n.requests = append(n.requests, reqData)
 
 	return resp
 }
 
-func (n *NeoBatch) GetNode(uri string) (*NeoNode, *NeoResponse) {
-	result, req := n.service.builder.GetNode(uri)
+func (n *NeoBatch) queueRequestDataWithResult(reqData *neoRequestData, result batchIdSetter) *NeoResponse {
 	batchId := n.nextBatchId()
-	req.batchId = batchId
-	result.batchId = batchId
-	n.requests = append(n.requests, req)
-	resp := &NeoResponse{req.expectedStatus, 0, nil}
-	n.responses = append(n.responses, resp)
+	reqData.setBatchId(batchId)
+	result.setBatchId(batchId)
 
+	resp := &NeoResponse{reqData.expectedStatus, 0, nil}
+	n.responses = append(n.responses, resp)
+	n.requests = append(n.requests, reqData)
+
+	return resp
+}
+
+func (n *NeoBatch) CreateNode() (*NeoNode, *NeoResponse) {
+	result, reqData := n.service.builder.CreateNode()
+	resp := n.queueRequestDataWithResult(reqData, result)
+	return result, resp
+}
+
+func (n *NeoBatch) CreateNodeWithProperties(properties map[string]interface{}) (*NeoNode, *NeoResponse) {
+	result, reqData := n.service.builder.CreateNodeWithProperties(properties)
+	resp := n.queueRequestDataWithResult(reqData, result)
+	return result, resp
+}
+
+func (n *NeoBatch) DeleteNode(node *NeoNode) *NeoResponse {
+	reqData := n.service.builder.DeleteNode(node)
+	return n.queueRequestData(reqData)
+}
+
+func (n *NeoBatch) GetNode(uri string) (*NeoNode, *NeoResponse) {
+	result, reqData := n.service.builder.GetNode(uri)
+	resp := n.queueRequestDataWithResult(reqData, result)
+	return result, resp
+}
+
+// Untested below
+
+func (n *NeoBatch) GetRelationship(uri string) (*NeoRelationship, *NeoResponse) {
+	result, reqData := n.service.builder.GetRelationship(uri)
+	resp := n.queueRequestDataWithResult(reqData, result)
+	return result, resp
+}
+
+func (n *NeoBatch) CreateRelationship(source *NeoNode, target *NeoNode) (*NeoRelationship, *NeoResponse) {
+	result, reqData := n.service.builder.CreateRelationship(source, target)
+	resp := n.queueRequestDataWithResult(reqData, result)
+	return result, resp
+}
+
+func (n *NeoBatch) CreateRelationshipWithType(source *NeoNode, target *NeoNode, relType string) (*NeoRelationship, *NeoResponse) {
+	result, reqData := n.service.builder.CreateRelationshipWithType(source, target, relType)
+	resp := n.queueRequestDataWithResult(reqData, result)
+	return result, resp
+}
+
+func (n *NeoBatch) CreateRelationshipWithProperties(source *NeoNode, target *NeoNode, properties map[string]interface{}) (*NeoRelationship, *NeoResponse) {
+	result, reqData := n.service.builder.CreateRelationshipWithProperties(source, target, properties)
+	resp := n.queueRequestDataWithResult(reqData, result)
+	return result, resp
+}
+
+func (n *NeoBatch) CreateRelationshipWithPropertiesAndType(source *NeoNode, target *NeoNode, properties map[string]interface{}, relType string) (*NeoRelationship, *NeoResponse) {
+	result, reqData := n.service.builder.CreateRelationshipWithPropertiesAndType(source, target, properties, relType)
+	resp := n.queueRequestDataWithResult(reqData, result)
 	return result, resp
 }
 
@@ -100,20 +139,20 @@ func (n *NeoBatch) Commit() *NeoResponse {
 
 	elements := make([]*neoBatchElement, len(n.requests))
 	baseUrlLength := len(n.service.builder.self.String()) - 1
-	for i, req := range n.requests {
+	for i, reqData := range n.requests {
 		batchElem := new(neoBatchElement)
-		batchElem.Body = req.body
-		batchElem.Id = req.batchId
-		batchElem.Method = req.method
+		batchElem.Body = reqData.body
+		batchElem.Id = reqData.batchId
+		batchElem.Method = reqData.method
 
-		re := regexp.MustCompile(`^{([0-9]+)}$`)
-		if match := re.FindStringSubmatch(req.requestUrl); len(match) > 1 {
-			batchElem.To = fmt.Sprintf("{%s}", match[1])
-		} else if len(req.requestUrl) >= baseUrlLength {
-			batchElem.To = req.requestUrl[baseUrlLength:]
+		if matches := batchIdRegExp.MatchString(reqData.requestUrl); matches {
+			batchElem.To = reqData.requestUrl
+		} else if len(reqData.requestUrl) >= baseUrlLength {
+			batchElem.To = reqData.requestUrl[baseUrlLength:]
 		} else {
-			return &NeoResponse{expectedStatus, 600, fmt.Errorf("Unknown/badly formatted url: %v", req.requestUrl)}
+			return &NeoResponse{expectedStatus, 600, fmt.Errorf("Unknown/badly formatted url: %v", reqData.requestUrl)}
 		}
+
 		elements[i] = batchElem
 	}
 
@@ -124,9 +163,9 @@ func (n *NeoBatch) Commit() *NeoResponse {
 	bodyBuf := bytes.NewBuffer(bodyData)
 
 	results := make([]*NeoBatchResultElement, len(n.requests))
-	for i, req := range n.requests {
+	for i, reqData := range n.requests {
 		resultElem := new(NeoBatchResultElement)
-		resultElem.Body = req.result
+		resultElem.Body = reqData.result
 		results[i] = resultElem
 	}
 

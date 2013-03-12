@@ -107,10 +107,6 @@ func (u *UrlTemplate) parseNamedParams(s string) error {
 }
 
 func (u *UrlTemplate) renderUrlParameterIntoBuffer(urlparam *urlParameter, buf *bytes.Buffer, paramValue interface{}, questionMarkInserted *bool, wasLastSectionQueried *bool) error {
-	if paramValue == nil && !urlparam.Queried {
-		return fmt.Errorf("The value for key '%v' is required.", urlparam.Name)
-	}
-
 	if s, ok := paramValue.(string); ok {
 		if len(urlparam.Delimiter) > 0 {
 			return fmt.Errorf("The type of the value for key '%v' is a `string`, but `[]string` was expected.")

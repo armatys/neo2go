@@ -43,31 +43,60 @@ func (g *GraphDatabaseService) Batch() *NeoBatch {
 }
 
 func (g *GraphDatabaseService) Cypher(cql string, params map[string]interface{}) (*CypherResponse, *NeoResponse) {
-	result, req := g.builder.Cypher(cql, params)
-	return result, g.executeFromRequestData(req)
+	result, reqData := g.builder.Cypher(cql, params)
+	return result, g.executeFromRequestData(reqData)
 }
 
 // Grapher interface
 
 func (g *GraphDatabaseService) CreateNode() (*NeoNode, *NeoResponse) {
-	result, req := g.builder.CreateNode()
-	return result, g.executeFromRequestData(req)
+	result, reqData := g.builder.CreateNode()
+	return result, g.executeFromRequestData(reqData)
 }
 
 func (g *GraphDatabaseService) CreateNodeWithProperties(properties map[string]interface{}) (*NeoNode, *NeoResponse) {
-	result, req := g.builder.CreateNodeWithProperties(properties)
-	return result, g.executeFromRequestData(req)
+	result, reqData := g.builder.CreateNodeWithProperties(properties)
+	return result, g.executeFromRequestData(reqData)
 }
 
 func (g *GraphDatabaseService) DeleteNode(node *NeoNode) *NeoResponse {
-	req := g.builder.DeleteNode(node)
-	return g.executeFromRequestData(req)
+	reqData := g.builder.DeleteNode(node)
+	return g.executeFromRequestData(reqData)
 }
 
 func (g *GraphDatabaseService) GetNode(uri string) (*NeoNode, *NeoResponse) {
-	result, req := g.builder.GetNode(uri)
-	return result, g.executeFromRequestData(req)
+	result, reqData := g.builder.GetNode(uri)
+	return result, g.executeFromRequestData(reqData)
 }
+
+// Untested below
+
+func (g *GraphDatabaseService) GetRelationship(uri string) (*NeoRelationship, *NeoResponse) {
+	result, reqData := g.builder.GetRelationship(uri)
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) CreateRelationship(source *NeoNode, target *NeoNode) (*NeoRelationship, *NeoResponse) {
+	result, reqData := g.builder.CreateRelationship(source, target)
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) CreateRelationshipWithType(source *NeoNode, target *NeoNode, relType string) (*NeoRelationship, *NeoResponse) {
+	result, reqData := g.builder.CreateRelationshipWithType(source, target, relType)
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) CreateRelationshipWithProperties(source *NeoNode, target *NeoNode, properties map[string]interface{}) (*NeoRelationship, *NeoResponse) {
+	result, reqData := g.builder.CreateRelationshipWithProperties(source, target, properties)
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) CreateRelationshipWithPropertiesAndType(source *NeoNode, target *NeoNode, properties map[string]interface{}, relType string) (*NeoRelationship, *NeoResponse) {
+	result, reqData := g.builder.CreateRelationshipWithPropertiesAndType(source, target, properties, relType)
+	return result, g.executeFromRequestData(reqData)
+}
+
+// Utility methods
 
 func (g *GraphDatabaseService) httpRequestFromData(reqData *neoRequestData) (*NeoHttpRequest, error) {
 	var bodyBuffer *bytes.Buffer = nil
@@ -78,12 +107,10 @@ func (g *GraphDatabaseService) httpRequestFromData(reqData *neoRequestData) (*Ne
 			return nil, err
 		}
 		bodyBuffer = bytes.NewBuffer(bodyData)
-	} else {
-		bodyBuffer = nil
+		return NewNeoHttpRequest(reqData.method, reqData.requestUrl, bodyBuffer)
 	}
 
-	req, err := NewNeoHttpRequest(reqData.method, reqData.requestUrl, bodyBuffer)
-	return req, err
+	return NewNeoHttpRequest(reqData.method, reqData.requestUrl, nil)
 }
 
 func (g *GraphDatabaseService) executeFromRequestData(reqData *neoRequestData) *NeoResponse {
