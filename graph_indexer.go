@@ -8,19 +8,19 @@ type GraphIndexer interface {
 	// 17.10.3
 	DeleteIndex(*NeoIndex) NeoResponse
 	// 17.10.4
-	GetNodeIndexes() ([]*NeoIndex, NeoResponse)
+	GetNodeIndexes() (map[string]*NeoIndex, NeoResponse)
 	// 17.10.5
-	AddNodeToIndex(*NeoNode, *NeoIndex) (*NeoNode, NeoResponse)
+	AddNodeToIndex(*NeoIndex, *NeoNode) (*NeoNode, NeoResponse)
 	// 17.10.6
-	RemoveAllIndexEntriesForNode(*NeoNode, *NeoIndex) NeoResponse
+	DeleteAllIndexEntriesForNode(*NeoIndex, *NeoNode) NeoResponse
 	// 17.10.7
-	RemoveAllIndexEntriesForNodeAndKey(node *NeoNode, key string, index *NeoIndex) NeoResponse
+	DeleteAllIndexEntriesForNodeAndKey(index *NeoIndex, node *NeoNode, key string) NeoResponse
 	// 17.10.8
-	RemoveAllIndexEntriesForNodeKeyAndValue(node *NeoNode, key string, value string, index *NeoIndex) NeoResponse
+	DeleteAllIndexEntriesForNodeKeyAndValue(index *NeoIndex, node *NeoNode, key string, value string) NeoResponse
 	// 17.10.9
-	FindNodeByExactMatch(value string) ([]*NeoNode, NeoResponse)
+	FindNodeByExactMatch(index *NeoIndex, key, value string) ([]*NeoNode, NeoResponse)
 	// 17.10.10
-	FindNodeByQuery(query string) ([]*NeoNode, NeoResponse)
+	FindNodeByQuery(index *NeoIndex, query string) ([]*NeoNode, NeoResponse)
 
 	// 17.10.1 - Relationships
 	CreateRelationshipIndex(name string) (*NeoIndex, NeoResponse)
@@ -29,25 +29,25 @@ type GraphIndexer interface {
 	// 17.10.4
 	GetRelationshipIndexes() ([]*NeoIndex, NeoResponse)
 	// 17.10.5
-	AddRelationshipToIndex(*NeoRelationship, *NeoIndex) (*NeoRelationship, NeoResponse)
+	AddRelationshipToIndex(*NeoIndex, *NeoRelationship) (*NeoRelationship, NeoResponse)
 	// 17.10.6
-	RemoveAllIndexEntriesForRelationship(*NeoRelationship, *NeoIndex) NeoResponse
+	DeleteAllIndexEntriesForRelationship(*NeoIndex, *NeoRelationship) NeoResponse
 	// 17.10.7
-	RemoveAllIndexEntriesForRelationshipAndKey(rel *NeoRelationship, key string, index *NeoIndex) NeoResponse
+	DeleteAllIndexEntriesForRelationshipAndKey(index *NeoIndex, rel *NeoRelationship, key string) NeoResponse
 	// 17.10.8
-	RemoveAllIndexEntriesForRelationshipKeyAndValue(rel *NeoRelationship, key string, value string, index *NeoIndex) NeoResponse
+	DeleteAllIndexEntriesForRelationshipKeyAndValue(index *NeoIndex, rel *NeoRelationship, key string, value string) NeoResponse
 	// 17.10.9
-	FindRelationshipByExactMatch(value string) ([]*NeoRelationship, NeoResponse)
+	FindRelationshipByExactMatch(index *NeoIndex, key, value string) ([]*NeoRelationship, NeoResponse)
 	// 17.10.10
-	FindRelationshipByQuery(query string) ([]*NeoRelationship, NeoResponse)
+	FindRelationshipByQuery(index *NeoIndex, query string) ([]*NeoRelationship, NeoResponse)
 
 	// 17.11.1
-	GetOrCreateUniqueNode(*NeoIndex) (*NeoNode, *NeoResponse)
-	GetOrCreateUniqueNodeWithProperties(*NeoIndex, map[string]interface{}) (*NeoNode, *NeoResponse)
+	GetOrCreateUniqueNode(index *NeoIndex, key, value string) (*NeoNode, *NeoResponse)
+	GetOrCreateUniqueNodeWithProperties(index *NeoIndex, key, value string, properties map[string]interface{}) (*NeoNode, *NeoResponse)
 
 	// 17.11.3
-	CreateUniqueNodeOrFail() (*NeoIndex, *NeoNode, *NeoResponse)
-	CreateUniqueNodeWithPropertiesOrFail(*NeoIndex, map[string]interface{}) (*NeoNode, *NeoResponse)
+	CreateUniqueNodeOrFail(index *NeoIndex, key, value string) (*NeoNode, *NeoResponse)
+	CreateUniqueNodeWithPropertiesOrFail(index *NeoIndex, key, value string, properties map[string]interface{}) (*NeoNode, *NeoResponse)
 
 	// 17.11.5
 	GetOrCreateUniqueRelationship(index *NeoIndex, source *NeoNode, target *NeoNode) (*NeoRelationship, *NeoResponse)

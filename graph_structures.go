@@ -50,13 +50,25 @@ type NeoNode struct {
 }
 
 func (n *NeoNode) Id() int64 {
-	selfUri := n.Self.String()
-	_, file := path.Split(selfUri)
-	id, err := strconv.ParseInt(file, 10, 64)
-	if err != nil {
-		return 0
+	if n.Self != nil {
+		selfUri := n.Self.String()
+		_, file := path.Split(selfUri)
+		id, err := strconv.ParseInt(file, 10, 64)
+		if err != nil {
+			return 0
+		}
+		return id
 	}
-	return id
+	return 0
+}
+
+func (n *NeoNode) IdOrBatchId() string {
+	if n.Self != nil {
+		return fmt.Sprintf("%d", n.Id())
+	} else if n.batchId > 0 {
+		return fmt.Sprintf("{%d}", n.batchId)
+	}
+	return ""
 }
 
 func (n *NeoNode) SelfReference() string {
@@ -83,6 +95,28 @@ type NeoRelationship struct {
 	Type       string
 	End        *UrlTemplate
 	batchId    NeoBatchId
+}
+
+func (n *NeoRelationship) Id() int64 {
+	if n.Self != nil {
+		selfUri := n.Self.String()
+		_, file := path.Split(selfUri)
+		id, err := strconv.ParseInt(file, 10, 64)
+		if err != nil {
+			return 0
+		}
+		return id
+	}
+	return 0
+}
+
+func (n *NeoRelationship) IdOrBatchId() string {
+	if n.Self != nil {
+		return fmt.Sprintf("%d", n.Id())
+	} else if n.batchId > 0 {
+		return fmt.Sprintf("{%d}", n.batchId)
+	}
+	return ""
 }
 
 func (n *NeoRelationship) SelfReference() string {

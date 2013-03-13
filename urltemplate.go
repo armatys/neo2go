@@ -106,10 +106,14 @@ func (u *UrlTemplate) parseNamedParams(s string) error {
 	return nil
 }
 
-func (u *UrlTemplate) renderUrlParameterIntoBuffer(urlparam *urlParameter, buf *bytes.Buffer, paramValue interface{}, questionMarkInserted *bool, wasLastSectionQueried *bool) error {
+func (u *UrlTemplate) renderUrlParameterIntoBuffer(urlparam *urlParameter, buf *bytes.Buffer, paramValue interface{}, questionMarkInserted *bool, wasLastSectionQueried *bool) (error, bool) {
+	if paramValue == nil && !urlparam.Queried {
+		return nil, true // true - should stop processing the template, even if there are more sections to process.
+	}
+
 	if s, ok := paramValue.(string); ok {
 		if len(urlparam.Delimiter) > 0 {
-			return fmt.Errorf("The type of the value for key '%v' is a `string`, but `[]string` was expected.")
+			return fmt.Errorf("The type of the value for key '%v' is a `string`, but `[]string` was expected."), true
 		}
 
 		if urlparam.Queried {
@@ -126,11 +130,11 @@ func (u *UrlTemplate) renderUrlParameterIntoBuffer(urlparam *urlParameter, buf *
 			buf.WriteString(url.QueryEscape(s))
 			*wasLastSectionQueried = true
 		} else {
-			buf.WriteString(s)
+			buf.WriteString(url.QueryEscape(s))
 		}
 	} else if arr, ok := paramValue.([]string); ok {
 		if len(urlparam.Delimiter) == 0 {
-			return fmt.Errorf("The type of the value for key '%v' is a `[]string`, but `string` was expected.")
+			return fmt.Errorf("The type of the value for key '%v' is a `[]string`, but `string` was expected."), true
 		}
 
 		maxIndexForPlacingDelimiter := len(arr) - 2
@@ -142,10 +146,10 @@ func (u *UrlTemplate) renderUrlParameterIntoBuffer(urlparam *urlParameter, buf *
 			}
 		}
 	} else if paramValue != nil {
-		return fmt.Errorf("The type of the value for key '%v' is not supported (use `string` or `[]string`).", urlparam.Name)
+		return fmt.Errorf("The type of the value for key '%v' is not supported (use `string` or `[]string`).", urlparam.Name), true
 	}
 
-	return nil
+	return nil, false
 }
 
 func (u *UrlTemplate) Render(params map[string]interface{}) (string, error) {
@@ -157,9 +161,12 @@ func (u *UrlTemplate) Render(params map[string]interface{}) (string, error) {
 		if indices, ok := section.([2]int); ok {
 			buf.WriteString(u.template[indices[0]:indices[1]])
 		} else if urlparam, ok := section.(urlParameter); ok {
-			err := u.renderUrlParameterIntoBuffer(&urlparam, &buf, params[urlparam.Name], &questionMarkInserted, &wasLastSectionQueried)
+			err, shouldStop := u.renderUrlParameterIntoBuffer(&urlparam, &buf, params[urlparam.Name], &questionMarkInserted, &wasLastSectionQueried)
 			if err != nil {
 				return "", err
+			}
+			if shouldStop {
+				break
 			}
 		}
 	}

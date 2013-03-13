@@ -137,7 +137,8 @@ func TestRenderingWithQueryParam(t *testing.T) {
 	tpl.UnmarshalJSON([]byte(`"http://localhost:7474/db/data/node/1/paged/traverse/{returnType}{?pageSize,leaseTime}"`))
 
 	params := map[string]interface{}{
-		"leaseTime": "100",
+		"returnType": "",
+		"leaseTime":  "100",
 	}
 	s, err := tpl.Render(params)
 	if err != nil {
@@ -155,8 +156,9 @@ func TestRenderingWithQueryParams(t *testing.T) {
 	tpl.UnmarshalJSON([]byte(`"http://localhost:7474/db/data/node/1/paged/traverse/{returnType}{?pageSize,leaseTime}"`))
 
 	params := map[string]interface{}{
-		"leaseTime": "100",
-		"pageSize":  "33",
+		"returnType": "",
+		"leaseTime":  "100",
+		"pageSize":   "33",
 	}
 	s, err := tpl.Render(params)
 	if err != nil {
@@ -204,6 +206,41 @@ func TestRenderingSimpleParamAndQueried(t *testing.T) {
 
 	// Note that the order of queried params is determined by the template.
 	expected := "http://localhost:7474/db/data/node/1/paged/traverse/node?pageSize=10&leaseTime=100"
+	if s != expected {
+		t.Fatalf("Expected to render '%v', but got '%v'", expected, s)
+	}
+}
+
+func TestNoOptionalArguments(t *testing.T) {
+	tpl := new(UrlTemplate)
+	tpl.UnmarshalJSON([]byte(`"http://localhost:7474/db/data/index/node/fulltext/{key}/{value}"`))
+
+	s, err := tpl.Render(nil)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err.Error())
+	}
+
+	// Note that the order of queried params is determined by the template.
+	expected := "http://localhost:7474/db/data/index/node/fulltext/"
+	if s != expected {
+		t.Fatalf("Expected to render '%v', but got '%v'", expected, s)
+	}
+}
+
+func TestOptionalArguments(t *testing.T) {
+	tpl := new(UrlTemplate)
+	tpl.UnmarshalJSON([]byte(`"http://localhost:7474/db/data/index/node/fulltext/{key}/{value}"`))
+
+	params := map[string]interface{}{
+		"key": "100",
+	}
+	s, err := tpl.Render(params)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err.Error())
+	}
+
+	// Note that the order of queried params is determined by the template.
+	expected := "http://localhost:7474/db/data/index/node/fulltext/100/"
 	if s != expected {
 		t.Fatalf("Expected to render '%v', but got '%v'", expected, s)
 	}

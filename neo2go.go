@@ -11,6 +11,8 @@ import (
 var _ Grapher = (*GraphDatabaseService)(nil)
 
 //var _ GraphIndexer = (*GraphDatabaseService)(nil)
+//var _ GraphPathFinder = (*GraphDatabaseService)(nil)
+//var _ GraphTraverser = (*GraphDatabaseService)(nil)
 
 type GraphDatabaseService struct {
 	client  *http.Client
