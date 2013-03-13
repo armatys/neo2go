@@ -475,4 +475,110 @@ func (n *neoRequestBuilder) CreateUniqueNodeWithPropertiesOrFail(index *NeoIndex
 	return &neoRequestData{body: params, expectedStatus: 201, method: "POST", result: nodeResult, requestUrl: url}
 }
 
-// 17.11.5
+func (n *neoRequestBuilder) GetOrCreateUniqueRelationship(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode) *neoRequestData {
+	var relResult *NeoRelationship
+	url := index.SelfReference() + "?uniqueness=get_or_create"
+	params := map[string]interface{}{
+		"key":   key,
+		"value": value,
+		"start": source.SelfReference(),
+		"end":   target.SelfReference(),
+	}
+	// TODO expectedStatus can be 200 or 201
+	return &neoRequestData{body: params, expectedStatus: 200, method: "POST", result: relResult, requestUrl: url}
+}
+
+func (n *neoRequestBuilder) GetOrCreateUniqueTypedRelationship(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string) *neoRequestData {
+	var relResult *NeoRelationship
+	url := index.SelfReference() + "?uniqueness=get_or_create"
+	params := map[string]interface{}{
+		"key":   key,
+		"value": value,
+		"start": source.SelfReference(),
+		"end":   target.SelfReference(),
+		"type":  relType,
+	}
+	// TODO expectedStatus can be 200 or 201
+	return &neoRequestData{body: params, expectedStatus: 200, method: "POST", result: relResult, requestUrl: url}
+}
+
+func (n *neoRequestBuilder) GetOrCreateUniqueRelationshipWithProperties(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, properties map[string]interface{}) *neoRequestData {
+	var relResult *NeoRelationship
+	url := index.SelfReference() + "?uniqueness=get_or_create"
+	params := map[string]interface{}{
+		"key":   key,
+		"value": value,
+		"start": source.SelfReference(),
+		"end":   target.SelfReference(),
+		"data":  properties,
+	}
+	// TODO expectedStatus can be 200 or 201
+	return &neoRequestData{body: params, expectedStatus: 200, method: "POST", result: relResult, requestUrl: url}
+}
+
+func (n *neoRequestBuilder) GetOrCreateUniqueTypedRelationshipWithProperties(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string, properties map[string]interface{}) *neoRequestData {
+	var relResult *NeoRelationship
+	url := index.SelfReference() + "?uniqueness=get_or_create"
+	params := map[string]interface{}{
+		"key":   key,
+		"value": value,
+		"start": source.SelfReference(),
+		"end":   target.SelfReference(),
+		"data":  properties,
+		"type":  relType,
+	}
+	// TODO expectedStatus can be 200 or 201
+	return &neoRequestData{body: params, expectedStatus: 200, method: "POST", result: relResult, requestUrl: url}
+}
+
+func (n *neoRequestBuilder) CreateUniqueRelationshipOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode) *neoRequestData {
+	var relResult *NeoRelationship
+	url := index.SelfReference() + "?uniqueness=create_or_fail"
+	params := map[string]interface{}{
+		"key":   key,
+		"value": value,
+		"start": source.SelfReference(),
+		"end":   target.SelfReference(),
+	}
+	return &neoRequestData{body: params, expectedStatus: 201, method: "POST", result: relResult, requestUrl: url}
+}
+
+func (n *neoRequestBuilder) CreateUniqueTypedRelationshipOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string) *neoRequestData {
+	var relResult *NeoRelationship
+	url := index.SelfReference() + "?uniqueness=create_or_fail"
+	params := map[string]interface{}{
+		"key":   key,
+		"value": value,
+		"start": source.SelfReference(),
+		"end":   target.SelfReference(),
+		"type":  relType,
+	}
+	return &neoRequestData{body: params, expectedStatus: 201, method: "POST", result: relResult, requestUrl: url}
+}
+
+func (n *neoRequestBuilder) CreateUniqueRelationshipWithPropertiesOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, properties map[string]interface{}) *neoRequestData {
+	var relResult *NeoRelationship
+	url := index.SelfReference() + "?uniqueness=create_or_fail"
+	params := map[string]interface{}{
+		"key":   key,
+		"value": value,
+		"start": source.SelfReference(),
+		"end":   target.SelfReference(),
+		"data":  properties,
+	}
+	return &neoRequestData{body: params, expectedStatus: 201, method: "POST", result: relResult, requestUrl: url}
+}
+
+func (n *neoRequestBuilder) CreateUniqueTypedRelationshipWithPropertiesOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string, properties map[string]interface{}) *neoRequestData {
+	var relResult *NeoRelationship
+	url := index.SelfReference() + "?uniqueness=create_or_fail"
+	params := map[string]interface{}{
+		"key":   key,
+		"value": value,
+		"start": source.SelfReference(),
+		"end":   target.SelfReference(),
+		"data":  properties,
+		"type":  relType,
+	}
+	return &neoRequestData{body: params, expectedStatus: 201, method: "POST", result: relResult, requestUrl: url}
+}
