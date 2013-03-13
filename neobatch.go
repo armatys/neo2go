@@ -7,7 +7,7 @@ import (
 	"regexp"
 )
 
-//var _ Grapher = (*NeoBatch)(nil)
+var _ Grapher = (*NeoBatch)(nil)
 
 var batchIdRegExp *regexp.Regexp
 
@@ -129,6 +129,106 @@ func (n *NeoBatch) CreateRelationshipWithPropertiesAndType(source *NeoNode, targ
 	result, reqData := n.service.builder.CreateRelationshipWithPropertiesAndType(source, target, properties, relType)
 	resp := n.queueRequestDataWithResult(reqData, result)
 	return result, resp
+}
+
+//======
+
+func (n *NeoBatch) DeleteRelationship(rel *NeoRelationship) *NeoResponse {
+	reqData := n.service.builder.DeleteRelationship(rel)
+	return n.queueRequestData(reqData)
+}
+
+func (n *NeoBatch) GetPropertiesForRelationship(rel *NeoRelationship) (map[string]interface{}, *NeoResponse) {
+	result, reqData := n.service.builder.GetPropertiesForRelationship(rel)
+	return result, n.queueRequestData(reqData)
+}
+
+func (n *NeoBatch) ReplacePropertiesForRelationship(rel *NeoRelationship, properties map[string]interface{}) *NeoResponse {
+	reqData := n.service.builder.ReplacePropertiesForRelationship(rel, properties)
+	return n.queueRequestData(reqData)
+}
+
+func (n *NeoBatch) GetPropertyForRelationship(rel *NeoRelationship, propertyKey string) (interface{}, *NeoResponse) {
+	result, reqData, err := n.service.builder.GetPropertyForRelationship(rel, propertyKey)
+	if err != nil {
+		return result, &NeoResponse{reqData.expectedStatus, 600, err}
+	}
+	return result, n.queueRequestData(reqData)
+}
+
+func (n *NeoBatch) SetPropertyForRelationship(rel *NeoRelationship, propertyKey string, propertyValue interface{}) *NeoResponse {
+	reqData, err := n.service.builder.SetPropertyForRelationship(rel, propertyKey, propertyValue)
+	if err != nil {
+		return &NeoResponse{reqData.expectedStatus, 600, err}
+	}
+	return n.queueRequestData(reqData)
+}
+
+func (n *NeoBatch) GetRelationshipsForNode(node *NeoNode, direction NeoTraversalDirection) ([]*NeoRelationship, *NeoResponse) {
+	result, reqData := n.service.builder.GetRelationshipsForNode(node, direction)
+	return result, n.queueRequestData(reqData)
+}
+
+func (n *NeoBatch) GetRelationshipsWithTypesForNode(node *NeoNode, direction NeoTraversalDirection, relTypes []string) ([]*NeoRelationship, *NeoResponse) {
+	result, reqData, err := n.service.builder.GetRelationshipsWithTypesForNode(node, direction, relTypes)
+	if err != nil {
+		return result, &NeoResponse{reqData.expectedStatus, 600, err}
+	}
+	return result, n.queueRequestData(reqData)
+}
+
+func (n *NeoBatch) GetRelationshipTypes() ([]string, *NeoResponse) {
+	result, reqData := n.service.builder.GetRelationshipTypes()
+	return result, n.queueRequestData(reqData)
+}
+
+func (n *NeoBatch) SetPropertyForNode(node *NeoNode, propertyKey string, propertyValue interface{}) *NeoResponse {
+	reqData, err := n.service.builder.SetPropertyForNode(node, propertyKey, propertyValue)
+	if err != nil {
+		return &NeoResponse{reqData.expectedStatus, 600, err}
+	}
+	return n.queueRequestData(reqData)
+}
+
+func (n *NeoBatch) ReplacePropertiesForNode(node *NeoNode, properties map[string]interface{}) *NeoResponse {
+	reqData := n.service.builder.ReplacePropertiesForNode(node, properties)
+	return n.queueRequestData(reqData)
+}
+
+func (n *NeoBatch) GetPropertiesForNode(node *NeoNode) (map[string]interface{}, *NeoResponse) {
+	result, reqData := n.service.builder.GetPropertiesForNode(node)
+	return result, n.queueRequestData(reqData)
+}
+
+func (n *NeoBatch) DeletePropertiesForNode(node *NeoNode) *NeoResponse {
+	reqData := n.service.builder.DeletePropertiesForNode(node)
+	return n.queueRequestData(reqData)
+}
+
+func (n *NeoBatch) DeletePropertyWithKeyForNode(node *NeoNode, keyName string) *NeoResponse {
+	reqData, err := n.service.builder.DeletePropertyWithKeyForNode(node, keyName)
+	if err != nil {
+		return &NeoResponse{reqData.expectedStatus, 600, err}
+	}
+	return n.queueRequestData(reqData)
+}
+
+func (n *NeoBatch) UpdatePropertiesForRelationship(rel *NeoRelationship, properties map[string]interface{}) *NeoResponse {
+	reqData := n.service.builder.UpdatePropertiesForRelationship(rel, properties)
+	return n.queueRequestData(reqData)
+}
+
+func (n *NeoBatch) DeletePropertiesForRelationship(rel *NeoRelationship) *NeoResponse {
+	reqData := n.service.builder.DeletePropertiesForRelationship(rel)
+	return n.queueRequestData(reqData)
+}
+
+func (n *NeoBatch) DeletePropertyWithKeyForRelationship(rel *NeoRelationship, keyName string) *NeoResponse {
+	reqData, err := n.service.builder.DeletePropertyWithKeyForRelationship(rel, keyName)
+	if err != nil {
+		return &NeoResponse{reqData.expectedStatus, 600, err}
+	}
+	return n.queueRequestData(reqData)
 }
 
 func (n *NeoBatch) Commit() *NeoResponse {

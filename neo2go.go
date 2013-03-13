@@ -8,7 +8,8 @@ import (
 	"regexp"
 )
 
-//var _ Grapher = (*GraphDatabaseService)(nil)
+var _ Grapher = (*GraphDatabaseService)(nil)
+
 //var _ GraphIndexer = (*GraphDatabaseService)(nil)
 
 type GraphDatabaseService struct {
@@ -94,6 +95,104 @@ func (g *GraphDatabaseService) CreateRelationshipWithProperties(source *NeoNode,
 func (g *GraphDatabaseService) CreateRelationshipWithPropertiesAndType(source *NeoNode, target *NeoNode, properties map[string]interface{}, relType string) (*NeoRelationship, *NeoResponse) {
 	result, reqData := g.builder.CreateRelationshipWithPropertiesAndType(source, target, properties, relType)
 	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) DeleteRelationship(rel *NeoRelationship) *NeoResponse {
+	reqData := g.builder.DeleteRelationship(rel)
+	return g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) GetPropertiesForRelationship(rel *NeoRelationship) (map[string]interface{}, *NeoResponse) {
+	result, reqData := g.builder.GetPropertiesForRelationship(rel)
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) ReplacePropertiesForRelationship(rel *NeoRelationship, properties map[string]interface{}) *NeoResponse {
+	reqData := g.builder.ReplacePropertiesForRelationship(rel, properties)
+	return g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) GetPropertyForRelationship(rel *NeoRelationship, propertyKey string) (interface{}, *NeoResponse) {
+	result, reqData, err := g.builder.GetPropertyForRelationship(rel, propertyKey)
+	if err != nil {
+		return result, &NeoResponse{reqData.expectedStatus, 600, err}
+	}
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) SetPropertyForRelationship(rel *NeoRelationship, propertyKey string, propertyValue interface{}) *NeoResponse {
+	reqData, err := g.builder.SetPropertyForRelationship(rel, propertyKey, propertyValue)
+	if err != nil {
+		return &NeoResponse{reqData.expectedStatus, 600, err}
+	}
+	return g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) GetRelationshipsForNode(node *NeoNode, direction NeoTraversalDirection) ([]*NeoRelationship, *NeoResponse) {
+	result, reqData := g.builder.GetRelationshipsForNode(node, direction)
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) GetRelationshipsWithTypesForNode(node *NeoNode, direction NeoTraversalDirection, relTypes []string) ([]*NeoRelationship, *NeoResponse) {
+	result, reqData, err := g.builder.GetRelationshipsWithTypesForNode(node, direction, relTypes)
+	if err != nil {
+		return result, &NeoResponse{reqData.expectedStatus, 600, err}
+	}
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) GetRelationshipTypes() ([]string, *NeoResponse) {
+	result, reqData := g.builder.GetRelationshipTypes()
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) SetPropertyForNode(node *NeoNode, propertyKey string, propertyValue interface{}) *NeoResponse {
+	reqData, err := g.builder.SetPropertyForNode(node, propertyKey, propertyValue)
+	if err != nil {
+		return &NeoResponse{reqData.expectedStatus, 600, err}
+	}
+	return g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) ReplacePropertiesForNode(node *NeoNode, properties map[string]interface{}) *NeoResponse {
+	reqData := g.builder.ReplacePropertiesForNode(node, properties)
+	return g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) GetPropertiesForNode(node *NeoNode) (map[string]interface{}, *NeoResponse) {
+	result, reqData := g.builder.GetPropertiesForNode(node)
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) DeletePropertiesForNode(node *NeoNode) *NeoResponse {
+	reqData := g.builder.DeletePropertiesForNode(node)
+	return g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) DeletePropertyWithKeyForNode(node *NeoNode, keyName string) *NeoResponse {
+	reqData, err := g.builder.DeletePropertyWithKeyForNode(node, keyName)
+	if err != nil {
+		return &NeoResponse{reqData.expectedStatus, 600, err}
+	}
+	return g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) UpdatePropertiesForRelationship(rel *NeoRelationship, properties map[string]interface{}) *NeoResponse {
+	reqData := g.builder.UpdatePropertiesForRelationship(rel, properties)
+	return g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) DeletePropertiesForRelationship(rel *NeoRelationship) *NeoResponse {
+	reqData := g.builder.DeletePropertiesForRelationship(rel)
+	return g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) DeletePropertyWithKeyForRelationship(rel *NeoRelationship, keyName string) *NeoResponse {
+	reqData, err := g.builder.DeletePropertyWithKeyForRelationship(rel, keyName)
+	if err != nil {
+		return &NeoResponse{reqData.expectedStatus, 600, err}
+	}
+	return g.executeFromRequestData(reqData)
 }
 
 // Utility methods
