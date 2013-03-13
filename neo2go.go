@@ -29,10 +29,7 @@ func NewGraphDatabaseService() *GraphDatabaseService {
 
 func (g *GraphDatabaseService) Connect(url string) *NeoResponse {
 	g.builder.self.template = url
-	err := g.builder.self.parse()
-	if err != nil {
-		return &NeoResponse{0, 600, err}
-	}
+	g.builder.self.parse()
 
 	reqData := g.builder.Connect()
 	req, err := g.httpRequestFromData(reqData)

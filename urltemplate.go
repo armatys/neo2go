@@ -28,20 +28,14 @@ type UrlTemplate struct {
 	sections []interface{}
 }
 
-func NewUrlTemplate(url string) (*UrlTemplate, error) {
+func NewUrlTemplate(url string) *UrlTemplate {
 	u := new(UrlTemplate)
 	u.template = url
-	return u, u.parse()
-}
-
-func NewPlainUrlTemplate(url string) *UrlTemplate {
-	u := new(UrlTemplate)
-	u.template = url
-	u.sections = append(u.sections, [2]int{0, len(url)})
+	u.parse()
 	return u
 }
 
-func (u *UrlTemplate) parse() error {
+func (u *UrlTemplate) parse() {
 	indices := u.paramIndices()
 	prevIndex := 0
 
@@ -54,40 +48,27 @@ func (u *UrlTemplate) parse() error {
 		paramString := u.template[indexPair[0]:indexPair[1]]
 		s := strings.Trim(paramString, "{}")
 
-		var err error = nil
-		if strings.HasPrefix(s, "-list|") {
-			err = u.parseList(s)
+		matches := listParamRe.FindStringSubmatch(s)
+		if matches != nil || len(matches) == 3 {
+			u.parseList(matches)
 		} else {
-			err = u.parseNamedParams(s)
-		}
-
-		if err != nil {
-			return err
+			u.parseNamedParams(s)
 		}
 	}
-
-	return nil
 }
 
 func (u *UrlTemplate) paramIndices() [][]int {
 	return paramsRe.FindAllStringIndex(u.template, -1)
 }
 
-func (u *UrlTemplate) parseList(s string) error {
-	matches := listParamRe.FindStringSubmatch(s)
-	if matches == nil || len(matches) != 3 {
-		return fmt.Errorf("Could not find match for the url parameter: %s", s)
-	}
-
+func (u *UrlTemplate) parseList(matches []string) {
 	var param urlParameter
 	param.Delimiter = matches[1]
 	param.Name = matches[2]
 	u.sections = append(u.sections, param)
-
-	return nil
 }
 
-func (u *UrlTemplate) parseNamedParams(s string) error {
+func (u *UrlTemplate) parseNamedParams(s string) {
 	queried := false
 
 	if s[0] == '?' {
@@ -102,8 +83,6 @@ func (u *UrlTemplate) parseNamedParams(s string) error {
 		param.Name = name
 		u.sections = append(u.sections, param)
 	}
-
-	return nil
 }
 
 func (u *UrlTemplate) renderUrlParameterIntoBuffer(urlparam *urlParameter, buf *bytes.Buffer, paramValue interface{}, questionMarkInserted *bool, wasLastSectionQueried *bool) (error, bool) {
@@ -179,9 +158,12 @@ func (u *UrlTemplate) String() string {
 }
 
 func (u *UrlTemplate) UnmarshalJSON(data []byte) error {
+	u.template = ""
+	u.sections = u.sections[:0]
 	s := string(data)
 	u.template = s[1 : len(s)-1]
-	return u.parse()
+	u.parse()
+	return nil
 }
 
 func init() {

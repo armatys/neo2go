@@ -20,6 +20,10 @@ func (n *NeoResponse) Ok() bool {
 	return n.ExpectedCode == n.StatusCode
 }
 
+func (n *NeoResponse) Created() bool {
+	return n.StatusCode == 201
+}
+
 type NeoServiceRoot struct {
 	Node              *UrlTemplate `json:"node"`
 	ReferenceNode     *UrlTemplate `json:"reference_node"`

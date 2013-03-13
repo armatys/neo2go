@@ -31,6 +31,13 @@ char    16-bit unsigned   u0000 to uffff (0 to 65535)
 String  sequence of Unicode characters
 */
 
+func setTemplateIfNil(tmpl **UrlTemplate, val string) {
+	if *tmpl == nil {
+		newTempl := NewUrlTemplate(val)
+		*tmpl = newTempl
+	}
+}
+
 type NeoNode struct {
 	AllRelationships           *UrlTemplate
 	AllTypedRelationships      *UrlTemplate
@@ -71,18 +78,21 @@ func (n *NeoNode) IdOrBatchId() string {
 	return ""
 }
 
-func (n *NeoNode) SelfReference() string {
-	if n.Self != nil {
-		return n.Self.String()
-	}
-	if n.batchId > 0 {
-		return fmt.Sprintf(`{%d}`, n.batchId)
-	}
-	return ""
-}
-
 func (n *NeoNode) setBatchId(bid NeoBatchId) {
 	n.batchId = bid
+
+	setTemplateIfNil(&n.AllRelationships, fmt.Sprintf(`{%v}/relationships/all`, bid))
+	setTemplateIfNil(&n.AllTypedRelationships, fmt.Sprintf(`{%v}/relationships/all/{-list|&|types}`, bid))
+	setTemplateIfNil(&n.CreateRelationship, fmt.Sprintf(`{%v}/relationships`, bid))
+	setTemplateIfNil(&n.IncomingRelationships, fmt.Sprintf(`{%v}/relationships/in`, bid))
+	setTemplateIfNil(&n.IncomingTypedRelationships, fmt.Sprintf(`{%v}/relationships/in/{-list|&|types}`, bid))
+	setTemplateIfNil(&n.OutgoingRelationships, fmt.Sprintf(`{%v}/relationships/out`, bid))
+	setTemplateIfNil(&n.OutgoingTypedRelationships, fmt.Sprintf(`{%v}/relationships/out/{-list|&|types}`, bid))
+	setTemplateIfNil(&n.PagedTraverse, fmt.Sprintf(`{%v}/paged/traverse/{returnType}{?pageSize,leaseTime}`, bid))
+	setTemplateIfNil(&n.Properties, fmt.Sprintf(`{%v}/properties`, bid))
+	setTemplateIfNil(&n.Property, fmt.Sprintf(`{%v}/properties/{key}`, bid))
+	setTemplateIfNil(&n.Self, fmt.Sprintf(`{%v}`, bid))
+	setTemplateIfNil(&n.Traverse, fmt.Sprintf(`{%v}/traverse/{returnType}`, bid))
 }
 
 type NeoRelationship struct {
@@ -119,18 +129,12 @@ func (n *NeoRelationship) IdOrBatchId() string {
 	return ""
 }
 
-func (n *NeoRelationship) SelfReference() string {
-	if n.Self != nil {
-		return n.Self.String()
-	}
-	if n.batchId > 0 {
-		return fmt.Sprintf(`{%d}`, n.batchId)
-	}
-	return ""
-}
-
 func (n *NeoRelationship) setBatchId(bid NeoBatchId) {
 	n.batchId = bid
+
+	setTemplateIfNil(&n.Property, fmt.Sprintf(`{%v}/properties/{key}`, bid))
+	setTemplateIfNil(&n.Self, fmt.Sprintf(`{%v}`, bid))
+	setTemplateIfNil(&n.Properties, fmt.Sprintf(`{%v}/properties`, bid))
 }
 
 type NeoIndex struct {
@@ -140,21 +144,10 @@ type NeoIndex struct {
 	batchId  NeoBatchId
 }
 
-func (n *NeoIndex) SelfReference() string {
-	if n.Template != nil {
-		url, err := n.Template.Render(nil)
-		if err == nil {
-			return url
-		}
-	}
-	if n.batchId > 0 {
-		return fmt.Sprintf(`{%d}`, n.batchId)
-	}
-	return ""
-}
-
 func (n *NeoIndex) setBatchId(bid NeoBatchId) {
 	n.batchId = bid
+
+	setTemplateIfNil(&n.Template, fmt.Sprintf(`{%v}`, bid))
 }
 
 type NeoCodeSnippet struct {

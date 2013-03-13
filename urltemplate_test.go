@@ -29,10 +29,7 @@ func TestParsingIndices(t *testing.T) {
 func TestParsingList(t *testing.T) {
 	tpl := new(UrlTemplate)
 	tpl.template = "http://localhost:7474/db/data/node/9/relationships/all/{-list|&|types}"
-	err := tpl.parse()
-	if err != nil {
-		t.Fatal(err)
-	}
+	tpl.parse()
 
 	if len(tpl.sections) != 2 {
 		t.Fatalf("Expected 2 sections, but got %d", len(tpl.sections))
@@ -68,10 +65,7 @@ func TestParsingList(t *testing.T) {
 func TestParsingNamedParams(t *testing.T) {
 	tpl := new(UrlTemplate)
 	tpl.template = "http://localhost:7474/db/data/node/1/paged/traverse/{returnType}{?pageSize,leaseTime}"
-	err := tpl.parse()
-	if err != nil {
-		t.Fatal(err)
-	}
+	tpl.parse()
 
 	expected := []interface{}{
 		[2]int{0, 52},

@@ -125,7 +125,7 @@ func TestDeleteNonExistendNode(t *testing.T) {
 	}
 
 	node := new(NeoNode)
-	node.Self = NewPlainUrlTemplate(databaseAddress + "node/909090")
+	node.Self = NewUrlTemplate(databaseAddress + "node/909090")
 
 	resp = service.DeleteNode(node)
 	if !responseHasFailedWithCode(resp, 404) {

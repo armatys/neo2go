@@ -2,20 +2,20 @@ package neo2go
 
 type GraphTraverser interface {
 	// 17.14.1+
-	TraverseNodes(*NeoTraversal) ([]*NeoNode, *NeoResponse)
-	TraverseRelationships(*NeoTraversal) ([]*NeoRelationship, *NeoResponse)
-	TraversePaths(*NeoTraversal) ([]*NeoPath, *NeoResponse)
-	TraverseFullPaths(*NeoTraversal) ([]*NeoFullPath, *NeoResponse)
+	TraverseByNodes(traversal *NeoTraversal, start *NeoNode) ([]*NeoNode, *NeoResponse)
+	TraverseByRelationships(traversal *NeoTraversal, start *NeoNode) ([]*NeoRelationship, *NeoResponse)
+	TraverseByPaths(traversal *NeoTraversal, start *NeoNode) ([]*NeoPath, *NeoResponse)
+	TraverseByFullPaths(traversal *NeoTraversal, start *NeoNode) ([]*NeoFullPath, *NeoResponse)
 
 	// 17.14.5
-	TraverseNodesWithPaging(*NeoTraversal) (*NeoPagedTraverser, []*NeoNode, *NeoResponse)
-	TraverseRelationshipsWithPaging(*NeoTraversal) (*NeoPagedTraverser, []*NeoRelationship, *NeoResponse)
-	TraversePathsWithPaging(*NeoTraversal) (*NeoPagedTraverser, []*NeoPath, *NeoResponse)
-	TraverseFullPathsWithPaging(*NeoTraversal) (*NeoPagedTraverser, []*NeoFullPath, *NeoResponse)
+	TraverseByNodesWithPaging(traversal *NeoTraversal, start *NeoNode) (*NeoPagedTraverser, []*NeoNode, *NeoResponse)
+	TraverseByRelationshipsWithPaging(traversal *NeoTraversal, start *NeoNode) (*NeoPagedTraverser, []*NeoRelationship, *NeoResponse)
+	TraverseByPathsWithPaging(traversal *NeoTraversal, start *NeoNode) (*NeoPagedTraverser, []*NeoPath, *NeoResponse)
+	TraverseByFullPathsWithPaging(traversal *NeoTraversal, start *NeoNode) (*NeoPagedTraverser, []*NeoFullPath, *NeoResponse)
 
-	// 17.14.6+
-	TraverseNodesGetNextPage(*NeoPagedTraverser) ([]*NeoNode, *NeoResponse)
-	TraverseRelationshipsGetNextPage(*NeoPagedTraverser) ([]*NeoRelationship, *NeoResponse)
-	TraversePathsGetNextPage(*NeoPagedTraverser) ([]*NeoPath, *NeoResponse)
-	TraverseFullPathsGetNextPage(*NeoPagedTraverser) ([]*NeoFullPath, *NeoResponse)
+	// 17.14.6+; not sure if all 4 are needed, or just 1 would be sufficient?
+	TraverseByNodesGetNextPage(*NeoPagedTraverser) ([]*NeoNode, *NeoResponse)
+	TraverseByRelationshipsGetNextPage(*NeoPagedTraverser) ([]*NeoRelationship, *NeoResponse)
+	TraverseByPathsGetNextPage(*NeoPagedTraverser) ([]*NeoPath, *NeoResponse)
+	TraverseByFullPathsGetNextPage(*NeoPagedTraverser) ([]*NeoFullPath, *NeoResponse)
 }

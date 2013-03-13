@@ -92,7 +92,7 @@ func TestBatchDeleteNonExistentAndCreate(t *testing.T) {
 
 	batch := service.Batch()
 	node0 := new(NeoNode)
-	node0.Self = NewPlainUrlTemplate(databaseAddress + "node/909090")
+	node0.Self = NewUrlTemplate(databaseAddress + "node/909090")
 	batch.DeleteNode(node0)
 
 	node, resp := batch.CreateNode()
