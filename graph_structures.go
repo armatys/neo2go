@@ -151,8 +151,8 @@ func (n *NeoIndex) setBatchId(bid NeoBatchId) {
 }
 
 type NeoCodeSnippet struct {
-	Body     string
-	Language string
+	Body     string `json:"body"`
+	Language string `json:"language"`
 }
 
 type NeoTraversalOrder uint8
@@ -162,6 +162,15 @@ const (
 	NeoTraversalDepthFirst
 )
 
+func (n NeoTraversalOrder) MarshalJSON() ([]byte, error) {
+	if n == NeoTraversalBreadthFirst {
+		return []byte(`"breadth_first"`), nil
+	} else if n == NeoTraversalDepthFirst {
+		return []byte(`"depth_first"`), nil
+	}
+	return nil, fmt.Errorf("Could not marshal NeoTraversalOrder to JSON.")
+}
+
 type NeoTraversalDirection uint8
 
 const (
@@ -169,6 +178,17 @@ const (
 	NeoTraversalIn
 	NeoTraversalOut
 )
+
+func (n NeoTraversalDirection) MarshalJSON() ([]byte, error) {
+	if n == NeoTraversalAll {
+		return []byte(`"all"`), nil
+	} else if n == NeoTraversalIn {
+		return []byte(`"in"`), nil
+	} else if n == NeoTraversalOut {
+		return []byte(`"out"`), nil
+	}
+	return nil, fmt.Errorf("Could not marshal NeoTraversalDirection to JSON.")
+}
 
 type NeoTraversalUniqueness uint8
 
@@ -180,20 +200,35 @@ const (
 	NeoTraversalRelationshipPath
 )
 
+func (n NeoTraversalUniqueness) MarshalJSON() ([]byte, error) {
+	if n == NeoTraversalNodeGlobal {
+		return []byte(`"node_global"`), nil
+	} else if n == NeoTraversalNone {
+		return []byte(`"none"`), nil
+	} else if n == NeoTraversalRelationhipGlobal {
+		return []byte(`"relationship_global"`), nil
+	} else if n == NeoTraversalNodePath {
+		return []byte(`"node_path"`), nil
+	} else if n == NeoTraversalRelationshipPath {
+		return []byte(`"relationship_path"`), nil
+	}
+	return nil, fmt.Errorf("Could not marshal NeoTraversalUniqueness to JSON.")
+}
+
 type NeoTraversalRelationship struct {
-	Direction NeoTraversalDirection
-	Type      string
+	Direction NeoTraversalDirection `json:"direction"`
+	Type      string                `json:"type"`
 }
 
 type NeoTraversal struct {
-	LeaseTime      uint32
-	PageSize       uint32
-	Order          NeoTraversalOrder
-	Relationships  []*NeoTraversalRelationship
-	Uniqueness     NeoTraversalUniqueness
-	PruneEvaluator *NeoCodeSnippet
-	ReturnFilter   *NeoCodeSnippet
-	MaxDepth       uint32
+	LeaseTime      uint32                      `json:"-"`
+	PageSize       uint32                      `json:"-"`
+	Order          NeoTraversalOrder           `json:"order"`
+	Relationships  []*NeoTraversalRelationship `json:"relationships,omitempty"`
+	Uniqueness     NeoTraversalUniqueness      `json:"uniqueness"`
+	PruneEvaluator *NeoCodeSnippet             `json:"prune_evaluator,omitempty"`
+	ReturnFilter   *NeoCodeSnippet             `json:"return_filter,omitempty"`
+	MaxDepth       uint32                      `json:"max_depth"`
 }
 
 type NeoPath struct {
@@ -214,9 +249,7 @@ type NeoFullPath struct {
 }
 
 type NeoPagedTraverser struct {
-	LeaseTime uint32
-	PageSize  uint32
-	url       string
+	location string
 }
 
 type NeoGraphAlgorithm uint8
@@ -228,10 +261,24 @@ const (
 	NeoDijkstra
 )
 
+func (n NeoGraphAlgorithm) MarshalJSON() ([]byte, error) {
+	if n == NeoShortestPath {
+		return []byte(`"shortestPath"`), nil
+	} else if n == NeoAllSimplePaths {
+		return []byte(`"allSimplePaths"`), nil
+	} else if n == NeoAllPaths {
+		return []byte(`"allPaths"`), nil
+	} else if n == NeoDijkstra {
+		return []byte(`"dijkstra"`), nil
+	}
+	return nil, fmt.Errorf("Could not marshal NeoGraphAlgorithm to JSON.")
+}
+
 type NeoPathFinderSpec struct {
-	CostProperty  string
-	DefaultCost   float64
-	MaxDepth      uint32
-	Relationships *NeoTraversalRelationship
-	Algorithm     NeoGraphAlgorithm
+	CostProperty  string                    `json:"cost_property"`
+	DefaultCost   float64                   `json:"default_cost"`
+	MaxDepth      uint32                    `json:"max_depth"`
+	Relationships *NeoTraversalRelationship `json:"relationships,omitempty"`
+	Algorithm     NeoGraphAlgorithm         `json:"algorithm"`
+	to            string                    `json:"to"`
 }

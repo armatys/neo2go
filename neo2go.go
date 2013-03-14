@@ -9,8 +9,8 @@ import (
 )
 
 var _ Grapher = (*GraphDatabaseService)(nil)
+var _ GraphIndexer = (*GraphDatabaseService)(nil)
 
-//var _ GraphIndexer = (*GraphDatabaseService)(nil)
 //var _ GraphPathFinder = (*GraphDatabaseService)(nil)
 //var _ GraphTraverser = (*GraphDatabaseService)(nil)
 
@@ -192,6 +192,225 @@ func (g *GraphDatabaseService) DeletePropertyWithKeyForRelationship(rel *NeoRela
 		return &NeoResponse{reqData.expectedStatus, 600, err}
 	}
 	return g.executeFromRequestData(reqData)
+}
+
+// GraphIndexer
+
+// 17.10.1 - Nodes
+func (g *GraphDatabaseService) CreateNodeIndex(name string) (*NeoIndex, *NeoResponse) {
+	result, reqData := g.builder.CreateNodeIndex(name)
+	return result, g.executeFromRequestData(reqData)
+}
+
+// 17.10.2
+func (g *GraphDatabaseService) CreateNodeIndexWithConfiguration(name string, config map[string]interface{}) (*NeoIndex, *NeoResponse) {
+	result, reqData := g.builder.CreateNodeIndexWithConfiguration(name, config)
+	return result, g.executeFromRequestData(reqData)
+}
+
+// 17.10.3
+func (g *GraphDatabaseService) DeleteIndex(index *NeoIndex) *NeoResponse {
+	reqData, err := g.builder.DeleteIndex(index)
+	if err != nil {
+		return &NeoResponse{reqData.expectedStatus, 600, err}
+	}
+	return g.executeFromRequestData(reqData)
+}
+
+// 17.10.4
+func (g *GraphDatabaseService) GetNodeIndexes() (map[string]*NeoIndex, *NeoResponse) {
+	result, reqData := g.builder.GetNodeIndexes()
+	return result, g.executeFromRequestData(reqData)
+}
+
+// 17.10.5
+func (g *GraphDatabaseService) AddNodeToIndex(index *NeoIndex, node *NeoNode, key, value string) (*NeoNode, *NeoResponse) {
+	result, reqData, err := g.builder.AddNodeToIndex(index, node, key, value)
+	if err != nil {
+		return result, &NeoResponse{reqData.expectedStatus, 600, err}
+	}
+	return result, g.executeFromRequestData(reqData)
+}
+
+// 17.10.6
+func (g *GraphDatabaseService) DeleteAllIndexEntriesForNode(index *NeoIndex, node *NeoNode) *NeoResponse {
+	reqData, err := g.builder.DeleteAllIndexEntriesForNode(index, node)
+	if err != nil {
+		return &NeoResponse{reqData.expectedStatus, 600, err}
+	}
+	return g.executeFromRequestData(reqData)
+}
+
+// 17.10.7
+func (g *GraphDatabaseService) DeleteAllIndexEntriesForNodeAndKey(index *NeoIndex, node *NeoNode, key string) *NeoResponse {
+	reqData, err := g.builder.DeleteAllIndexEntriesForNodeAndKey(index, node, key)
+	if err != nil {
+		return &NeoResponse{reqData.expectedStatus, 600, err}
+	}
+	return g.executeFromRequestData(reqData)
+}
+
+// 17.10.8
+func (g *GraphDatabaseService) DeleteAllIndexEntriesForNodeKeyAndValue(index *NeoIndex, node *NeoNode, key string, value string) *NeoResponse {
+	reqData, err := g.builder.DeleteAllIndexEntriesForNodeKeyAndValue(index, node, key, value)
+	if err != nil {
+		return &NeoResponse{reqData.expectedStatus, 600, err}
+	}
+	return g.executeFromRequestData(reqData)
+}
+
+// 17.10.9
+func (g *GraphDatabaseService) FindNodeByExactMatch(index *NeoIndex, key, value string) ([]*NeoNode, *NeoResponse) {
+	result, reqData, err := g.builder.FindNodeByExactMatch(index, key, value)
+	if err != nil {
+		return result, &NeoResponse{reqData.expectedStatus, 600, err}
+	}
+	return result, g.executeFromRequestData(reqData)
+}
+
+// 17.10.10
+func (g *GraphDatabaseService) FindNodeByQuery(index *NeoIndex, query string) ([]*NeoNode, *NeoResponse) {
+	result, reqData, err := g.builder.FindNodeByQuery(index, query)
+	if err != nil {
+		return result, &NeoResponse{reqData.expectedStatus, 600, err}
+	}
+	return result, g.executeFromRequestData(reqData)
+}
+
+// 17.10.1 - Relationships
+func (g *GraphDatabaseService) CreateRelationshipIndex(name string) (*NeoIndex, *NeoResponse) {
+	result, reqData := g.builder.CreateRelationshipIndex(name)
+	return result, g.executeFromRequestData(reqData)
+}
+
+// 17.10.2
+func (g *GraphDatabaseService) CreateRelationshipIndexWithConfiguration(name string, config map[string]interface{}) (*NeoIndex, *NeoResponse) {
+	result, reqData := g.builder.CreateRelationshipIndexWithConfiguration(name, config)
+	return result, g.executeFromRequestData(reqData)
+}
+
+// 17.10.4
+func (g *GraphDatabaseService) GetRelationshipIndexes() ([]*NeoIndex, *NeoResponse) {
+	result, reqData := g.builder.GetRelationshipIndexes()
+	return result, g.executeFromRequestData(reqData)
+}
+
+// 17.10.5
+func (g *GraphDatabaseService) AddRelationshipToIndex(index *NeoIndex, rel *NeoRelationship, key, value string) (*NeoRelationship, *NeoResponse) {
+	result, reqData, err := g.builder.AddRelationshipToIndex(index, rel, key, value)
+	if err != nil {
+		return result, &NeoResponse{reqData.expectedStatus, 600, err}
+	}
+	return result, g.executeFromRequestData(reqData)
+}
+
+// 17.10.6
+func (g *GraphDatabaseService) DeleteAllIndexEntriesForRelationship(index *NeoIndex, rel *NeoRelationship) *NeoResponse {
+	reqData, err := g.builder.DeleteAllIndexEntriesForRelationship(index, rel)
+	if err != nil {
+		return &NeoResponse{reqData.expectedStatus, 600, err}
+	}
+	return g.executeFromRequestData(reqData)
+}
+
+// 17.10.7
+func (g *GraphDatabaseService) DeleteAllIndexEntriesForRelationshipAndKey(index *NeoIndex, rel *NeoRelationship, key string) *NeoResponse {
+	reqData, err := g.builder.DeleteAllIndexEntriesForRelationshipAndKey(index, rel, key)
+	if err != nil {
+		return &NeoResponse{reqData.expectedStatus, 600, err}
+	}
+	return g.executeFromRequestData(reqData)
+}
+
+// 17.10.8
+func (g *GraphDatabaseService) DeleteAllIndexEntriesForRelationshipKeyAndValue(index *NeoIndex, rel *NeoRelationship, key string, value string) *NeoResponse {
+	reqData, err := g.builder.DeleteAllIndexEntriesForRelationshipKeyAndValue(index, rel, key, value)
+	if err != nil {
+		return &NeoResponse{reqData.expectedStatus, 600, err}
+	}
+	return g.executeFromRequestData(reqData)
+}
+
+// 17.10.9
+func (g *GraphDatabaseService) FindRelationshipByExactMatch(index *NeoIndex, key, value string) ([]*NeoRelationship, *NeoResponse) {
+	result, reqData, err := g.builder.FindRelationshipByExactMatch(index, key, value)
+	if err != nil {
+		return result, &NeoResponse{reqData.expectedStatus, 600, err}
+	}
+	return result, g.executeFromRequestData(reqData)
+}
+
+// 17.10.10
+func (g *GraphDatabaseService) FindRelationshipByQuery(index *NeoIndex, query string) ([]*NeoRelationship, *NeoResponse) {
+	result, reqData, err := g.builder.FindRelationshipByQuery(index, query)
+	if err != nil {
+		return result, &NeoResponse{reqData.expectedStatus, 600, err}
+	}
+	return result, g.executeFromRequestData(reqData)
+}
+
+// 17.11.1
+func (g *GraphDatabaseService) GetOrCreateUniqueNode(index *NeoIndex, key, value string) (*NeoNode, *NeoResponse) {
+	result, reqData := g.builder.GetOrCreateUniqueNode(index, key, value)
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) GetOrCreateUniqueNodeWithProperties(index *NeoIndex, key, value string, properties map[string]interface{}) (*NeoNode, *NeoResponse) {
+	result, reqData := g.builder.GetOrCreateUniqueNodeWithProperties(index, key, value, properties)
+	return result, g.executeFromRequestData(reqData)
+}
+
+// 17.11.3
+func (g *GraphDatabaseService) CreateUniqueNodeOrFail(index *NeoIndex, key, value string) (*NeoNode, *NeoResponse) {
+	result, reqData := g.builder.CreateUniqueNodeOrFail(index, key, value)
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) CreateUniqueNodeWithPropertiesOrFail(index *NeoIndex, key, value string, properties map[string]interface{}) (*NeoNode, *NeoResponse) {
+	result, reqData := g.builder.CreateUniqueNodeWithPropertiesOrFail(index, key, value, properties)
+	return result, g.executeFromRequestData(reqData)
+}
+
+// 17.11.5
+func (g *GraphDatabaseService) GetOrCreateUniqueRelationship(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode) (*NeoRelationship, *NeoResponse) {
+	result, reqData := g.builder.GetOrCreateUniqueRelationship(index, key, value, source, target)
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) GetOrCreateUniqueTypedRelationship(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string) (*NeoRelationship, *NeoResponse) {
+	result, reqData := g.builder.GetOrCreateUniqueTypedRelationship(index, key, value, source, target, relType)
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) GetOrCreateUniqueRelationshipWithProperties(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, properties map[string]interface{}) (*NeoRelationship, *NeoResponse) {
+	result, reqData := g.builder.GetOrCreateUniqueRelationshipWithProperties(index, key, value, source, target, properties)
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) GetOrCreateUniqueTypedRelationshipWithProperties(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string, properties map[string]interface{}) (*NeoRelationship, *NeoResponse) {
+	result, reqData := g.builder.GetOrCreateUniqueTypedRelationshipWithProperties(index, key, value, source, target, relType, properties)
+	return result, g.executeFromRequestData(reqData)
+}
+
+// 17.11.7
+func (g *GraphDatabaseService) CreateUniqueRelationshipOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode) (*NeoRelationship, *NeoResponse) {
+	result, reqData := g.builder.CreateUniqueRelationshipOrFail(index, key, value, source, target)
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) CreateUniqueTypedRelationshipOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string) (*NeoRelationship, *NeoResponse) {
+	result, reqData := g.builder.CreateUniqueTypedRelationshipOrFail(index, key, value, source, target, relType)
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) CreateUniqueRelationshipWithPropertiesOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, properties map[string]interface{}) (*NeoRelationship, *NeoResponse) {
+	result, reqData := g.builder.CreateUniqueRelationshipWithPropertiesOrFail(index, key, value, source, target, properties)
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) CreateUniqueTypedRelationshipWithPropertiesOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string, properties map[string]interface{}) (*NeoRelationship, *NeoResponse) {
+	result, reqData := g.builder.CreateUniqueTypedRelationshipWithPropertiesOrFail(index, key, value, source, target, relType, properties)
+	return result, g.executeFromRequestData(reqData)
 }
 
 // Utility methods
