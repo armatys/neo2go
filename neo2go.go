@@ -10,8 +10,7 @@ import (
 
 var _ Grapher = (*GraphDatabaseService)(nil)
 var _ GraphIndexer = (*GraphDatabaseService)(nil)
-
-//var _ GraphPathFinder = (*GraphDatabaseService)(nil)
+var _ GraphPathFinder = (*GraphDatabaseService)(nil)
 var _ GraphTraverser = (*GraphDatabaseService)(nil)
 
 type GraphDatabaseService struct {
@@ -519,6 +518,18 @@ func (g *GraphDatabaseService) TraverseByPathsGetNextPage(traverser *NeoPagedTra
 
 func (g *GraphDatabaseService) TraverseByFullPathsGetNextPage(traverser *NeoPagedTraverser) ([]*NeoFullPath, *NeoResponse) {
 	result, reqData := g.builder.TraverseByFullPathsGetNextPage(traverser)
+	return result, g.executeFromRequestData(reqData)
+}
+
+// GraphPathFinder
+
+func (g *GraphDatabaseService) FindPathFromNode(start *NeoNode, target *NeoNode, spec *NeoPathFinderSpec) (*NeoPath, *NeoResponse) {
+	result, reqData := g.builder.FindPathFromNode(start, target, spec)
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) FindPathsFromNode(start *NeoNode, target *NeoNode, spec *NeoPathFinderSpec) ([]*NeoPath, *NeoResponse) {
+	result, reqData := g.builder.FindPathsFromNode(start, target, spec)
 	return result, g.executeFromRequestData(reqData)
 }
 
