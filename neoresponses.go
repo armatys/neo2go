@@ -14,6 +14,11 @@ type NeoResponse struct {
 	ExpectedCode int
 	StatusCode   int
 	NeoError     error
+	location     string
+}
+
+func NewLocalErrorResponse(expectedCode int, err error) *NeoResponse {
+	return &NeoResponse{expectedCode, 600, err, ""}
 }
 
 func (n *NeoResponse) Ok() bool {

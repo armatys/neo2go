@@ -12,7 +12,7 @@ var _ Grapher = (*GraphDatabaseService)(nil)
 var _ GraphIndexer = (*GraphDatabaseService)(nil)
 
 //var _ GraphPathFinder = (*GraphDatabaseService)(nil)
-//var _ GraphTraverser = (*GraphDatabaseService)(nil)
+var _ GraphTraverser = (*GraphDatabaseService)(nil)
 
 type GraphDatabaseService struct {
 	client  *http.Client
@@ -114,7 +114,7 @@ func (g *GraphDatabaseService) ReplacePropertiesForRelationship(rel *NeoRelation
 func (g *GraphDatabaseService) GetPropertyForRelationship(rel *NeoRelationship, propertyKey string) (interface{}, *NeoResponse) {
 	result, reqData, err := g.builder.GetPropertyForRelationship(rel, propertyKey)
 	if err != nil {
-		return result, &NeoResponse{reqData.expectedStatus, 600, err}
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
 	return result, g.executeFromRequestData(reqData)
 }
@@ -122,7 +122,7 @@ func (g *GraphDatabaseService) GetPropertyForRelationship(rel *NeoRelationship, 
 func (g *GraphDatabaseService) SetPropertyForRelationship(rel *NeoRelationship, propertyKey string, propertyValue interface{}) *NeoResponse {
 	reqData, err := g.builder.SetPropertyForRelationship(rel, propertyKey, propertyValue)
 	if err != nil {
-		return &NeoResponse{reqData.expectedStatus, 600, err}
+		return NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
 	return g.executeFromRequestData(reqData)
 }
@@ -135,7 +135,7 @@ func (g *GraphDatabaseService) GetRelationshipsForNode(node *NeoNode, direction 
 func (g *GraphDatabaseService) GetRelationshipsWithTypesForNode(node *NeoNode, direction NeoTraversalDirection, relTypes []string) ([]*NeoRelationship, *NeoResponse) {
 	result, reqData, err := g.builder.GetRelationshipsWithTypesForNode(node, direction, relTypes)
 	if err != nil {
-		return result, &NeoResponse{reqData.expectedStatus, 600, err}
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
 	return result, g.executeFromRequestData(reqData)
 }
@@ -148,7 +148,7 @@ func (g *GraphDatabaseService) GetRelationshipTypes() ([]string, *NeoResponse) {
 func (g *GraphDatabaseService) SetPropertyForNode(node *NeoNode, propertyKey string, propertyValue interface{}) *NeoResponse {
 	reqData, err := g.builder.SetPropertyForNode(node, propertyKey, propertyValue)
 	if err != nil {
-		return &NeoResponse{reqData.expectedStatus, 600, err}
+		return NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
 	return g.executeFromRequestData(reqData)
 }
@@ -171,7 +171,7 @@ func (g *GraphDatabaseService) DeletePropertiesForNode(node *NeoNode) *NeoRespon
 func (g *GraphDatabaseService) DeletePropertyWithKeyForNode(node *NeoNode, keyName string) *NeoResponse {
 	reqData, err := g.builder.DeletePropertyWithKeyForNode(node, keyName)
 	if err != nil {
-		return &NeoResponse{reqData.expectedStatus, 600, err}
+		return NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
 	return g.executeFromRequestData(reqData)
 }
@@ -189,7 +189,7 @@ func (g *GraphDatabaseService) DeletePropertiesForRelationship(rel *NeoRelations
 func (g *GraphDatabaseService) DeletePropertyWithKeyForRelationship(rel *NeoRelationship, keyName string) *NeoResponse {
 	reqData, err := g.builder.DeletePropertyWithKeyForRelationship(rel, keyName)
 	if err != nil {
-		return &NeoResponse{reqData.expectedStatus, 600, err}
+		return NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
 	return g.executeFromRequestData(reqData)
 }
@@ -212,7 +212,7 @@ func (g *GraphDatabaseService) CreateNodeIndexWithConfiguration(name string, con
 func (g *GraphDatabaseService) DeleteIndex(index *NeoIndex) *NeoResponse {
 	reqData, err := g.builder.DeleteIndex(index)
 	if err != nil {
-		return &NeoResponse{reqData.expectedStatus, 600, err}
+		return NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
 	return g.executeFromRequestData(reqData)
 }
@@ -227,7 +227,7 @@ func (g *GraphDatabaseService) GetNodeIndexes() (map[string]*NeoIndex, *NeoRespo
 func (g *GraphDatabaseService) AddNodeToIndex(index *NeoIndex, node *NeoNode, key, value string) (*NeoNode, *NeoResponse) {
 	result, reqData, err := g.builder.AddNodeToIndex(index, node, key, value)
 	if err != nil {
-		return result, &NeoResponse{reqData.expectedStatus, 600, err}
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
 	return result, g.executeFromRequestData(reqData)
 }
@@ -236,7 +236,7 @@ func (g *GraphDatabaseService) AddNodeToIndex(index *NeoIndex, node *NeoNode, ke
 func (g *GraphDatabaseService) DeleteAllIndexEntriesForNode(index *NeoIndex, node *NeoNode) *NeoResponse {
 	reqData, err := g.builder.DeleteAllIndexEntriesForNode(index, node)
 	if err != nil {
-		return &NeoResponse{reqData.expectedStatus, 600, err}
+		return NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
 	return g.executeFromRequestData(reqData)
 }
@@ -245,7 +245,7 @@ func (g *GraphDatabaseService) DeleteAllIndexEntriesForNode(index *NeoIndex, nod
 func (g *GraphDatabaseService) DeleteAllIndexEntriesForNodeAndKey(index *NeoIndex, node *NeoNode, key string) *NeoResponse {
 	reqData, err := g.builder.DeleteAllIndexEntriesForNodeAndKey(index, node, key)
 	if err != nil {
-		return &NeoResponse{reqData.expectedStatus, 600, err}
+		return NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
 	return g.executeFromRequestData(reqData)
 }
@@ -254,7 +254,7 @@ func (g *GraphDatabaseService) DeleteAllIndexEntriesForNodeAndKey(index *NeoInde
 func (g *GraphDatabaseService) DeleteAllIndexEntriesForNodeKeyAndValue(index *NeoIndex, node *NeoNode, key string, value string) *NeoResponse {
 	reqData, err := g.builder.DeleteAllIndexEntriesForNodeKeyAndValue(index, node, key, value)
 	if err != nil {
-		return &NeoResponse{reqData.expectedStatus, 600, err}
+		return NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
 	return g.executeFromRequestData(reqData)
 }
@@ -263,7 +263,7 @@ func (g *GraphDatabaseService) DeleteAllIndexEntriesForNodeKeyAndValue(index *Ne
 func (g *GraphDatabaseService) FindNodeByExactMatch(index *NeoIndex, key, value string) ([]*NeoNode, *NeoResponse) {
 	result, reqData, err := g.builder.FindNodeByExactMatch(index, key, value)
 	if err != nil {
-		return result, &NeoResponse{reqData.expectedStatus, 600, err}
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
 	return result, g.executeFromRequestData(reqData)
 }
@@ -272,7 +272,7 @@ func (g *GraphDatabaseService) FindNodeByExactMatch(index *NeoIndex, key, value 
 func (g *GraphDatabaseService) FindNodeByQuery(index *NeoIndex, query string) ([]*NeoNode, *NeoResponse) {
 	result, reqData, err := g.builder.FindNodeByQuery(index, query)
 	if err != nil {
-		return result, &NeoResponse{reqData.expectedStatus, 600, err}
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
 	return result, g.executeFromRequestData(reqData)
 }
@@ -299,7 +299,7 @@ func (g *GraphDatabaseService) GetRelationshipIndexes() ([]*NeoIndex, *NeoRespon
 func (g *GraphDatabaseService) AddRelationshipToIndex(index *NeoIndex, rel *NeoRelationship, key, value string) (*NeoRelationship, *NeoResponse) {
 	result, reqData, err := g.builder.AddRelationshipToIndex(index, rel, key, value)
 	if err != nil {
-		return result, &NeoResponse{reqData.expectedStatus, 600, err}
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
 	return result, g.executeFromRequestData(reqData)
 }
@@ -308,7 +308,7 @@ func (g *GraphDatabaseService) AddRelationshipToIndex(index *NeoIndex, rel *NeoR
 func (g *GraphDatabaseService) DeleteAllIndexEntriesForRelationship(index *NeoIndex, rel *NeoRelationship) *NeoResponse {
 	reqData, err := g.builder.DeleteAllIndexEntriesForRelationship(index, rel)
 	if err != nil {
-		return &NeoResponse{reqData.expectedStatus, 600, err}
+		return NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
 	return g.executeFromRequestData(reqData)
 }
@@ -317,7 +317,7 @@ func (g *GraphDatabaseService) DeleteAllIndexEntriesForRelationship(index *NeoIn
 func (g *GraphDatabaseService) DeleteAllIndexEntriesForRelationshipAndKey(index *NeoIndex, rel *NeoRelationship, key string) *NeoResponse {
 	reqData, err := g.builder.DeleteAllIndexEntriesForRelationshipAndKey(index, rel, key)
 	if err != nil {
-		return &NeoResponse{reqData.expectedStatus, 600, err}
+		return NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
 	return g.executeFromRequestData(reqData)
 }
@@ -326,7 +326,7 @@ func (g *GraphDatabaseService) DeleteAllIndexEntriesForRelationshipAndKey(index 
 func (g *GraphDatabaseService) DeleteAllIndexEntriesForRelationshipKeyAndValue(index *NeoIndex, rel *NeoRelationship, key string, value string) *NeoResponse {
 	reqData, err := g.builder.DeleteAllIndexEntriesForRelationshipKeyAndValue(index, rel, key, value)
 	if err != nil {
-		return &NeoResponse{reqData.expectedStatus, 600, err}
+		return NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
 	return g.executeFromRequestData(reqData)
 }
@@ -335,7 +335,7 @@ func (g *GraphDatabaseService) DeleteAllIndexEntriesForRelationshipKeyAndValue(i
 func (g *GraphDatabaseService) FindRelationshipByExactMatch(index *NeoIndex, key, value string) ([]*NeoRelationship, *NeoResponse) {
 	result, reqData, err := g.builder.FindRelationshipByExactMatch(index, key, value)
 	if err != nil {
-		return result, &NeoResponse{reqData.expectedStatus, 600, err}
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
 	return result, g.executeFromRequestData(reqData)
 }
@@ -344,7 +344,7 @@ func (g *GraphDatabaseService) FindRelationshipByExactMatch(index *NeoIndex, key
 func (g *GraphDatabaseService) FindRelationshipByQuery(index *NeoIndex, query string) ([]*NeoRelationship, *NeoResponse) {
 	result, reqData, err := g.builder.FindRelationshipByQuery(index, query)
 	if err != nil {
-		return result, &NeoResponse{reqData.expectedStatus, 600, err}
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
 	return result, g.executeFromRequestData(reqData)
 }
@@ -413,6 +413,115 @@ func (g *GraphDatabaseService) CreateUniqueTypedRelationshipWithPropertiesOrFail
 	return result, g.executeFromRequestData(reqData)
 }
 
+// GraphTraverser
+
+// 17.14.1+
+func (g *GraphDatabaseService) TraverseByNodes(traversal *NeoTraversal, start *NeoNode) ([]*NeoNode, *NeoResponse) {
+	result, reqData, err := g.builder.TraverseByNodes(traversal, start)
+	if err != nil {
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) TraverseByRelationships(traversal *NeoTraversal, start *NeoNode) ([]*NeoRelationship, *NeoResponse) {
+	result, reqData, err := g.builder.TraverseByRelationships(traversal, start)
+	if err != nil {
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) TraverseByPaths(traversal *NeoTraversal, start *NeoNode) ([]*NeoPath, *NeoResponse) {
+	result, reqData, err := g.builder.TraverseByPaths(traversal, start)
+	if err != nil {
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) TraverseByFullPaths(traversal *NeoTraversal, start *NeoNode) ([]*NeoFullPath, *NeoResponse) {
+	result, reqData, err := g.builder.TraverseByFullPaths(traversal, start)
+	if err != nil {
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
+	return result, g.executeFromRequestData(reqData)
+}
+
+// 17.14.5
+func (g *GraphDatabaseService) TraverseByNodesWithPaging(traversal *NeoTraversal, start *NeoNode) (*NeoPagedTraverser, []*NeoNode, *NeoResponse) {
+	result, reqData, err := g.builder.TraverseByNodesWithPaging(traversal, start)
+	if err != nil {
+		return nil, result, NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
+	response := g.executeFromRequestData(reqData)
+	if len(response.location) > 0 {
+		pagedTraverser := &NeoPagedTraverser{response.location}
+		return pagedTraverser, result, response
+	}
+	return nil, nil, NewLocalErrorResponse(reqData.expectedStatus, fmt.Errorf("The server did not return traverser's location."))
+}
+
+func (g *GraphDatabaseService) TraverseByRelationshipsWithPaging(traversal *NeoTraversal, start *NeoNode) (*NeoPagedTraverser, []*NeoRelationship, *NeoResponse) {
+	result, reqData, err := g.builder.TraverseByRelationshipsWithPaging(traversal, start)
+	if err != nil {
+		return nil, result, NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
+	response := g.executeFromRequestData(reqData)
+	if len(response.location) > 0 {
+		pagedTraverser := &NeoPagedTraverser{response.location}
+		return pagedTraverser, result, response
+	}
+	return nil, nil, NewLocalErrorResponse(reqData.expectedStatus, fmt.Errorf("The server did not return traverser's location."))
+}
+
+func (g *GraphDatabaseService) TraverseByPathsWithPaging(traversal *NeoTraversal, start *NeoNode) (*NeoPagedTraverser, []*NeoPath, *NeoResponse) {
+	result, reqData, err := g.builder.TraverseByPathsWithPaging(traversal, start)
+	if err != nil {
+		return nil, result, NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
+	response := g.executeFromRequestData(reqData)
+	if len(response.location) > 0 {
+		pagedTraverser := &NeoPagedTraverser{response.location}
+		return pagedTraverser, result, response
+	}
+	return nil, nil, NewLocalErrorResponse(reqData.expectedStatus, fmt.Errorf("The server did not return traverser's location."))
+}
+
+func (g *GraphDatabaseService) TraverseByFullPathsWithPaging(traversal *NeoTraversal, start *NeoNode) (*NeoPagedTraverser, []*NeoFullPath, *NeoResponse) {
+	result, reqData, err := g.builder.TraverseByFullPathsWithPaging(traversal, start)
+	if err != nil {
+		return nil, result, NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
+	response := g.executeFromRequestData(reqData)
+	if len(response.location) > 0 {
+		pagedTraverser := &NeoPagedTraverser{response.location}
+		return pagedTraverser, result, response
+	}
+	return nil, nil, NewLocalErrorResponse(reqData.expectedStatus, fmt.Errorf("The server did not return traverser's location."))
+}
+
+// 17.14.6+
+func (g *GraphDatabaseService) TraverseByNodesGetNextPage(traverser *NeoPagedTraverser) ([]*NeoNode, *NeoResponse) {
+	result, reqData := g.builder.TraverseByNodesGetNextPage(traverser)
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) TraverseByRelationshipsGetNextPage(traverser *NeoPagedTraverser) ([]*NeoRelationship, *NeoResponse) {
+	result, reqData := g.builder.TraverseByRelationshipsGetNextPage(traverser)
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) TraverseByPathsGetNextPage(traverser *NeoPagedTraverser) ([]*NeoPath, *NeoResponse) {
+	result, reqData := g.builder.TraverseByPathsGetNextPage(traverser)
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) TraverseByFullPathsGetNextPage(traverser *NeoPagedTraverser) ([]*NeoFullPath, *NeoResponse) {
+	result, reqData := g.builder.TraverseByFullPathsGetNextPage(traverser)
+	return result, g.executeFromRequestData(reqData)
+}
+
 // Utility methods
 
 func (g *GraphDatabaseService) httpRequestFromData(reqData *neoRequestData) (*NeoHttpRequest, error) {
@@ -445,16 +554,16 @@ func (g *GraphDatabaseService) execute(neoRequest *NeoHttpRequest, neoRequestErr
 // while processing the request or response.
 func (g *GraphDatabaseService) execute_(neoRequest *NeoHttpRequest, neoRequestErr error, expectedStatusCode int, result interface{}, connRequired bool) *NeoResponse {
 	if connRequired && len(g.builder.root.Neo4jVersion) == 0 {
-		return &NeoResponse{expectedStatusCode, 600, fmt.Errorf("Cannot execute the request because the client is not connected.")}
+		return NewLocalErrorResponse(expectedStatusCode, fmt.Errorf("Cannot execute the request because the client is not connected."))
 	}
 
 	if neoRequestErr != nil {
-		return &NeoResponse{expectedStatusCode, 600, neoRequestErr}
+		return NewLocalErrorResponse(expectedStatusCode, neoRequestErr)
 	}
 
 	resp, err := g.client.Do(neoRequest.Request)
 	if err != nil {
-		return &NeoResponse{expectedStatusCode, 600, err}
+		return NewLocalErrorResponse(expectedStatusCode, err)
 	}
 
 	defer resp.Body.Close()
@@ -463,6 +572,10 @@ func (g *GraphDatabaseService) execute_(neoRequest *NeoHttpRequest, neoRequestEr
 	neoResponse := new(NeoResponse)
 	neoResponse.ExpectedCode = expectedStatusCode
 	neoResponse.StatusCode = resp.StatusCode
+	locationUrl, err := resp.Location()
+	if err == nil {
+		neoResponse.location = locationUrl.String()
+	}
 	if resp.StatusCode >= 400 {
 		neoErr := &NeoError{}
 		container = neoErr
@@ -477,13 +590,13 @@ func (g *GraphDatabaseService) execute_(neoRequest *NeoHttpRequest, neoRequestEr
 			dec := json.NewDecoder(resp.Body)
 			err = dec.Decode(container)
 			if err != nil {
-				return &NeoResponse{expectedStatusCode, 600, err}
+				return NewLocalErrorResponse(expectedStatusCode, err)
 			}
 		} else if len(ctype) == 0 {
-			return &NeoResponse{expectedStatusCode, 600, &NeoError{"Server did not return a content-type for this response.", "", nil}}
+			return NewLocalErrorResponse(expectedStatusCode, fmt.Errorf("Server did not return a content-type for this response."))
 		} else {
-			errorMessage := fmt.Sprintf("Server has returned a response with unsupported content-type (%s)", ctype)
-			return &NeoResponse{expectedStatusCode, 600, &NeoError{errorMessage, "", nil}}
+			err := fmt.Errorf("Server has returned a response with unsupported content-type (%s)", ctype)
+			return NewLocalErrorResponse(expectedStatusCode, err)
 		}
 	}
 

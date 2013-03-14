@@ -57,7 +57,7 @@ func (n *NeoBatch) queueRequestData(reqData *neoRequestData) *NeoResponse {
 	batchId := n.nextBatchId()
 	reqData.setBatchId(batchId)
 
-	resp := &NeoResponse{reqData.expectedStatus, 0, nil}
+	resp := NewLocalErrorResponse(reqData.expectedStatus, nil)
 	n.responses = append(n.responses, resp)
 	n.requests = append(n.requests, reqData)
 
@@ -69,7 +69,7 @@ func (n *NeoBatch) queueRequestDataWithResult(reqData *neoRequestData, result ba
 	reqData.setBatchId(batchId)
 	result.setBatchId(batchId)
 
-	resp := &NeoResponse{reqData.expectedStatus, 0, nil}
+	resp := NewLocalErrorResponse(reqData.expectedStatus, nil)
 	n.responses = append(n.responses, resp)
 	n.requests = append(n.requests, reqData)
 
@@ -151,7 +151,7 @@ func (n *NeoBatch) ReplacePropertiesForRelationship(rel *NeoRelationship, proper
 func (n *NeoBatch) GetPropertyForRelationship(rel *NeoRelationship, propertyKey string) (interface{}, *NeoResponse) {
 	result, reqData, err := n.service.builder.GetPropertyForRelationship(rel, propertyKey)
 	if err != nil {
-		return result, &NeoResponse{reqData.expectedStatus, 600, err}
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
 	return result, n.queueRequestData(reqData)
 }
@@ -159,7 +159,7 @@ func (n *NeoBatch) GetPropertyForRelationship(rel *NeoRelationship, propertyKey 
 func (n *NeoBatch) SetPropertyForRelationship(rel *NeoRelationship, propertyKey string, propertyValue interface{}) *NeoResponse {
 	reqData, err := n.service.builder.SetPropertyForRelationship(rel, propertyKey, propertyValue)
 	if err != nil {
-		return &NeoResponse{reqData.expectedStatus, 600, err}
+		return NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
 	return n.queueRequestData(reqData)
 }
@@ -172,7 +172,7 @@ func (n *NeoBatch) GetRelationshipsForNode(node *NeoNode, direction NeoTraversal
 func (n *NeoBatch) GetRelationshipsWithTypesForNode(node *NeoNode, direction NeoTraversalDirection, relTypes []string) ([]*NeoRelationship, *NeoResponse) {
 	result, reqData, err := n.service.builder.GetRelationshipsWithTypesForNode(node, direction, relTypes)
 	if err != nil {
-		return result, &NeoResponse{reqData.expectedStatus, 600, err}
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
 	return result, n.queueRequestData(reqData)
 }
@@ -185,7 +185,7 @@ func (n *NeoBatch) GetRelationshipTypes() ([]string, *NeoResponse) {
 func (n *NeoBatch) SetPropertyForNode(node *NeoNode, propertyKey string, propertyValue interface{}) *NeoResponse {
 	reqData, err := n.service.builder.SetPropertyForNode(node, propertyKey, propertyValue)
 	if err != nil {
-		return &NeoResponse{reqData.expectedStatus, 600, err}
+		return NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
 	return n.queueRequestData(reqData)
 }
@@ -208,7 +208,7 @@ func (n *NeoBatch) DeletePropertiesForNode(node *NeoNode) *NeoResponse {
 func (n *NeoBatch) DeletePropertyWithKeyForNode(node *NeoNode, keyName string) *NeoResponse {
 	reqData, err := n.service.builder.DeletePropertyWithKeyForNode(node, keyName)
 	if err != nil {
-		return &NeoResponse{reqData.expectedStatus, 600, err}
+		return NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
 	return n.queueRequestData(reqData)
 }
@@ -226,7 +226,7 @@ func (n *NeoBatch) DeletePropertiesForRelationship(rel *NeoRelationship) *NeoRes
 func (n *NeoBatch) DeletePropertyWithKeyForRelationship(rel *NeoRelationship, keyName string) *NeoResponse {
 	reqData, err := n.service.builder.DeletePropertyWithKeyForRelationship(rel, keyName)
 	if err != nil {
-		return &NeoResponse{reqData.expectedStatus, 600, err}
+		return NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
 	return n.queueRequestData(reqData)
 }
@@ -234,7 +234,7 @@ func (n *NeoBatch) DeletePropertyWithKeyForRelationship(rel *NeoRelationship, ke
 func (n *NeoBatch) Commit() *NeoResponse {
 	expectedStatus := 200
 	if n.currentBatchId == 0 {
-		return &NeoResponse{expectedStatus, 600, fmt.Errorf("This batch does not contain any operations.")}
+		return NewLocalErrorResponse(expectedStatus, fmt.Errorf("This batch does not contain any operations."))
 	}
 
 	elements := make([]*neoBatchElement, len(n.requests))
@@ -250,7 +250,7 @@ func (n *NeoBatch) Commit() *NeoResponse {
 		} else if len(reqData.requestUrl) >= baseUrlLength {
 			batchElem.To = reqData.requestUrl[baseUrlLength:]
 		} else {
-			return &NeoResponse{expectedStatus, 600, fmt.Errorf("Unknown/badly formatted url: %v", reqData.requestUrl)}
+			return NewLocalErrorResponse(expectedStatus, fmt.Errorf("Unknown/badly formatted url: %v", reqData.requestUrl))
 		}
 
 		elements[i] = batchElem
@@ -258,7 +258,7 @@ func (n *NeoBatch) Commit() *NeoResponse {
 
 	bodyData, err := json.Marshal(elements)
 	if err != nil {
-		return &NeoResponse{expectedStatus, 600, fmt.Errorf("Could not serialize batch element: %v", err.Error())}
+		return NewLocalErrorResponse(expectedStatus, fmt.Errorf("Could not serialize batch element: %v", err.Error()))
 	}
 	bodyBuf := bytes.NewBuffer(bodyData)
 

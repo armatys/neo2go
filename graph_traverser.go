@@ -13,7 +13,7 @@ type GraphTraverser interface {
 	TraverseByPathsWithPaging(traversal *NeoTraversal, start *NeoNode) (*NeoPagedTraverser, []*NeoPath, *NeoResponse)
 	TraverseByFullPathsWithPaging(traversal *NeoTraversal, start *NeoNode) (*NeoPagedTraverser, []*NeoFullPath, *NeoResponse)
 
-	// 17.14.6+; not sure if all 4 are needed, or just 1 would be sufficient?
+	// 17.14.6+
 	TraverseByNodesGetNextPage(*NeoPagedTraverser) ([]*NeoNode, *NeoResponse)
 	TraverseByRelationshipsGetNextPage(*NeoPagedTraverser) ([]*NeoRelationship, *NeoResponse)
 	TraverseByPathsGetNextPage(*NeoPagedTraverser) ([]*NeoPath, *NeoResponse)
