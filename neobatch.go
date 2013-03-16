@@ -154,6 +154,7 @@ func (n *NeoBatch) GetPropertyForRelationship(rel *NeoRelationship, propertyKey 
 	if err != nil {
 		return NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
+	reqData.result = result
 	return n.queueRequestData(reqData)
 }
 
