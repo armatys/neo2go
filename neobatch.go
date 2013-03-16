@@ -8,6 +8,7 @@ import (
 )
 
 var _ Grapher = (*NeoBatch)(nil)
+var _ GraphIndexer = (*NeoBatch)(nil)
 
 var batchIdRegExp *regexp.Regexp
 
@@ -229,6 +230,225 @@ func (n *NeoBatch) DeletePropertyWithKeyForRelationship(rel *NeoRelationship, ke
 		return NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
 	return n.queueRequestData(reqData)
+}
+
+// GraphIndexer
+
+// 17.10.1 - Nodes
+func (n *NeoBatch) CreateNodeIndex(name string) (*NeoIndex, *NeoResponse) {
+	result, reqData := n.service.builder.CreateNodeIndex(name)
+	return result, n.queueRequestData(reqData)
+}
+
+// 17.10.2
+func (n *NeoBatch) CreateNodeIndexWithConfiguration(name string, config map[string]interface{}) (*NeoIndex, *NeoResponse) {
+	result, reqData := n.service.builder.CreateNodeIndexWithConfiguration(name, config)
+	return result, n.queueRequestData(reqData)
+}
+
+// 17.10.3
+func (n *NeoBatch) DeleteIndex(index *NeoIndex) *NeoResponse {
+	reqData, err := n.service.builder.DeleteIndex(index)
+	if err != nil {
+		return NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
+	return n.queueRequestData(reqData)
+}
+
+// 17.10.4
+func (n *NeoBatch) GetNodeIndexes() (map[string]*NeoIndex, *NeoResponse) {
+	result, reqData := n.service.builder.GetNodeIndexes()
+	return result, n.queueRequestData(reqData)
+}
+
+// 17.10.5
+func (n *NeoBatch) AddNodeToIndex(index *NeoIndex, node *NeoNode, key, value string) (*NeoNode, *NeoResponse) {
+	result, reqData, err := n.service.builder.AddNodeToIndex(index, node, key, value)
+	if err != nil {
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
+	return result, n.queueRequestData(reqData)
+}
+
+// 17.10.6
+func (n *NeoBatch) DeleteAllIndexEntriesForNode(index *NeoIndex, node *NeoNode) *NeoResponse {
+	reqData, err := n.service.builder.DeleteAllIndexEntriesForNode(index, node)
+	if err != nil {
+		return NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
+	return n.queueRequestData(reqData)
+}
+
+// 17.10.7
+func (n *NeoBatch) DeleteAllIndexEntriesForNodeAndKey(index *NeoIndex, node *NeoNode, key string) *NeoResponse {
+	reqData, err := n.service.builder.DeleteAllIndexEntriesForNodeAndKey(index, node, key)
+	if err != nil {
+		return NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
+	return n.queueRequestData(reqData)
+}
+
+// 17.10.8
+func (n *NeoBatch) DeleteAllIndexEntriesForNodeKeyAndValue(index *NeoIndex, node *NeoNode, key string, value string) *NeoResponse {
+	reqData, err := n.service.builder.DeleteAllIndexEntriesForNodeKeyAndValue(index, node, key, value)
+	if err != nil {
+		return NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
+	return n.queueRequestData(reqData)
+}
+
+// 17.10.9
+func (n *NeoBatch) FindNodeByExactMatch(index *NeoIndex, key, value string) ([]*NeoNode, *NeoResponse) {
+	result, reqData, err := n.service.builder.FindNodeByExactMatch(index, key, value)
+	if err != nil {
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
+	return result, n.queueRequestData(reqData)
+}
+
+// 17.10.10
+func (n *NeoBatch) FindNodeByQuery(index *NeoIndex, query string) ([]*NeoNode, *NeoResponse) {
+	result, reqData, err := n.service.builder.FindNodeByQuery(index, query)
+	if err != nil {
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
+	return result, n.queueRequestData(reqData)
+}
+
+// 17.10.1 - Relationships
+func (n *NeoBatch) CreateRelationshipIndex(name string) (*NeoIndex, *NeoResponse) {
+	result, reqData := n.service.builder.CreateRelationshipIndex(name)
+	return result, n.queueRequestData(reqData)
+}
+
+// 17.10.2
+func (n *NeoBatch) CreateRelationshipIndexWithConfiguration(name string, config map[string]interface{}) (*NeoIndex, *NeoResponse) {
+	result, reqData := n.service.builder.CreateRelationshipIndexWithConfiguration(name, config)
+	return result, n.queueRequestData(reqData)
+}
+
+// 17.10.4
+func (n *NeoBatch) GetRelationshipIndexes() ([]*NeoIndex, *NeoResponse) {
+	result, reqData := n.service.builder.GetRelationshipIndexes()
+	return result, n.queueRequestData(reqData)
+}
+
+// 17.10.5
+func (n *NeoBatch) AddRelationshipToIndex(index *NeoIndex, rel *NeoRelationship, key, value string) (*NeoRelationship, *NeoResponse) {
+	result, reqData, err := n.service.builder.AddRelationshipToIndex(index, rel, key, value)
+	if err != nil {
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
+	return result, n.queueRequestData(reqData)
+}
+
+// 17.10.6
+func (n *NeoBatch) DeleteAllIndexEntriesForRelationship(index *NeoIndex, rel *NeoRelationship) *NeoResponse {
+	reqData, err := n.service.builder.DeleteAllIndexEntriesForRelationship(index, rel)
+	if err != nil {
+		return NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
+	return n.queueRequestData(reqData)
+}
+
+// 17.10.7
+func (n *NeoBatch) DeleteAllIndexEntriesForRelationshipAndKey(index *NeoIndex, rel *NeoRelationship, key string) *NeoResponse {
+	reqData, err := n.service.builder.DeleteAllIndexEntriesForRelationshipAndKey(index, rel, key)
+	if err != nil {
+		return NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
+	return n.queueRequestData(reqData)
+}
+
+// 17.10.8
+func (n *NeoBatch) DeleteAllIndexEntriesForRelationshipKeyAndValue(index *NeoIndex, rel *NeoRelationship, key string, value string) *NeoResponse {
+	reqData, err := n.service.builder.DeleteAllIndexEntriesForRelationshipKeyAndValue(index, rel, key, value)
+	if err != nil {
+		return NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
+	return n.queueRequestData(reqData)
+}
+
+// 17.10.9
+func (n *NeoBatch) FindRelationshipByExactMatch(index *NeoIndex, key, value string) ([]*NeoRelationship, *NeoResponse) {
+	result, reqData, err := n.service.builder.FindRelationshipByExactMatch(index, key, value)
+	if err != nil {
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
+	return result, n.queueRequestData(reqData)
+}
+
+// 17.10.10
+func (n *NeoBatch) FindRelationshipByQuery(index *NeoIndex, query string) ([]*NeoRelationship, *NeoResponse) {
+	result, reqData, err := n.service.builder.FindRelationshipByQuery(index, query)
+	if err != nil {
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
+	return result, n.queueRequestData(reqData)
+}
+
+// 17.11.1
+func (n *NeoBatch) GetOrCreateUniqueNode(index *NeoIndex, key, value string) (*NeoNode, *NeoResponse) {
+	result, reqData := n.service.builder.GetOrCreateUniqueNode(index, key, value)
+	return result, n.queueRequestData(reqData)
+}
+
+func (n *NeoBatch) GetOrCreateUniqueNodeWithProperties(index *NeoIndex, key, value string, properties map[string]interface{}) (*NeoNode, *NeoResponse) {
+	result, reqData := n.service.builder.GetOrCreateUniqueNodeWithProperties(index, key, value, properties)
+	return result, n.queueRequestData(reqData)
+}
+
+// 17.11.3
+func (n *NeoBatch) CreateUniqueNodeOrFail(index *NeoIndex, key, value string) (*NeoNode, *NeoResponse) {
+	result, reqData := n.service.builder.CreateUniqueNodeOrFail(index, key, value)
+	return result, n.queueRequestData(reqData)
+}
+
+func (n *NeoBatch) CreateUniqueNodeWithPropertiesOrFail(index *NeoIndex, key, value string, properties map[string]interface{}) (*NeoNode, *NeoResponse) {
+	result, reqData := n.service.builder.CreateUniqueNodeWithPropertiesOrFail(index, key, value, properties)
+	return result, n.queueRequestData(reqData)
+}
+
+// 17.11.5
+func (n *NeoBatch) GetOrCreateUniqueRelationship(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode) (*NeoRelationship, *NeoResponse) {
+	result, reqData := n.service.builder.GetOrCreateUniqueRelationship(index, key, value, source, target)
+	return result, n.queueRequestData(reqData)
+}
+
+func (n *NeoBatch) GetOrCreateUniqueTypedRelationship(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string) (*NeoRelationship, *NeoResponse) {
+	result, reqData := n.service.builder.GetOrCreateUniqueTypedRelationship(index, key, value, source, target, relType)
+	return result, n.queueRequestData(reqData)
+}
+
+func (n *NeoBatch) GetOrCreateUniqueRelationshipWithProperties(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, properties map[string]interface{}) (*NeoRelationship, *NeoResponse) {
+	result, reqData := n.service.builder.GetOrCreateUniqueRelationshipWithProperties(index, key, value, source, target, properties)
+	return result, n.queueRequestData(reqData)
+}
+
+func (n *NeoBatch) GetOrCreateUniqueTypedRelationshipWithProperties(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string, properties map[string]interface{}) (*NeoRelationship, *NeoResponse) {
+	result, reqData := n.service.builder.GetOrCreateUniqueTypedRelationshipWithProperties(index, key, value, source, target, relType, properties)
+	return result, n.queueRequestData(reqData)
+}
+
+// 17.11.7
+func (n *NeoBatch) CreateUniqueRelationshipOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode) (*NeoRelationship, *NeoResponse) {
+	result, reqData := n.service.builder.CreateUniqueRelationshipOrFail(index, key, value, source, target)
+	return result, n.queueRequestData(reqData)
+}
+
+func (n *NeoBatch) CreateUniqueTypedRelationshipOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string) (*NeoRelationship, *NeoResponse) {
+	result, reqData := n.service.builder.CreateUniqueTypedRelationshipOrFail(index, key, value, source, target, relType)
+	return result, n.queueRequestData(reqData)
+}
+
+func (n *NeoBatch) CreateUniqueRelationshipWithPropertiesOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, properties map[string]interface{}) (*NeoRelationship, *NeoResponse) {
+	result, reqData := n.service.builder.CreateUniqueRelationshipWithPropertiesOrFail(index, key, value, source, target, properties)
+	return result, n.queueRequestData(reqData)
+}
+
+func (n *NeoBatch) CreateUniqueTypedRelationshipWithPropertiesOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string, properties map[string]interface{}) (*NeoRelationship, *NeoResponse) {
+	result, reqData := n.service.builder.CreateUniqueTypedRelationshipWithPropertiesOrFail(index, key, value, source, target, relType, properties)
+	return result, n.queueRequestData(reqData)
 }
 
 func (n *NeoBatch) Commit() *NeoResponse {
