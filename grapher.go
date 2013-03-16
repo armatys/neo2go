@@ -33,7 +33,7 @@ type Grapher interface {
 	// 17.6.6
 	ReplacePropertiesForRelationship(rel *NeoRelationship, properties map[string]interface{}) *NeoResponse
 	// 17.6.7
-	GetPropertyForRelationship(rel *NeoRelationship, propertyKey string) (interface{}, *NeoResponse)
+	GetPropertyForRelationship(rel *NeoRelationship, propertyKey string, result interface{}) *NeoResponse
 	// 17.6.8
 	SetPropertyForRelationship(rel *NeoRelationship, propertyKey string, propertyValue interface{}) *NeoResponse
 

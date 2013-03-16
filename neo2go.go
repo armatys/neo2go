@@ -13,6 +13,12 @@ var _ GraphIndexer = (*GraphDatabaseService)(nil)
 var _ GraphPathFinder = (*GraphDatabaseService)(nil)
 var _ GraphTraverser = (*GraphDatabaseService)(nil)
 
+var jsonContentTypeRegExp *regexp.Regexp
+
+func init() {
+	jsonContentTypeRegExp = regexp.MustCompile(`^application/json.*`)
+}
+
 type GraphDatabaseService struct {
 	client  *http.Client
 	builder *neoRequestBuilder
@@ -110,12 +116,13 @@ func (g *GraphDatabaseService) ReplacePropertiesForRelationship(rel *NeoRelation
 	return g.executeFromRequestData(reqData)
 }
 
-func (g *GraphDatabaseService) GetPropertyForRelationship(rel *NeoRelationship, propertyKey string) (interface{}, *NeoResponse) {
-	result, reqData, err := g.builder.GetPropertyForRelationship(rel, propertyKey)
+func (g *GraphDatabaseService) GetPropertyForRelationship(rel *NeoRelationship, propertyKey string, result interface{}) *NeoResponse {
+	reqData, err := g.builder.GetPropertyForRelationship(rel, propertyKey)
 	if err != nil {
-		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+		return NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
-	return result, g.executeFromRequestData(reqData)
+	reqData.result = result
+	return g.executeFromRequestData(reqData)
 }
 
 func (g *GraphDatabaseService) SetPropertyForRelationship(rel *NeoRelationship, propertyKey string, propertyValue interface{}) *NeoResponse {
@@ -597,14 +604,16 @@ func (g *GraphDatabaseService) execute_(neoRequest *NeoHttpRequest, neoRequestEr
 
 	if container != nil {
 		ctype := resp.Header.Get("content-type")
-		if matched, err := regexp.MatchString("^application/json.*", ctype); matched {
+		matched := jsonContentTypeRegExp.MatchString(ctype)
+
+		if matched {
 			dec := json.NewDecoder(resp.Body)
 			err = dec.Decode(container)
 			if err != nil {
 				return NewLocalErrorResponse(expectedStatusCode, err)
 			}
 		} else if len(ctype) == 0 {
-			return NewLocalErrorResponse(expectedStatusCode, fmt.Errorf("Server did not return a content-type for this response."))
+			//return NewLocalErrorResponse(expectedStatusCode, fmt.Errorf("Server did not return a content-type for this response."))
 		} else {
 			err := fmt.Errorf("Server has returned a response with unsupported content-type (%s)", ctype)
 			return NewLocalErrorResponse(expectedStatusCode, err)

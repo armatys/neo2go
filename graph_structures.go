@@ -39,20 +39,20 @@ func setTemplateIfNil(tmpl **UrlTemplate, val string) {
 }
 
 type NeoNode struct {
-	AllRelationships           *UrlTemplate
-	AllTypedRelationships      *UrlTemplate
-	CreateRelationship         *UrlTemplate
-	Data                       map[string]interface{}
-	Extensions                 map[string]interface{}
-	IncomingRelationships      *UrlTemplate
-	IncomingTypedRelationships *UrlTemplate
-	OutgoingRelationships      *UrlTemplate
-	OutgoingTypedRelationships *UrlTemplate
-	PagedTraverse              *UrlTemplate
-	Properties                 *UrlTemplate
-	Property                   *UrlTemplate
-	Self                       *UrlTemplate
-	Traverse                   *UrlTemplate
+	AllRelationships           *UrlTemplate           `json:"all_relationships"`
+	AllTypedRelationships      *UrlTemplate           `json:"all_typed_relationships"`
+	CreateRelationship         *UrlTemplate           `json:"create_relationship"`
+	Data                       map[string]interface{} `json:"data"`
+	Extensions                 map[string]interface{} `json:"extensions"`
+	IncomingRelationships      *UrlTemplate           `json:"incoming_relationships"`
+	IncomingTypedRelationships *UrlTemplate           `json:"incoming_typed_relationships"`
+	OutgoingRelationships      *UrlTemplate           `json:"outgoing_relationships"`
+	OutgoingTypedRelationships *UrlTemplate           `json:"outgoing_typed_relationships"`
+	PagedTraverse              *UrlTemplate           `json:"paged_traverse"`
+	Properties                 *UrlTemplate           `json:"properties"`
+	Property                   *UrlTemplate           `json:"property"`
+	Self                       *UrlTemplate           `json:"self"`
+	Traverse                   *UrlTemplate           `json:"traverse"`
 	batchId                    NeoBatchId
 }
 
@@ -97,7 +97,7 @@ func (n *NeoNode) setBatchId(bid NeoBatchId) {
 
 type NeoRelationship struct {
 	Data       map[string]interface{}
-	Extensions []*UrlTemplate
+	Extensions map[string]interface{}
 	Start      *UrlTemplate
 	Property   *UrlTemplate
 	Self       *UrlTemplate

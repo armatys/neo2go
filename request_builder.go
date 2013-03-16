@@ -132,14 +132,13 @@ func (n *neoRequestBuilder) ReplacePropertiesForRelationship(rel *NeoRelationshi
 	return &requestData
 }
 
-func (n *neoRequestBuilder) GetPropertyForRelationship(rel *NeoRelationship, propertyKey string) (interface{}, *neoRequestData, error) {
-	var propertyValue interface{}
+func (n *neoRequestBuilder) GetPropertyForRelationship(rel *NeoRelationship, propertyKey string) (*neoRequestData, error) {
 	url, err := rel.Property.Render(map[string]interface{}{"key": propertyKey})
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	requestData := neoRequestData{expectedStatus: 200, method: "GET", result: propertyValue, requestUrl: url}
-	return propertyValue, &requestData, nil
+	requestData := neoRequestData{expectedStatus: 200, method: "GET", requestUrl: url}
+	return &requestData, nil
 }
 
 func (n *neoRequestBuilder) SetPropertyForRelationship(rel *NeoRelationship, propertyKey string, propertyValue interface{}) (*neoRequestData, error) {

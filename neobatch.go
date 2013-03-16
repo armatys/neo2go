@@ -149,12 +149,12 @@ func (n *NeoBatch) ReplacePropertiesForRelationship(rel *NeoRelationship, proper
 	return n.queueRequestData(reqData)
 }
 
-func (n *NeoBatch) GetPropertyForRelationship(rel *NeoRelationship, propertyKey string) (interface{}, *NeoResponse) {
-	result, reqData, err := n.service.builder.GetPropertyForRelationship(rel, propertyKey)
+func (n *NeoBatch) GetPropertyForRelationship(rel *NeoRelationship, propertyKey string, result interface{}) *NeoResponse {
+	reqData, err := n.service.builder.GetPropertyForRelationship(rel, propertyKey)
 	if err != nil {
-		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+		return NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
-	return result, n.queueRequestData(reqData)
+	return n.queueRequestData(reqData)
 }
 
 func (n *NeoBatch) SetPropertyForRelationship(rel *NeoRelationship, propertyKey string, propertyValue interface{}) *NeoResponse {

@@ -174,3 +174,44 @@ func TestSimpleCypherQuery(t *testing.T) {
 		t.Fatalf("Server returned unexpected response: %v", resp.NeoError.Error())
 	}
 }
+
+func TestRelationships(t *testing.T) {
+	service := NewGraphDatabaseService()
+	resp := service.Connect(databaseAddress)
+	if !responseHasSucceededWithCode(resp, 200) {
+		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
+	}
+
+	source, resp := service.CreateNode()
+	if !resp.Ok() {
+		t.Fatalf(resp.NeoError.Error())
+	}
+	target, resp := service.CreateNode()
+	if !resp.Ok() {
+		t.Fatalf(resp.NeoError.Error())
+	}
+
+	properties := map[string]interface{}{"weight": 30}
+	relType := "has"
+	rel, resp := service.CreateRelationshipWithPropertiesAndType(source, target, properties, relType)
+	if !resp.Ok() {
+		t.Fatalf("Error creating relationship: %v", resp.NeoError.Error())
+	}
+
+	var weight float64
+	resp = service.GetPropertyForRelationship(rel, "weight", &weight)
+	if !resp.Ok() {
+		t.Fatalf("Could not get relationship property: %v", resp.NeoError.Error())
+	}
+	expected := 30.0
+	if weight != expected {
+		t.Fatalf("Expected relationship property value %d, but got: %d", expected, weight)
+	}
+
+	resp = service.DeleteRelationship(rel)
+	if !resp.Ok() {
+		t.Fatalf("Error deleting relationship: %v", resp.NeoError.Error())
+	}
+	service.DeleteNode(source)
+	service.DeleteNode(target)
+}
