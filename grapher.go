@@ -29,7 +29,7 @@ type Grapher interface {
 	DeleteRelationship(rel *NeoRelationship) *NeoResponse
 
 	// 17.6.5
-	GetPropertiesForRelationship(rel *NeoRelationship) (map[string]interface{}, *NeoResponse)
+	GetPropertiesForRelationship(rel *NeoRelationship, result interface{}) *NeoResponse
 	// 17.6.6
 	ReplacePropertiesForRelationship(rel *NeoRelationship, properties map[string]interface{}) *NeoResponse
 	// 17.6.7
@@ -46,12 +46,14 @@ type Grapher interface {
 	// 17.7.1
 	GetRelationshipTypes() ([]string, *NeoResponse)
 
+	// ?
+	GetPropertyForNode(node *NeoNode, propertyKey string, result interface{}) *NeoResponse
 	// 17.8.1
 	SetPropertyForNode(node *NeoNode, propertyKey string, propertyValue interface{}) *NeoResponse
 	// 17.8.2
 	ReplacePropertiesForNode(node *NeoNode, properties map[string]interface{}) *NeoResponse
 	// 17.8.3
-	GetPropertiesForNode(node *NeoNode) (map[string]interface{}, *NeoResponse)
+	GetPropertiesForNode(node *NeoNode, result interface{}) *NeoResponse
 	// 17.8.6
 	DeletePropertiesForNode(node *NeoNode) *NeoResponse
 	// 17.8.7
