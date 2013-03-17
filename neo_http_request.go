@@ -2,8 +2,15 @@ package neo2go
 
 import (
 	"bytes"
+	"fmt"
 	"net/http"
 )
+
+var versionHeader string
+
+func init() {
+	versionHeader = fmt.Sprintf("neo2go v.%d", Version)
+}
 
 type NeoHttpRequest struct {
 	*http.Request
@@ -23,6 +30,7 @@ func NewNeoHttpRequest(method, urlStr string, bodyBuf *bytes.Buffer) (*NeoHttpRe
 	}
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("X-Stream", "true")
+	req.Header.Set("User-Agent", "neo2go v.%d")
 	if bodyBuf != nil {
 		req.Header.Set("Content-Type", "application/json")
 	}

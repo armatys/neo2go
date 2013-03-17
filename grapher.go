@@ -17,8 +17,6 @@ type Grapher interface {
 	GetRelationship(uri string) (*NeoRelationship, *NeoResponse)
 
 	// 17.6.2
-	CreateRelationship(source *NeoNode, target *NeoNode) (*NeoRelationship, *NeoResponse)
-	// 17.6.2
 	CreateRelationshipWithType(source *NeoNode, target *NeoNode, relType string) (*NeoRelationship, *NeoResponse)
 	// 17.6.3
 	CreateRelationshipWithProperties(source *NeoNode, target *NeoNode, properties map[string]interface{}) (*NeoRelationship, *NeoResponse)

@@ -175,7 +175,7 @@ func TestSimpleCypherQuery(t *testing.T) {
 	}
 }
 
-func TestRelationships(t *testing.T) {
+func TestSimpleRelationships(t *testing.T) {
 	service := NewGraphDatabaseService()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
@@ -191,11 +191,16 @@ func TestRelationships(t *testing.T) {
 		t.Fatalf(resp.NeoError.Error())
 	}
 
+	_, resp = service.CreateRelationshipWithType(source, target, "likes")
+	if !resp.Ok() {
+		t.Fatalf("Error creating relationship: %v", resp.NeoError.Error())
+	}
+
 	properties := map[string]interface{}{"weight": 30}
 	relType := "has"
 	rel, resp := service.CreateRelationshipWithPropertiesAndType(source, target, properties, relType)
 	if !resp.Ok() {
-		t.Fatalf("Error creating relationship: %v", resp.NeoError.Error())
+		t.Fatalf("Error creating relationship (with properties): %v", resp.NeoError.Error())
 	}
 
 	var weight float64
@@ -208,10 +213,57 @@ func TestRelationships(t *testing.T) {
 		t.Fatalf("Expected relationship property value %d, but got: %d", expected, weight)
 	}
 
+	expected = 45.0
+	service.SetPropertyForRelationship(rel, "weight", expected)
+	if !resp.Ok() {
+		t.Fatalf("Could not set relationship property: %v", resp.NeoError.Error())
+	}
+
+	props, resp := service.GetPropertiesForRelationship(rel)
+	if !resp.Ok() {
+		t.Fatalf("Could not get relationship property: %v", resp.NeoError.Error())
+	}
+
+	val := props["weight"]
+	if val != expected {
+		t.Fatalf("Expected relationship property value %d, but got: %d", expected, val)
+	}
+
+	rels, resp := service.GetRelationshipsWithTypesForNode(source, NeoTraversalOut, []string{relType})
+	if !resp.Ok() {
+		t.Fatalf("Could not get node relationships: %v", resp.NeoError.Error())
+	}
+
+	if len(rels) != 1 {
+		t.Fatalf("Expected to get 1-element array of relationships but got %d elements.", len(rels))
+	}
+
+	relTypes, resp := service.GetRelationshipTypes()
+	if !resp.Ok() {
+		t.Fatalf("Could not get relationship types: %v", resp.NeoError.Error())
+	}
+
+	if len(relTypes) < 2 {
+		t.Fatalf("Expected at least 2 relationship types, but got: %d", len(relTypes))
+	}
+
+	if len(relTypes) != 2 {
+		t.Logf("Expected at 2 relationship types, but got: %d", len(relTypes))
+	}
+
 	resp = service.DeleteRelationship(rel)
 	if !resp.Ok() {
 		t.Fatalf("Error deleting relationship: %v", resp.NeoError.Error())
 	}
 	service.DeleteNode(source)
 	service.DeleteNode(target)
+}
+
+func TestRelationships(t *testing.T) {
+	service := NewGraphDatabaseService()
+	resp := service.Connect(databaseAddress)
+	if !responseHasSucceededWithCode(resp, 200) {
+		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
+	}
+
 }

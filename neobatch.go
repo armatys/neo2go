@@ -108,12 +108,6 @@ func (n *NeoBatch) GetRelationship(uri string) (*NeoRelationship, *NeoResponse) 
 	return result, resp
 }
 
-func (n *NeoBatch) CreateRelationship(source *NeoNode, target *NeoNode) (*NeoRelationship, *NeoResponse) {
-	result, reqData := n.service.builder.CreateRelationship(source, target)
-	resp := n.queueRequestDataWithResult(reqData, result)
-	return result, resp
-}
-
 func (n *NeoBatch) CreateRelationshipWithType(source *NeoNode, target *NeoNode, relType string) (*NeoRelationship, *NeoResponse) {
 	result, reqData := n.service.builder.CreateRelationshipWithType(source, target, relType)
 	resp := n.queueRequestDataWithResult(reqData, result)
@@ -141,7 +135,7 @@ func (n *NeoBatch) DeleteRelationship(rel *NeoRelationship) *NeoResponse {
 
 func (n *NeoBatch) GetPropertiesForRelationship(rel *NeoRelationship) (map[string]interface{}, *NeoResponse) {
 	result, reqData := n.service.builder.GetPropertiesForRelationship(rel)
-	return result, n.queueRequestData(reqData)
+	return *result, n.queueRequestData(reqData)
 }
 
 func (n *NeoBatch) ReplacePropertiesForRelationship(rel *NeoRelationship, properties map[string]interface{}) *NeoResponse {
@@ -168,20 +162,20 @@ func (n *NeoBatch) SetPropertyForRelationship(rel *NeoRelationship, propertyKey 
 
 func (n *NeoBatch) GetRelationshipsForNode(node *NeoNode, direction NeoTraversalDirection) ([]*NeoRelationship, *NeoResponse) {
 	result, reqData := n.service.builder.GetRelationshipsForNode(node, direction)
-	return result, n.queueRequestData(reqData)
+	return *result, n.queueRequestData(reqData)
 }
 
 func (n *NeoBatch) GetRelationshipsWithTypesForNode(node *NeoNode, direction NeoTraversalDirection, relTypes []string) ([]*NeoRelationship, *NeoResponse) {
 	result, reqData, err := n.service.builder.GetRelationshipsWithTypesForNode(node, direction, relTypes)
 	if err != nil {
-		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+		return *result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
-	return result, n.queueRequestData(reqData)
+	return *result, n.queueRequestData(reqData)
 }
 
 func (n *NeoBatch) GetRelationshipTypes() ([]string, *NeoResponse) {
 	result, reqData := n.service.builder.GetRelationshipTypes()
-	return result, n.queueRequestData(reqData)
+	return *result, n.queueRequestData(reqData)
 }
 
 func (n *NeoBatch) SetPropertyForNode(node *NeoNode, propertyKey string, propertyValue interface{}) *NeoResponse {
@@ -199,7 +193,7 @@ func (n *NeoBatch) ReplacePropertiesForNode(node *NeoNode, properties map[string
 
 func (n *NeoBatch) GetPropertiesForNode(node *NeoNode) (map[string]interface{}, *NeoResponse) {
 	result, reqData := n.service.builder.GetPropertiesForNode(node)
-	return result, n.queueRequestData(reqData)
+	return *result, n.queueRequestData(reqData)
 }
 
 func (n *NeoBatch) DeletePropertiesForNode(node *NeoNode) *NeoResponse {
@@ -259,7 +253,7 @@ func (n *NeoBatch) DeleteIndex(index *NeoIndex) *NeoResponse {
 // 17.10.4
 func (n *NeoBatch) GetNodeIndexes() (map[string]*NeoIndex, *NeoResponse) {
 	result, reqData := n.service.builder.GetNodeIndexes()
-	return result, n.queueRequestData(reqData)
+	return *result, n.queueRequestData(reqData)
 }
 
 // 17.10.5
@@ -302,18 +296,18 @@ func (n *NeoBatch) DeleteAllIndexEntriesForNodeKeyAndValue(index *NeoIndex, node
 func (n *NeoBatch) FindNodeByExactMatch(index *NeoIndex, key, value string) ([]*NeoNode, *NeoResponse) {
 	result, reqData, err := n.service.builder.FindNodeByExactMatch(index, key, value)
 	if err != nil {
-		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+		return *result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
-	return result, n.queueRequestData(reqData)
+	return *result, n.queueRequestData(reqData)
 }
 
 // 17.10.10
 func (n *NeoBatch) FindNodeByQuery(index *NeoIndex, query string) ([]*NeoNode, *NeoResponse) {
 	result, reqData, err := n.service.builder.FindNodeByQuery(index, query)
 	if err != nil {
-		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+		return *result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
-	return result, n.queueRequestData(reqData)
+	return *result, n.queueRequestData(reqData)
 }
 
 // 17.10.1 - Relationships
@@ -331,7 +325,7 @@ func (n *NeoBatch) CreateRelationshipIndexWithConfiguration(name string, config 
 // 17.10.4
 func (n *NeoBatch) GetRelationshipIndexes() ([]*NeoIndex, *NeoResponse) {
 	result, reqData := n.service.builder.GetRelationshipIndexes()
-	return result, n.queueRequestData(reqData)
+	return *result, n.queueRequestData(reqData)
 }
 
 // 17.10.5
@@ -374,18 +368,18 @@ func (n *NeoBatch) DeleteAllIndexEntriesForRelationshipKeyAndValue(index *NeoInd
 func (n *NeoBatch) FindRelationshipByExactMatch(index *NeoIndex, key, value string) ([]*NeoRelationship, *NeoResponse) {
 	result, reqData, err := n.service.builder.FindRelationshipByExactMatch(index, key, value)
 	if err != nil {
-		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+		return *result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
-	return result, n.queueRequestData(reqData)
+	return *result, n.queueRequestData(reqData)
 }
 
 // 17.10.10
 func (n *NeoBatch) FindRelationshipByQuery(index *NeoIndex, query string) ([]*NeoRelationship, *NeoResponse) {
 	result, reqData, err := n.service.builder.FindRelationshipByQuery(index, query)
 	if err != nil {
-		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+		return *result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
-	return result, n.queueRequestData(reqData)
+	return *result, n.queueRequestData(reqData)
 }
 
 // 17.11.1
