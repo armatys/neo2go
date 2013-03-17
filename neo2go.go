@@ -190,11 +190,6 @@ func (g *GraphDatabaseService) DeletePropertyWithKeyForNode(node *NeoNode, keyNa
 	return g.executeFromRequestData(reqData)
 }
 
-func (g *GraphDatabaseService) UpdatePropertiesForRelationship(rel *NeoRelationship, properties interface{}) *NeoResponse {
-	reqData := g.builder.UpdatePropertiesForRelationship(rel, properties)
-	return g.executeFromRequestData(reqData)
-}
-
 func (g *GraphDatabaseService) DeletePropertiesForRelationship(rel *NeoRelationship) *NeoResponse {
 	reqData := g.builder.DeletePropertiesForRelationship(rel)
 	return g.executeFromRequestData(reqData)

@@ -245,11 +245,6 @@ func (n *neoRequestBuilder) DeletePropertyWithKeyForNode(node *NeoNode, keyName 
 	return &neoRequestData{expectedStatus: 204, method: "DELETE", requestUrl: url}, nil
 }
 
-func (n *neoRequestBuilder) UpdatePropertiesForRelationship(rel *NeoRelationship, properties interface{}) *neoRequestData {
-	url := rel.Properties.String()
-	return &neoRequestData{body: properties, expectedStatus: 204, method: "PUT", requestUrl: url}
-}
-
 func (n *neoRequestBuilder) DeletePropertiesForRelationship(rel *NeoRelationship) *neoRequestData {
 	url := rel.Properties.String()
 	return &neoRequestData{expectedStatus: 204, method: "DELETE", requestUrl: url}

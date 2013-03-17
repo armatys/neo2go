@@ -260,11 +260,79 @@ func TestSimpleRelationships(t *testing.T) {
 	service.DeleteNode(target)
 }
 
-func TestRelationships(t *testing.T) {
+func TestSimpleRelationships2(t *testing.T) {
 	service := NewGraphDatabaseService()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
 	}
 
+	source, resp := service.CreateNode()
+	if !resp.Ok() {
+		t.Fatalf(resp.NeoError.Error())
+	}
+	target, resp := service.CreateNode()
+	if !resp.Ok() {
+		t.Fatalf(resp.NeoError.Error())
+	}
+
+	rel, resp := service.CreateRelationshipWithPropertiesAndType(source, target, &map[string]string{"one": "two"}, "likes")
+	if !resp.Ok() {
+		t.Fatalf("Error creating relationship: %v", resp.NeoError.Error())
+	}
+
+	rel, resp = service.GetRelationship(rel.Self.String())
+	if !resp.Ok() {
+		t.Fatalf("Expected 200 code but got: %d", resp.StatusCode)
+	}
+
+	if v, ok := rel.Data.(map[string]interface{}); ok {
+		expected := "two"
+		if v["one"] != expected {
+			t.Fatalf("Expected the property value to be `%v`, but got: `%v`", expected, v["one"])
+		}
+	} else {
+		t.Fatalf("Could not convert properties to map[string]string")
+	}
+
+	resp = service.ReplacePropertiesForRelationship(rel, &map[string]string{"three": "four"})
+	if !resp.Ok() {
+		t.Fatalf("Error updating relationship properties: %v", resp.NeoError.Error())
+	}
+
+	var props map[string]string
+	resp = service.GetPropertiesForRelationship(rel, &props)
+	if !resp.Ok() {
+		t.Fatalf("Error getting relationship properties: %v", resp.NeoError.Error())
+	}
+	expected := "four"
+	if props["three"] != expected {
+		t.Fatalf("Expected the property value to be `%v`, but got: `%v`", expected, props["three"])
+	}
+	expected = ""
+	if props["one"] != expected {
+		t.Fatalf("Expected the property value to be `%v`, but got: `%v`", expected, props["one"])
+	}
+
+	batch := service.Batch()
+	batch.DeleteNode(source)
+	batch.DeleteNode(target)
+	batch.DeleteRelationship(rel)
+	resp = batch.Commit()
+	if !resp.Ok() {
+		t.Fatalf("Could not execute batch (deletion): %v", resp.NeoError.Error())
+	}
+
+	_, resp = service.GetNode(source.Self.String())
+	if !responseHasFailedWithCode(resp, 404) {
+		t.Fatalf("Expected 404 code but got: %d", resp.StatusCode)
+	}
+	_, resp = service.GetNode(target.Self.String())
+	if !responseHasFailedWithCode(resp, 404) {
+		t.Fatalf("Expected 404 code but got: %d", resp.StatusCode)
+	}
+	_, resp = service.GetRelationship(rel.Self.String())
+	if !responseHasFailedWithCode(resp, 404) {
+		t.Fatalf("Expected 404 code but got: %d", resp.StatusCode)
+	}
 }

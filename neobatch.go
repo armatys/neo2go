@@ -220,11 +220,6 @@ func (n *NeoBatch) DeletePropertyWithKeyForNode(node *NeoNode, keyName string) *
 	return n.queueRequestData(reqData)
 }
 
-func (n *NeoBatch) UpdatePropertiesForRelationship(rel *NeoRelationship, properties interface{}) *NeoResponse {
-	reqData := n.service.builder.UpdatePropertiesForRelationship(rel, properties)
-	return n.queueRequestData(reqData)
-}
-
 func (n *NeoBatch) DeletePropertiesForRelationship(rel *NeoRelationship) *NeoResponse {
 	reqData := n.service.builder.DeletePropertiesForRelationship(rel)
 	return n.queueRequestData(reqData)
