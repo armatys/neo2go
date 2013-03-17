@@ -53,7 +53,7 @@ func (n *neoRequestBuilder) CreateNode() (*NeoNode, *neoRequestData) {
 	return n.CreateNodeWithProperties(nil)
 }
 
-func (n *neoRequestBuilder) CreateNodeWithProperties(properties map[string]interface{}) (*NeoNode, *neoRequestData) {
+func (n *neoRequestBuilder) CreateNodeWithProperties(properties interface{}) (*NeoNode, *neoRequestData) {
 	node := new(NeoNode)
 	url := n.root.Node.String()
 	requestData := neoRequestData{body: properties, expectedStatus: 201, method: "POST", result: node, requestUrl: url}
@@ -91,7 +91,7 @@ func (n *neoRequestBuilder) CreateRelationshipWithType(source *NeoNode, target *
 	return n.createRelationshipHelper(source, bodyMap)
 }
 
-func (n *neoRequestBuilder) CreateRelationshipWithProperties(source *NeoNode, target *NeoNode, properties map[string]interface{}) (*NeoRelationship, *neoRequestData) {
+func (n *neoRequestBuilder) CreateRelationshipWithProperties(source *NeoNode, target *NeoNode, properties interface{}) (*NeoRelationship, *neoRequestData) {
 	bodyMap := map[string]interface{}{
 		"to":   target.Self.String(),
 		"data": properties,
@@ -99,7 +99,7 @@ func (n *neoRequestBuilder) CreateRelationshipWithProperties(source *NeoNode, ta
 	return n.createRelationshipHelper(source, bodyMap)
 }
 
-func (n *neoRequestBuilder) CreateRelationshipWithPropertiesAndType(source *NeoNode, target *NeoNode, properties map[string]interface{}, relType string) (*NeoRelationship, *neoRequestData) {
+func (n *neoRequestBuilder) CreateRelationshipWithPropertiesAndType(source *NeoNode, target *NeoNode, properties interface{}, relType string) (*NeoRelationship, *neoRequestData) {
 	bodyMap := map[string]interface{}{
 		"to":   target.Self.String(),
 		"type": relType,
@@ -112,14 +112,13 @@ func (n *neoRequestBuilder) DeleteRelationship(rel *NeoRelationship) *neoRequest
 	return &neoRequestData{expectedStatus: 204, method: "DELETE", requestUrl: rel.Self.String()}
 }
 
-func (n *neoRequestBuilder) GetPropertiesForRelationship(rel *NeoRelationship) (*map[string]interface{}, *neoRequestData) {
-	var properties map[string]interface{}
+func (n *neoRequestBuilder) GetPropertiesForRelationship(rel *NeoRelationship) *neoRequestData {
 	url := rel.Properties.String()
-	requestData := neoRequestData{expectedStatus: 200, method: "GET", result: &properties, requestUrl: url}
-	return &properties, &requestData
+	requestData := neoRequestData{expectedStatus: 200, method: "GET", requestUrl: url}
+	return &requestData
 }
 
-func (n *neoRequestBuilder) ReplacePropertiesForRelationship(rel *NeoRelationship, properties map[string]interface{}) *neoRequestData {
+func (n *neoRequestBuilder) ReplacePropertiesForRelationship(rel *NeoRelationship, properties interface{}) *neoRequestData {
 	url := rel.Properties.String()
 	requestData := neoRequestData{body: properties, expectedStatus: 204, method: "PUT", requestUrl: url}
 	return &requestData
@@ -213,7 +212,7 @@ func (n *neoRequestBuilder) SetPropertyForNode(node *NeoNode, propertyKey string
 	return &requestData, nil
 }
 
-func (n *neoRequestBuilder) ReplacePropertiesForNode(node *NeoNode, properties map[string]interface{}) *neoRequestData {
+func (n *neoRequestBuilder) ReplacePropertiesForNode(node *NeoNode, properties interface{}) *neoRequestData {
 	url := node.Properties.String()
 	return &neoRequestData{body: properties, expectedStatus: 204, method: "PUT", requestUrl: url}
 }
@@ -227,11 +226,10 @@ func (n *neoRequestBuilder) GetPropertyForNode(node *NeoNode, propertyKey string
 	return &reqData, nil
 }
 
-func (n *neoRequestBuilder) GetPropertiesForNode(node *NeoNode) (*map[string]interface{}, *neoRequestData) {
-	var properties map[string]interface{} = make(map[string]interface{})
+func (n *neoRequestBuilder) GetPropertiesForNode(node *NeoNode) *neoRequestData {
 	url := node.Properties.String()
-	reqData := neoRequestData{expectedStatus: 200, method: "GET", result: &properties, requestUrl: url}
-	return &properties, &reqData
+	reqData := neoRequestData{expectedStatus: 200, method: "GET", requestUrl: url}
+	return &reqData
 }
 
 func (n *neoRequestBuilder) DeletePropertiesForNode(node *NeoNode) *neoRequestData {
@@ -247,7 +245,7 @@ func (n *neoRequestBuilder) DeletePropertyWithKeyForNode(node *NeoNode, keyName 
 	return &neoRequestData{expectedStatus: 204, method: "DELETE", requestUrl: url}, nil
 }
 
-func (n *neoRequestBuilder) UpdatePropertiesForRelationship(rel *NeoRelationship, properties map[string]interface{}) *neoRequestData {
+func (n *neoRequestBuilder) UpdatePropertiesForRelationship(rel *NeoRelationship, properties interface{}) *neoRequestData {
 	url := rel.Properties.String()
 	return &neoRequestData{body: properties, expectedStatus: 204, method: "PUT", requestUrl: url}
 }
@@ -278,7 +276,7 @@ func (n *neoRequestBuilder) CreateNodeIndex(name string) (*NeoIndex, *neoRequest
 	return n.createNodeIndexHelper(params)
 }
 
-func (n *neoRequestBuilder) CreateNodeIndexWithConfiguration(name string, config map[string]interface{}) (*NeoIndex, *neoRequestData) {
+func (n *neoRequestBuilder) CreateNodeIndexWithConfiguration(name string, config interface{}) (*NeoIndex, *neoRequestData) {
 	params := map[string]interface{}{"name": name, "config": config}
 	return n.createNodeIndexHelper(params)
 }
@@ -362,7 +360,7 @@ func (n *neoRequestBuilder) CreateRelationshipIndex(name string) (*NeoIndex, *ne
 	return n.createRelationshipIndexHelper(params)
 }
 
-func (n *neoRequestBuilder) CreateRelationshipIndexWithConfiguration(name string, config map[string]interface{}) (*NeoIndex, *neoRequestData) {
+func (n *neoRequestBuilder) CreateRelationshipIndexWithConfiguration(name string, config interface{}) (*NeoIndex, *neoRequestData) {
 	params := map[string]interface{}{"name": name, "config": config}
 	return n.createRelationshipIndexHelper(params)
 }
@@ -441,7 +439,7 @@ func (n *neoRequestBuilder) GetOrCreateUniqueNode(index *NeoIndex, key, value st
 	return getOrCreateUniqueNodeHelper(index, params)
 }
 
-func (n *neoRequestBuilder) GetOrCreateUniqueNodeWithProperties(index *NeoIndex, key, value string, properties map[string]interface{}) (*NeoNode, *neoRequestData) {
+func (n *neoRequestBuilder) GetOrCreateUniqueNodeWithProperties(index *NeoIndex, key, value string, properties interface{}) (*NeoNode, *neoRequestData) {
 	params := map[string]interface{}{
 		"key":        key,
 		"value":      value,
@@ -464,7 +462,7 @@ func (n *neoRequestBuilder) CreateUniqueNodeOrFail(index *NeoIndex, key, value s
 	return createUniqueNodeOrFailHelper(index, params)
 }
 
-func (n *neoRequestBuilder) CreateUniqueNodeWithPropertiesOrFail(index *NeoIndex, key, value string, properties map[string]interface{}) (*NeoNode, *neoRequestData) {
+func (n *neoRequestBuilder) CreateUniqueNodeWithPropertiesOrFail(index *NeoIndex, key, value string, properties interface{}) (*NeoNode, *neoRequestData) {
 	params := map[string]interface{}{
 		"key":        key,
 		"value":      value,
@@ -500,7 +498,7 @@ func (n *neoRequestBuilder) GetOrCreateUniqueTypedRelationship(index *NeoIndex, 
 	return getOrCreateUniqueRelationshipHelper(index, params)
 }
 
-func (n *neoRequestBuilder) GetOrCreateUniqueRelationshipWithProperties(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, properties map[string]interface{}) (*NeoRelationship, *neoRequestData) {
+func (n *neoRequestBuilder) GetOrCreateUniqueRelationshipWithProperties(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, properties interface{}) (*NeoRelationship, *neoRequestData) {
 	params := map[string]interface{}{
 		"key":   key,
 		"value": value,
@@ -511,7 +509,7 @@ func (n *neoRequestBuilder) GetOrCreateUniqueRelationshipWithProperties(index *N
 	return getOrCreateUniqueRelationshipHelper(index, params)
 }
 
-func (n *neoRequestBuilder) GetOrCreateUniqueTypedRelationshipWithProperties(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string, properties map[string]interface{}) (*NeoRelationship, *neoRequestData) {
+func (n *neoRequestBuilder) GetOrCreateUniqueTypedRelationshipWithProperties(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string, properties interface{}) (*NeoRelationship, *neoRequestData) {
 	params := map[string]interface{}{
 		"key":   key,
 		"value": value,
@@ -550,7 +548,7 @@ func (n *neoRequestBuilder) CreateUniqueTypedRelationshipOrFail(index *NeoIndex,
 	return createUniqueRelationshipOrFailHelper(index, params)
 }
 
-func (n *neoRequestBuilder) CreateUniqueRelationshipWithPropertiesOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, properties map[string]interface{}) (*NeoRelationship, *neoRequestData) {
+func (n *neoRequestBuilder) CreateUniqueRelationshipWithPropertiesOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, properties interface{}) (*NeoRelationship, *neoRequestData) {
 	params := map[string]interface{}{
 		"key":   key,
 		"value": value,
@@ -561,7 +559,7 @@ func (n *neoRequestBuilder) CreateUniqueRelationshipWithPropertiesOrFail(index *
 	return createUniqueRelationshipOrFailHelper(index, params)
 }
 
-func (n *neoRequestBuilder) CreateUniqueTypedRelationshipWithPropertiesOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string, properties map[string]interface{}) (*NeoRelationship, *neoRequestData) {
+func (n *neoRequestBuilder) CreateUniqueTypedRelationshipWithPropertiesOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string, properties interface{}) (*NeoRelationship, *neoRequestData) {
 	params := map[string]interface{}{
 		"key":   key,
 		"value": value,

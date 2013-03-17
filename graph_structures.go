@@ -42,7 +42,7 @@ type NeoNode struct {
 	AllRelationships           *UrlTemplate           `json:"all_relationships"`
 	AllTypedRelationships      *UrlTemplate           `json:"all_typed_relationships"`
 	CreateRelationship         *UrlTemplate           `json:"create_relationship"`
-	Data                       map[string]interface{} `json:"data"`
+	Data                       interface{}            `json:"data"`
 	Extensions                 map[string]interface{} `json:"extensions"`
 	IncomingRelationships      *UrlTemplate           `json:"incoming_relationships"`
 	IncomingTypedRelationships *UrlTemplate           `json:"incoming_typed_relationships"`
@@ -96,7 +96,7 @@ func (n *NeoNode) setBatchId(bid NeoBatchId) {
 }
 
 type NeoRelationship struct {
-	Data       map[string]interface{}
+	Data       interface{}
 	Extensions map[string]interface{}
 	Start      *UrlTemplate
 	Property   *UrlTemplate

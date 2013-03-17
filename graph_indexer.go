@@ -4,7 +4,7 @@ type GraphIndexer interface {
 	// 17.10.1 - Nodes
 	CreateNodeIndex(name string) (*NeoIndex, *NeoResponse)
 	// 17.10.2
-	CreateNodeIndexWithConfiguration(name string, config map[string]interface{}) (*NeoIndex, *NeoResponse)
+	CreateNodeIndexWithConfiguration(name string, config interface{}) (*NeoIndex, *NeoResponse)
 	// 17.10.3
 	DeleteIndex(*NeoIndex) *NeoResponse
 	// 17.10.4
@@ -25,7 +25,7 @@ type GraphIndexer interface {
 	// 17.10.1 - Relationships
 	CreateRelationshipIndex(name string) (*NeoIndex, *NeoResponse)
 	// 17.10.2
-	CreateRelationshipIndexWithConfiguration(name string, config map[string]interface{}) (*NeoIndex, *NeoResponse)
+	CreateRelationshipIndexWithConfiguration(name string, config interface{}) (*NeoIndex, *NeoResponse)
 	// 17.10.4
 	GetRelationshipIndexes() ([]*NeoIndex, *NeoResponse)
 	// 17.10.5
@@ -43,23 +43,23 @@ type GraphIndexer interface {
 
 	// 17.11.1
 	GetOrCreateUniqueNode(index *NeoIndex, key, value string) (*NeoNode, *NeoResponse)
-	GetOrCreateUniqueNodeWithProperties(index *NeoIndex, key, value string, properties map[string]interface{}) (*NeoNode, *NeoResponse)
+	GetOrCreateUniqueNodeWithProperties(index *NeoIndex, key, value string, properties interface{}) (*NeoNode, *NeoResponse)
 
 	// 17.11.3
 	CreateUniqueNodeOrFail(index *NeoIndex, key, value string) (*NeoNode, *NeoResponse)
-	CreateUniqueNodeWithPropertiesOrFail(index *NeoIndex, key, value string, properties map[string]interface{}) (*NeoNode, *NeoResponse)
+	CreateUniqueNodeWithPropertiesOrFail(index *NeoIndex, key, value string, properties interface{}) (*NeoNode, *NeoResponse)
 
 	// 17.11.5
 	GetOrCreateUniqueRelationship(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode) (*NeoRelationship, *NeoResponse)
 	GetOrCreateUniqueTypedRelationship(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string) (*NeoRelationship, *NeoResponse)
-	GetOrCreateUniqueRelationshipWithProperties(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, properties map[string]interface{}) (*NeoRelationship, *NeoResponse)
-	GetOrCreateUniqueTypedRelationshipWithProperties(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string, properties map[string]interface{}) (*NeoRelationship, *NeoResponse)
+	GetOrCreateUniqueRelationshipWithProperties(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, properties interface{}) (*NeoRelationship, *NeoResponse)
+	GetOrCreateUniqueTypedRelationshipWithProperties(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string, properties interface{}) (*NeoRelationship, *NeoResponse)
 
 	// 17.11.7
 	CreateUniqueRelationshipOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode) (*NeoRelationship, *NeoResponse)
 	CreateUniqueTypedRelationshipOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string) (*NeoRelationship, *NeoResponse)
-	CreateUniqueRelationshipWithPropertiesOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, properties map[string]interface{}) (*NeoRelationship, *NeoResponse)
-	CreateUniqueTypedRelationshipWithPropertiesOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string, properties map[string]interface{}) (*NeoRelationship, *NeoResponse)
+	CreateUniqueRelationshipWithPropertiesOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, properties interface{}) (*NeoRelationship, *NeoResponse)
+	CreateUniqueTypedRelationshipWithPropertiesOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string, properties interface{}) (*NeoRelationship, *NeoResponse)
 
 	// 17.12.1
 	// FindNodeByExactMatchingAutoIndex(query string) ([]*NeoNode, *NeoResponse)
@@ -67,7 +67,7 @@ type GraphIndexer interface {
 	// FindNodeByQueryingAutoIndex(query string) ([]*NeoNode, *NeoResponse)
 
 	// 17.13.1 - autoindex configuration for Nodes
-	// CreateNodeAutoIndexWithConfiguration(name string, config map[string]interface{}) (*NeoIndex, *NeoResponse)
+	// CreateNodeAutoIndexWithConfiguration(name string, config interface{}) (*NeoIndex, *NeoResponse)
 	// 17.13.3
 	// GetNodeAutoIndexStatus() (bool, *NeoResponse)
 	// 17.13.4
@@ -80,7 +80,7 @@ type GraphIndexer interface {
 	// DeleteNodeAutoIndexProperty(propertyName string) *NeoResponse
 
 	// 17.13.2 - autoindex configuration for Relationships
-	// CreateRelationshipAutoIndexWithConfiguration(name string, config map[string]interface{}) (*NeoIndex, *NeoResponse)
+	// CreateRelationshipAutoIndexWithConfiguration(name string, config interface{}) (*NeoIndex, *NeoResponse)
 	// 17.13.3
 	// GetRelationshipAutoIndexStatus() (bool, *NeoResponse)
 	// 17.13.4

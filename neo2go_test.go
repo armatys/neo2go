@@ -196,7 +196,7 @@ func TestSimpleRelationships(t *testing.T) {
 		t.Fatalf("Error creating relationship: %v", resp.NeoError.Error())
 	}
 
-	properties := map[string]interface{}{"weight": 30}
+	properties := map[string]float64{"weight": 30}
 	relType := "has"
 	rel, resp := service.CreateRelationshipWithPropertiesAndType(source, target, properties, relType)
 	if !resp.Ok() {
@@ -219,7 +219,8 @@ func TestSimpleRelationships(t *testing.T) {
 		t.Fatalf("Could not set relationship property: %v", resp.NeoError.Error())
 	}
 
-	props, resp := service.GetPropertiesForRelationship(rel)
+	var props map[string]float64
+	resp = service.GetPropertiesForRelationship(rel, &props)
 	if !resp.Ok() {
 		t.Fatalf("Could not get relationship property: %v", resp.NeoError.Error())
 	}

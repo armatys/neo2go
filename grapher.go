@@ -6,7 +6,7 @@ type Grapher interface {
 	// 17.5.1
 	CreateNode() (*NeoNode, *NeoResponse)
 	// 17.5.2
-	CreateNodeWithProperties(map[string]interface{}) (*NeoNode, *NeoResponse)
+	CreateNodeWithProperties(interface{}) (*NeoNode, *NeoResponse)
 
 	// 17.5.5
 	DeleteNode(node *NeoNode) *NeoResponse
@@ -19,17 +19,17 @@ type Grapher interface {
 	// 17.6.2
 	CreateRelationshipWithType(source *NeoNode, target *NeoNode, relType string) (*NeoRelationship, *NeoResponse)
 	// 17.6.3
-	CreateRelationshipWithProperties(source *NeoNode, target *NeoNode, properties map[string]interface{}) (*NeoRelationship, *NeoResponse)
+	CreateRelationshipWithProperties(source *NeoNode, target *NeoNode, properties interface{}) (*NeoRelationship, *NeoResponse)
 	// 17.6.3
-	CreateRelationshipWithPropertiesAndType(source *NeoNode, target *NeoNode, properties map[string]interface{}, relType string) (*NeoRelationship, *NeoResponse)
+	CreateRelationshipWithPropertiesAndType(source *NeoNode, target *NeoNode, properties interface{}, relType string) (*NeoRelationship, *NeoResponse)
 
 	// 17.6.4
 	DeleteRelationship(rel *NeoRelationship) *NeoResponse
 
 	// 17.6.5
-	GetPropertiesForRelationship(rel *NeoRelationship) (map[string]interface{}, *NeoResponse)
+	GetPropertiesForRelationship(rel *NeoRelationship, result interface{}) *NeoResponse
 	// 17.6.6
-	ReplacePropertiesForRelationship(rel *NeoRelationship, properties map[string]interface{}) *NeoResponse
+	ReplacePropertiesForRelationship(rel *NeoRelationship, properties interface{}) *NeoResponse
 	// 17.6.7
 	GetPropertyForRelationship(rel *NeoRelationship, propertyKey string, result interface{}) *NeoResponse
 	// 17.6.8
@@ -49,16 +49,16 @@ type Grapher interface {
 	// 17.8.1
 	SetPropertyForNode(node *NeoNode, propertyKey string, propertyValue interface{}) *NeoResponse
 	// 17.8.2
-	ReplacePropertiesForNode(node *NeoNode, properties map[string]interface{}) *NeoResponse
+	ReplacePropertiesForNode(node *NeoNode, properties interface{}) *NeoResponse
 	// 17.8.3
-	GetPropertiesForNode(node *NeoNode) (map[string]interface{}, *NeoResponse)
+	GetPropertiesForNode(node *NeoNode, result interface{}) *NeoResponse
 	// 17.8.6
 	DeletePropertiesForNode(node *NeoNode) *NeoResponse
 	// 17.8.7
 	DeletePropertyWithKeyForNode(node *NeoNode, keyName string) *NeoResponse
 
 	// 17.9.1
-	UpdatePropertiesForRelationship(rel *NeoRelationship, properties map[string]interface{}) *NeoResponse
+	UpdatePropertiesForRelationship(rel *NeoRelationship, properties interface{}) *NeoResponse
 	// 17.9.2
 	DeletePropertiesForRelationship(rel *NeoRelationship) *NeoResponse
 	// 17.9.3
