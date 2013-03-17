@@ -161,6 +161,15 @@ func (g *GraphDatabaseService) ReplacePropertiesForNode(node *NeoNode, propertie
 	return g.executeFromRequestData(reqData)
 }
 
+func (g *GraphDatabaseService) GetPropertyForNode(node *NeoNode, propertyKey string, propertyValueResult interface{}) *NeoResponse {
+	reqData, err := g.builder.GetPropertyForNode(node, propertyKey)
+	if err != nil {
+		return NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
+	reqData.result = propertyValueResult
+	return g.executeFromRequestData(reqData)
+}
+
 func (g *GraphDatabaseService) GetPropertiesForNode(node *NeoNode) (map[string]interface{}, *NeoResponse) {
 	result, reqData := g.builder.GetPropertiesForNode(node)
 	return *result, g.executeFromRequestData(reqData)

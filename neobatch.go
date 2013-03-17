@@ -191,6 +191,15 @@ func (n *NeoBatch) ReplacePropertiesForNode(node *NeoNode, properties map[string
 	return n.queueRequestData(reqData)
 }
 
+func (n *NeoBatch) GetPropertyForNode(node *NeoNode, propertyKey string, propertyValueResult interface{}) *NeoResponse {
+	reqData, err := n.service.builder.GetPropertyForNode(node, propertyKey)
+	if err != nil {
+		return NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
+	reqData.result = propertyValueResult
+	return n.queueRequestData(reqData)
+}
+
 func (n *NeoBatch) GetPropertiesForNode(node *NeoNode) (map[string]interface{}, *NeoResponse) {
 	result, reqData := n.service.builder.GetPropertiesForNode(node)
 	return *result, n.queueRequestData(reqData)

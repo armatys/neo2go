@@ -218,6 +218,15 @@ func (n *neoRequestBuilder) ReplacePropertiesForNode(node *NeoNode, properties m
 	return &neoRequestData{body: properties, expectedStatus: 204, method: "PUT", requestUrl: url}
 }
 
+func (n *neoRequestBuilder) GetPropertyForNode(node *NeoNode, propertyKey string) (*neoRequestData, error) {
+	url, err := node.Property.Render(map[string]interface{}{"key": propertyKey})
+	if err != nil {
+		return nil, err
+	}
+	reqData := neoRequestData{expectedStatus: 200, method: "GET", requestUrl: url}
+	return &reqData, nil
+}
+
 func (n *neoRequestBuilder) GetPropertiesForNode(node *NeoNode) (*map[string]interface{}, *neoRequestData) {
 	var properties map[string]interface{} = make(map[string]interface{})
 	url := node.Properties.String()
