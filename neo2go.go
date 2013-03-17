@@ -8,6 +8,10 @@ import (
 	"regexp"
 )
 
+const (
+	Version = 1
+)
+
 var _ Grapher = (*GraphDatabaseService)(nil)
 var _ GraphIndexer = (*GraphDatabaseService)(nil)
 var _ GraphPathFinder = (*GraphDatabaseService)(nil)
