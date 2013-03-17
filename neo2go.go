@@ -381,44 +381,48 @@ func (g *GraphDatabaseService) CreateUniqueNodeWithPropertiesOrFail(index *NeoIn
 }
 
 // 17.11.5
+/*
 func (g *GraphDatabaseService) GetOrCreateUniqueRelationship(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode) (*NeoRelationship, *NeoResponse) {
 	result, reqData := g.builder.GetOrCreateUniqueRelationship(index, key, value, source, target)
 	return result, g.executeFromRequestData(reqData)
 }
+*/
 
-func (g *GraphDatabaseService) GetOrCreateUniqueTypedRelationship(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string) (*NeoRelationship, *NeoResponse) {
-	result, reqData := g.builder.GetOrCreateUniqueTypedRelationship(index, key, value, source, target, relType)
+func (g *GraphDatabaseService) GetOrCreateUniqueRelationship(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string) (*NeoRelationship, *NeoResponse) {
+	result, reqData := g.builder.GetOrCreateUniqueRelationship(index, key, value, source, target, relType)
 	return result, g.executeFromRequestData(reqData)
 }
 
-func (g *GraphDatabaseService) GetOrCreateUniqueRelationshipWithProperties(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, properties interface{}) (*NeoRelationship, *NeoResponse) {
-	result, reqData := g.builder.GetOrCreateUniqueRelationshipWithProperties(index, key, value, source, target, properties)
-	return result, g.executeFromRequestData(reqData)
-}
+// func (g *GraphDatabaseService) GetOrCreateUniqueRelationshipWithProperties(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, properties interface{}) (*NeoRelationship, *NeoResponse) {
+// 	result, reqData := g.builder.GetOrCreateUniqueRelationshipWithProperties(index, key, value, source, target, properties)
+// 	return result, g.executeFromRequestData(reqData)
+// }
 
-func (g *GraphDatabaseService) GetOrCreateUniqueTypedRelationshipWithProperties(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string, properties interface{}) (*NeoRelationship, *NeoResponse) {
-	result, reqData := g.builder.GetOrCreateUniqueTypedRelationshipWithProperties(index, key, value, source, target, relType, properties)
+func (g *GraphDatabaseService) GetOrCreateUniqueRelationshipWithProperties(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string, properties interface{}) (*NeoRelationship, *NeoResponse) {
+	result, reqData := g.builder.GetOrCreateUniqueRelationshipWithProperties(index, key, value, source, target, relType, properties)
 	return result, g.executeFromRequestData(reqData)
 }
 
 // 17.11.7
+/*
 func (g *GraphDatabaseService) CreateUniqueRelationshipOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode) (*NeoRelationship, *NeoResponse) {
 	result, reqData := g.builder.CreateUniqueRelationshipOrFail(index, key, value, source, target)
 	return result, g.executeFromRequestData(reqData)
 }
+*/
 
-func (g *GraphDatabaseService) CreateUniqueTypedRelationshipOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string) (*NeoRelationship, *NeoResponse) {
-	result, reqData := g.builder.CreateUniqueTypedRelationshipOrFail(index, key, value, source, target, relType)
+func (g *GraphDatabaseService) CreateUniqueRelationshipOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string) (*NeoRelationship, *NeoResponse) {
+	result, reqData := g.builder.CreateUniqueRelationshipOrFail(index, key, value, source, target, relType)
 	return result, g.executeFromRequestData(reqData)
 }
 
-func (g *GraphDatabaseService) CreateUniqueRelationshipWithPropertiesOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, properties interface{}) (*NeoRelationship, *NeoResponse) {
-	result, reqData := g.builder.CreateUniqueRelationshipWithPropertiesOrFail(index, key, value, source, target, properties)
-	return result, g.executeFromRequestData(reqData)
-}
+// func (g *GraphDatabaseService) CreateUniqueRelationshipWithPropertiesOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, properties interface{}) (*NeoRelationship, *NeoResponse) {
+// 	result, reqData := g.builder.CreateUniqueRelationshipWithPropertiesOrFail(index, key, value, source, target, properties)
+// 	return result, g.executeFromRequestData(reqData)
+// }
 
-func (g *GraphDatabaseService) CreateUniqueTypedRelationshipWithPropertiesOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string, properties interface{}) (*NeoRelationship, *NeoResponse) {
-	result, reqData := g.builder.CreateUniqueTypedRelationshipWithPropertiesOrFail(index, key, value, source, target, relType, properties)
+func (g *GraphDatabaseService) CreateUniqueRelationshipWithPropertiesOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string, properties interface{}) (*NeoRelationship, *NeoResponse) {
+	result, reqData := g.builder.CreateUniqueRelationshipWithPropertiesOrFail(index, key, value, source, target, relType, properties)
 	return result, g.executeFromRequestData(reqData)
 }
 
