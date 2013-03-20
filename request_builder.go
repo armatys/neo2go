@@ -261,7 +261,7 @@ func (n *neoRequestBuilder) DeletePropertyWithKeyForRelationship(rel *NeoRelatio
 // GraphIndexer
 
 func (n *neoRequestBuilder) createNodeIndexHelper(params map[string]interface{}) (*NeoIndex, *neoRequestData) {
-	var index *NeoIndex
+	var index *NeoIndex = new(NeoIndex)
 	url := n.root.NodeIndex.String()
 	return index, &neoRequestData{body: params, expectedStatus: 201, method: "POST", result: index, requestUrl: url}
 }
@@ -291,7 +291,7 @@ func (n *neoRequestBuilder) GetNodeIndexes() (*map[string]*NeoIndex, *neoRequest
 }
 
 func (n *neoRequestBuilder) AddNodeToIndex(index *NeoIndex, node *NeoNode, key, value string) (*NeoNode, *neoRequestData, error) {
-	var resultNode *NeoNode
+	var resultNode *NeoNode = new(NeoNode)
 	url, err := index.Template.Render(nil)
 	if err != nil {
 		return nil, nil, err
@@ -345,7 +345,7 @@ func (n *neoRequestBuilder) FindNodeByQuery(index *NeoIndex, query string) (*[]*
 }
 
 func (n *neoRequestBuilder) createRelationshipIndexHelper(params map[string]interface{}) (*NeoIndex, *neoRequestData) {
-	var index *NeoIndex
+	var index *NeoIndex = new(NeoIndex)
 	url := n.root.RelationshipIndex.String()
 	return index, &neoRequestData{body: params, expectedStatus: 201, method: "POST", result: index, requestUrl: url}
 }
@@ -360,14 +360,14 @@ func (n *neoRequestBuilder) CreateRelationshipIndexWithConfiguration(name string
 	return n.createRelationshipIndexHelper(params)
 }
 
-func (n *neoRequestBuilder) GetRelationshipIndexes() (*[]*NeoIndex, *neoRequestData) {
-	var result []*NeoIndex
+func (n *neoRequestBuilder) GetRelationshipIndexes() (*map[string]*NeoIndex, *neoRequestData) {
+	var result map[string]*NeoIndex
 	url := n.root.RelationshipIndex.String()
 	return &result, &neoRequestData{expectedStatus: 200, method: "GET", result: &result, requestUrl: url}
 }
 
 func (n *neoRequestBuilder) AddRelationshipToIndex(index *NeoIndex, rel *NeoRelationship, key, value string) (*NeoRelationship, *neoRequestData, error) {
-	var resultRelationship *NeoRelationship
+	var resultRelationship *NeoRelationship = new(NeoRelationship)
 	url, err := index.Template.Render(nil)
 	if err != nil {
 		return nil, nil, err
@@ -421,7 +421,7 @@ func (n *neoRequestBuilder) FindRelationshipByQuery(index *NeoIndex, query strin
 }
 
 func getOrCreateUniqueNodeHelper(index *NeoIndex, params map[string]interface{}) (*NeoNode, *neoRequestData) {
-	var nodeResult *NeoNode
+	var nodeResult *NeoNode = new(NeoNode)
 	url := index.Template.String() + "?uniqueness=get_or_create"
 	return nodeResult, &neoRequestData{body: params, expectedStatus: 200, method: "POST", result: nodeResult, requestUrl: url}
 }
@@ -444,7 +444,7 @@ func (n *neoRequestBuilder) GetOrCreateUniqueNodeWithProperties(index *NeoIndex,
 }
 
 func createUniqueNodeOrFailHelper(index *NeoIndex, params map[string]interface{}) (*NeoNode, *neoRequestData) {
-	var nodeResult *NeoNode
+	var nodeResult *NeoNode = new(NeoNode)
 	url := index.Template.String() + "?uniqueness=create_or_fail"
 	return nodeResult, &neoRequestData{body: params, expectedStatus: 201, method: "POST", result: nodeResult, requestUrl: url}
 }
@@ -467,22 +467,10 @@ func (n *neoRequestBuilder) CreateUniqueNodeWithPropertiesOrFail(index *NeoIndex
 }
 
 func getOrCreateUniqueRelationshipHelper(index *NeoIndex, params map[string]interface{}) (*NeoRelationship, *neoRequestData) {
-	var relResult *NeoRelationship
+	var relResult *NeoRelationship = new(NeoRelationship)
 	url := index.Template.String() + "?uniqueness=get_or_create"
 	return relResult, &neoRequestData{body: params, expectedStatus: 200, method: "POST", result: relResult, requestUrl: url}
 }
-
-/*
-func (n *neoRequestBuilder) GetOrCreateUniqueRelationship(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode) (*NeoRelationship, *neoRequestData) {
-	params := map[string]interface{}{
-		"key":   key,
-		"value": value,
-		"start": source.Self.String(),
-		"end":   target.Self.String(),
-	}
-	return getOrCreateUniqueRelationshipHelper(index, params)
-}
-*/
 
 func (n *neoRequestBuilder) GetOrCreateUniqueRelationship(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string) (*NeoRelationship, *neoRequestData) {
 	params := map[string]interface{}{
@@ -494,17 +482,6 @@ func (n *neoRequestBuilder) GetOrCreateUniqueRelationship(index *NeoIndex, key, 
 	}
 	return getOrCreateUniqueRelationshipHelper(index, params)
 }
-
-// func (n *neoRequestBuilder) GetOrCreateUniqueRelationshipWithProperties(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, properties interface{}) (*NeoRelationship, *neoRequestData) {
-// 	params := map[string]interface{}{
-// 		"key":   key,
-// 		"value": value,
-// 		"start": source.Self.String(),
-// 		"end":   target.Self.String(),
-// 		"data":  properties,
-// 	}
-// 	return getOrCreateUniqueRelationshipHelper(index, params)
-// }
 
 func (n *neoRequestBuilder) GetOrCreateUniqueRelationshipWithProperties(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string, properties interface{}) (*NeoRelationship, *neoRequestData) {
 	params := map[string]interface{}{
@@ -519,22 +496,10 @@ func (n *neoRequestBuilder) GetOrCreateUniqueRelationshipWithProperties(index *N
 }
 
 func createUniqueRelationshipOrFailHelper(index *NeoIndex, params map[string]interface{}) (*NeoRelationship, *neoRequestData) {
-	var relResult *NeoRelationship
+	var relResult *NeoRelationship = new(NeoRelationship)
 	url := index.Template.String() + "?uniqueness=create_or_fail"
 	return relResult, &neoRequestData{body: params, expectedStatus: 201, method: "POST", result: relResult, requestUrl: url}
 }
-
-/*
-func (n *neoRequestBuilder) CreateUniqueRelationshipOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode) (*NeoRelationship, *neoRequestData) {
-	params := map[string]interface{}{
-		"key":   key,
-		"value": value,
-		"start": source.Self.String(),
-		"end":   target.Self.String(),
-	}
-	return createUniqueRelationshipOrFailHelper(index, params)
-}
-*/
 
 func (n *neoRequestBuilder) CreateUniqueRelationshipOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string) (*NeoRelationship, *neoRequestData) {
 	params := map[string]interface{}{
@@ -546,17 +511,6 @@ func (n *neoRequestBuilder) CreateUniqueRelationshipOrFail(index *NeoIndex, key,
 	}
 	return createUniqueRelationshipOrFailHelper(index, params)
 }
-
-// func (n *neoRequestBuilder) CreateUniqueRelationshipWithPropertiesOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, properties interface{}) (*NeoRelationship, *neoRequestData) {
-// 	params := map[string]interface{}{
-// 		"key":   key,
-// 		"value": value,
-// 		"start": source.Self.String(),
-// 		"end":   target.Self.String(),
-// 		"data":  properties,
-// 	}
-// 	return createUniqueRelationshipOrFailHelper(index, params)
-// }
 
 func (n *neoRequestBuilder) CreateUniqueRelationshipWithPropertiesOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string, properties interface{}) (*NeoRelationship, *neoRequestData) {
 	params := map[string]interface{}{
@@ -667,7 +621,7 @@ func (n *neoRequestBuilder) TraverseByFullPathsGetNextPage(traverser *NeoPagedTr
 // GraphPathFinder
 
 func (n *neoRequestBuilder) FindPathFromNode(start *NeoNode, target *NeoNode, spec *NeoPathFinderSpec) (*NeoPath, *neoRequestData) {
-	var result *NeoPath
+	var result *NeoPath = new(NeoPath)
 	url := path.Join(start.Self.String(), "paths")
 	spec.to = target.Self.String()
 	return result, &neoRequestData{body: spec, expectedStatus: 200, method: "GET", result: result, requestUrl: url}

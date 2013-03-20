@@ -336,3 +336,55 @@ func TestSimpleRelationships2(t *testing.T) {
 		t.Fatalf("Expected 404 code but got: %d", resp.StatusCode)
 	}
 }
+
+func TestCreateDeleteNodeIndex(t *testing.T) {
+	service := NewGraphDatabaseService()
+	resp := service.Connect(databaseAddress)
+	if !responseHasSucceededWithCode(resp, 200) {
+		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
+	}
+
+	indexName := "test-n"
+	index, resp := service.CreateNodeIndex(indexName)
+	if !responseHasSucceededWithCode(resp, 201) {
+		t.Fatalf("Expected 201 response, but got error: %v", resp.NeoError)
+	}
+	indexes, resp := service.GetNodeIndexes()
+	if !responseHasSucceededWithCode(resp, 200) {
+		t.Fatalf("Expected 200 response, but got error: %v", resp.NeoError)
+	}
+	if indexes[indexName] == nil {
+		t.Fatalf("Expected to get a '%v' index but got nil.", indexName)
+	}
+
+	resp = service.DeleteIndex(index)
+	if !responseHasSucceededWithCode(resp, 204) {
+		t.Fatalf("Expected 204 response, but got error: %v", resp.NeoError)
+	}
+}
+
+func TestCreateDeleteRelationshipIndex(t *testing.T) {
+	service := NewGraphDatabaseService()
+	resp := service.Connect(databaseAddress)
+	if !responseHasSucceededWithCode(resp, 200) {
+		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
+	}
+
+	indexName := "test-r"
+	index, resp := service.CreateRelationshipIndex(indexName)
+	if !responseHasSucceededWithCode(resp, 201) {
+		t.Fatalf("Expected 201 response, but got error: %v", resp.NeoError)
+	}
+	indexes, resp := service.GetRelationshipIndexes()
+	if !responseHasSucceededWithCode(resp, 200) {
+		t.Fatalf("Expected 200 response, but got error: %v", resp.NeoError)
+	}
+	if indexes[indexName] == nil {
+		t.Fatalf("Expected to get a '%v' index but got nil.", indexName)
+	}
+
+	resp = service.DeleteIndex(index)
+	if !responseHasSucceededWithCode(resp, 204) {
+		t.Fatalf("Expected 204 response, but got error: %v", resp.NeoError)
+	}
+}

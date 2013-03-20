@@ -27,7 +27,7 @@ type GraphIndexer interface {
 	// 17.10.2
 	CreateRelationshipIndexWithConfiguration(name string, config interface{}) (*NeoIndex, *NeoResponse)
 	// 17.10.4
-	GetRelationshipIndexes() ([]*NeoIndex, *NeoResponse)
+	GetRelationshipIndexes() (map[string]*NeoIndex, *NeoResponse)
 	// 17.10.5
 	AddRelationshipToIndex(index *NeoIndex, rel *NeoRelationship, key, value string) (*NeoRelationship, *NeoResponse)
 	// 17.10.6

@@ -299,7 +299,7 @@ func (g *GraphDatabaseService) CreateRelationshipIndexWithConfiguration(name str
 }
 
 // 17.10.4
-func (g *GraphDatabaseService) GetRelationshipIndexes() ([]*NeoIndex, *NeoResponse) {
+func (g *GraphDatabaseService) GetRelationshipIndexes() (map[string]*NeoIndex, *NeoResponse) {
 	result, reqData := g.builder.GetRelationshipIndexes()
 	return *result, g.executeFromRequestData(reqData)
 }

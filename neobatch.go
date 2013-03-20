@@ -329,7 +329,7 @@ func (n *NeoBatch) CreateRelationshipIndexWithConfiguration(name string, config 
 }
 
 // 17.10.4
-func (n *NeoBatch) GetRelationshipIndexes() ([]*NeoIndex, *NeoResponse) {
+func (n *NeoBatch) GetRelationshipIndexes() (map[string]*NeoIndex, *NeoResponse) {
 	result, reqData := n.service.builder.GetRelationshipIndexes()
 	return *result, n.queueRequestData(reqData)
 }
