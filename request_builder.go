@@ -420,13 +420,17 @@ func (n *neoRequestBuilder) FindRelationshipByQuery(index *NeoIndex, query strin
 	return &rels, &neoRequestData{expectedStatus: 200, method: "GET", result: &rels, requestUrl: url}, nil
 }
 
-func getOrCreateUniqueNodeHelper(index *NeoIndex, params map[string]interface{}) (*NeoNode, *neoRequestData) {
+func getOrCreateUniqueNodeHelper(index *NeoIndex, params map[string]interface{}) (*NeoNode, *neoRequestData, error) {
 	var nodeResult *NeoNode = new(NeoNode)
-	url := index.Template.String() + "?uniqueness=get_or_create"
-	return nodeResult, &neoRequestData{body: params, expectedStatus: 200, method: "POST", result: nodeResult, requestUrl: url}
+	url, err := index.Template.Render(nil)
+	if err != nil {
+		return nil, nil, err
+	}
+	url = url + "?uniqueness=get_or_create"
+	return nodeResult, &neoRequestData{body: params, expectedStatus: 200, method: "POST", result: nodeResult, requestUrl: url}, nil
 }
 
-func (n *neoRequestBuilder) GetOrCreateUniqueNode(index *NeoIndex, key, value string) (*NeoNode, *neoRequestData) {
+func (n *neoRequestBuilder) GetOrCreateUniqueNode(index *NeoIndex, key, value string) (*NeoNode, *neoRequestData, error) {
 	params := map[string]interface{}{
 		"key":   key,
 		"value": value,
@@ -434,7 +438,7 @@ func (n *neoRequestBuilder) GetOrCreateUniqueNode(index *NeoIndex, key, value st
 	return getOrCreateUniqueNodeHelper(index, params)
 }
 
-func (n *neoRequestBuilder) GetOrCreateUniqueNodeWithProperties(index *NeoIndex, key, value string, properties interface{}) (*NeoNode, *neoRequestData) {
+func (n *neoRequestBuilder) GetOrCreateUniqueNodeWithProperties(index *NeoIndex, key, value string, properties interface{}) (*NeoNode, *neoRequestData, error) {
 	params := map[string]interface{}{
 		"key":        key,
 		"value":      value,

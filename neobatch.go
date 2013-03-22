@@ -390,12 +390,18 @@ func (n *NeoBatch) FindRelationshipByQuery(index *NeoIndex, query string) ([]*Ne
 
 // 17.11.1
 func (n *NeoBatch) GetOrCreateUniqueNode(index *NeoIndex, key, value string) (*NeoNode, *NeoResponse) {
-	result, reqData := n.service.builder.GetOrCreateUniqueNode(index, key, value)
+	result, reqData, err := n.service.builder.GetOrCreateUniqueNode(index, key, value)
+	if err != nil {
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
 	return result, n.queueRequestData(reqData)
 }
 
 func (n *NeoBatch) GetOrCreateUniqueNodeWithProperties(index *NeoIndex, key, value string, properties interface{}) (*NeoNode, *NeoResponse) {
-	result, reqData := n.service.builder.GetOrCreateUniqueNodeWithProperties(index, key, value, properties)
+	result, reqData, err := n.service.builder.GetOrCreateUniqueNodeWithProperties(index, key, value, properties)
+	if err != nil {
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
 	return result, n.queueRequestData(reqData)
 }
 

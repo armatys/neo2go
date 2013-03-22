@@ -360,12 +360,18 @@ func (g *GraphDatabaseService) FindRelationshipByQuery(index *NeoIndex, query st
 
 // 17.11.1
 func (g *GraphDatabaseService) GetOrCreateUniqueNode(index *NeoIndex, key, value string) (*NeoNode, *NeoResponse) {
-	result, reqData := g.builder.GetOrCreateUniqueNode(index, key, value)
+	result, reqData, err := g.builder.GetOrCreateUniqueNode(index, key, value)
+	if err != nil {
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
 	return result, g.executeFromRequestData(reqData)
 }
 
 func (g *GraphDatabaseService) GetOrCreateUniqueNodeWithProperties(index *NeoIndex, key, value string, properties interface{}) (*NeoNode, *NeoResponse) {
-	result, reqData := g.builder.GetOrCreateUniqueNodeWithProperties(index, key, value, properties)
+	result, reqData, err := g.builder.GetOrCreateUniqueNodeWithProperties(index, key, value, properties)
+	if err != nil {
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
 	return result, g.executeFromRequestData(reqData)
 }
 

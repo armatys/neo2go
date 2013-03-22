@@ -20,6 +20,12 @@ func responseHasFailedWithCode(resp *NeoResponse, unexpectedStatus int) bool {
 	return ((resp.StatusCode == unexpectedStatus) == !resp.Ok()) && !resp.Ok()
 }
 
+func checkResponseSucceeded(t *testing.T, resp *NeoResponse, expectedStatus int) {
+	if !responseHasSucceededWithCode(resp, expectedStatus) {
+		t.Fatalf("Expected %d response, but got error %d: %v", expectedStatus, resp.StatusCode, resp.NeoError)
+	}
+}
+
 func TestConnecting(t *testing.T) {
 	service := NewGraphDatabaseService()
 	resp := service.Connect(databaseAddress)
@@ -363,6 +369,90 @@ func TestCreateDeleteNodeIndex(t *testing.T) {
 	}
 }
 
+func TestFindExactNodeNoMatches(t *testing.T) {
+	service := NewGraphDatabaseService()
+	resp := service.Connect(databaseAddress)
+	checkResponseSucceeded(t, resp, 200)
+
+	indexName := "test-n"
+	index, resp := service.CreateNodeIndex(indexName)
+	checkResponseSucceeded(t, resp, 201)
+
+	nodes, resp := service.FindNodeByExactMatch(index, "name", "text-value")
+	checkResponseSucceeded(t, resp, 200)
+
+	if len(nodes) > 0 {
+		t.Fatalf("Expected to get 0 nodes but got %d", len(nodes))
+	}
+
+	resp = service.DeleteIndex(index)
+	checkResponseSucceeded(t, resp, 204)
+}
+
+func TestFindExactNodeMatches(t *testing.T) {
+	service := NewGraphDatabaseService()
+	resp := service.Connect(databaseAddress)
+	checkResponseSucceeded(t, resp, 200)
+
+	indexName := "test-n"
+	index, resp := service.CreateNodeIndex(indexName)
+	checkResponseSucceeded(t, resp, 201)
+
+	node, resp := service.CreateNode()
+	checkResponseSucceeded(t, resp, 201)
+
+	indexedNode, resp := service.AddNodeToIndex(index, node, "name", "text-value")
+	checkResponseSucceeded(t, resp, 201)
+	if node.Self.String() != indexedNode.Self.String() {
+		t.Fatalf("Expected to get the same node after indexing")
+	}
+
+	nodes, resp := service.FindNodeByExactMatch(index, "name", "text-value")
+	checkResponseSucceeded(t, resp, 200)
+
+	if len(nodes) != 1 {
+		t.Fatalf("Expected to get 1 nodes but got %d", len(nodes))
+	}
+
+	resp = service.DeleteIndex(index)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(node)
+	checkResponseSucceeded(t, resp, 204)
+}
+
+func TestCreateUniqueNode(t *testing.T) {
+	service := NewGraphDatabaseService()
+	resp := service.Connect(databaseAddress)
+	checkResponseSucceeded(t, resp, 200)
+
+	indexName := "test-n"
+	index, resp := service.CreateNodeIndex(indexName)
+	checkResponseSucceeded(t, resp, 201)
+
+	createdNode, resp := service.GetOrCreateUniqueNode(index, "name", "text-value")
+	if !resp.Created() || resp.StatusCode != 201 {
+		t.Fatalf("Unexpected response %d: %v", resp.StatusCode, resp.NeoError)
+	}
+
+	nodes, resp := service.FindNodeByExactMatch(index, "name", "text-value")
+	checkResponseSucceeded(t, resp, 200)
+
+	if len(nodes) != 1 {
+		t.Fatalf("Expected to get 1 nodes but got %d", len(nodes))
+	}
+
+	if nodes[0].Self.String() != createdNode.Self.String() {
+		t.Fatalf("Expected to get the same node but got (create) %v and (by exact match) %v", createdNode.Self.String(), nodes[0].Self.String())
+	}
+
+	resp = service.DeleteIndex(index)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(createdNode)
+	checkResponseSucceeded(t, resp, 204)
+}
+
 func TestCreateDeleteRelationshipIndex(t *testing.T) {
 	service := NewGraphDatabaseService()
 	resp := service.Connect(databaseAddress)
@@ -387,4 +477,74 @@ func TestCreateDeleteRelationshipIndex(t *testing.T) {
 	if !responseHasSucceededWithCode(resp, 204) {
 		t.Fatalf("Expected 204 response, but got error: %v", resp.NeoError)
 	}
+}
+
+func TestFindExactRelationshipNoMatches(t *testing.T) {
+	service := NewGraphDatabaseService()
+	resp := service.Connect(databaseAddress)
+	if !responseHasSucceededWithCode(resp, 200) {
+		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
+	}
+
+	indexName := "test-r"
+	index, resp := service.CreateRelationshipIndex(indexName)
+	if !responseHasSucceededWithCode(resp, 201) {
+		t.Fatalf("Expected 201 response, but got error: %v", resp.NeoError)
+	}
+
+	rels, resp := service.FindRelationshipByExactMatch(index, "name", "text-value")
+	checkResponseSucceeded(t, resp, 200)
+
+	if len(rels) > 0 {
+		t.Fatalf("Expected to get 0 nodes but got %d", len(rels))
+	}
+
+	resp = service.DeleteIndex(index)
+	if !responseHasSucceededWithCode(resp, 204) {
+		t.Fatalf("Expected 204 response, but got error: %v", resp.NeoError)
+	}
+}
+
+func TestFindExactRelationshipMatches(t *testing.T) {
+	service := NewGraphDatabaseService()
+	resp := service.Connect(databaseAddress)
+	checkResponseSucceeded(t, resp, 200)
+
+	indexName := "test-n"
+	index, resp := service.CreateRelationshipIndex(indexName)
+	checkResponseSucceeded(t, resp, 201)
+
+	source, resp := service.CreateNode()
+	checkResponseSucceeded(t, resp, 201)
+
+	target, resp := service.CreateNode()
+	checkResponseSucceeded(t, resp, 201)
+
+	rel, resp := service.CreateRelationshipWithType(source, target, "likes")
+	checkResponseSucceeded(t, resp, 201)
+
+	indexedRel, resp := service.AddRelationshipToIndex(index, rel, "name", "text-value")
+	checkResponseSucceeded(t, resp, 201)
+	if rel.Self.String() != indexedRel.Self.String() {
+		t.Fatalf("Expected to get the same relationship after indexing (%v; %v).", rel.Self.String(), indexedRel.Self.String())
+	}
+
+	rels, resp := service.FindRelationshipByExactMatch(index, "name", "text-value")
+	checkResponseSucceeded(t, resp, 200)
+
+	if len(rels) != 1 {
+		t.Fatalf("Expected to get 1 relationships but got %d", len(rels))
+	}
+
+	resp = service.DeleteIndex(index)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteRelationship(rel)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(source)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(target)
+	checkResponseSucceeded(t, resp, 204)
 }
