@@ -435,6 +435,52 @@ func TestCreateUniqueNode(t *testing.T) {
 		t.Fatalf("Unexpected response %d: %v", resp.StatusCode, resp.NeoError)
 	}
 
+	fetchedNode, resp := service.GetOrCreateUniqueNode(index, "name", "text-value")
+	if !resp.Ok() || resp.StatusCode != 200 {
+		t.Fatalf("Unexpected response %d: %v", resp.StatusCode, resp.NeoError)
+	}
+
+	if createdNode.Self.String() != fetchedNode.Self.String() {
+		t.Fatalf("Expected to get the same nodes, but got (created): %v and (fetched): %v", createdNode.Self.String(), fetchedNode.Self.String())
+	}
+
+	nodes, resp := service.FindNodeByExactMatch(index, "name", "text-value")
+	checkResponseSucceeded(t, resp, 200)
+
+	if len(nodes) != 1 {
+		t.Fatalf("Expected to get 1 nodes but got %d", len(nodes))
+	}
+
+	if nodes[0].Self.String() != createdNode.Self.String() {
+		t.Fatalf("Expected to get the same node but got (create) %v and (by exact match) %v", createdNode.Self.String(), nodes[0].Self.String())
+	}
+
+	resp = service.DeleteIndex(index)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(createdNode)
+	checkResponseSucceeded(t, resp, 204)
+}
+
+func TestCreateUniqueNodeOrFail(t *testing.T) {
+	service := NewGraphDatabaseService()
+	resp := service.Connect(databaseAddress)
+	checkResponseSucceeded(t, resp, 200)
+
+	indexName := "test-n"
+	index, resp := service.CreateNodeIndex(indexName)
+	checkResponseSucceeded(t, resp, 201)
+
+	createdNode, resp := service.CreateUniqueNodeOrFail(index, "name", "text-value")
+	if !resp.Created() || resp.StatusCode != 201 {
+		t.Fatalf("Unexpected response %d: %v", resp.StatusCode, resp.NeoError)
+	}
+
+	_, resp = service.CreateUniqueNodeOrFail(index, "name", "text-value")
+	if resp.Ok() || resp.StatusCode == 201 {
+		t.Fatalf("Unexpected response %d: %v", resp.StatusCode, resp.NeoError)
+	}
+
 	nodes, resp := service.FindNodeByExactMatch(index, "name", "text-value")
 	checkResponseSucceeded(t, resp, 200)
 

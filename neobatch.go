@@ -407,54 +407,51 @@ func (n *NeoBatch) GetOrCreateUniqueNodeWithProperties(index *NeoIndex, key, val
 
 // 17.11.3
 func (n *NeoBatch) CreateUniqueNodeOrFail(index *NeoIndex, key, value string) (*NeoNode, *NeoResponse) {
-	result, reqData := n.service.builder.CreateUniqueNodeOrFail(index, key, value)
+	result, reqData, err := n.service.builder.CreateUniqueNodeOrFail(index, key, value)
+	if err != nil {
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
 	return result, n.queueRequestData(reqData)
 }
 
 func (n *NeoBatch) CreateUniqueNodeWithPropertiesOrFail(index *NeoIndex, key, value string, properties interface{}) (*NeoNode, *NeoResponse) {
-	result, reqData := n.service.builder.CreateUniqueNodeWithPropertiesOrFail(index, key, value, properties)
+	result, reqData, err := n.service.builder.CreateUniqueNodeWithPropertiesOrFail(index, key, value, properties)
+	if err != nil {
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
 	return result, n.queueRequestData(reqData)
 }
 
 // 17.11.5
-// func (n *NeoBatch) GetOrCreateUniqueRelationship(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode) (*NeoRelationship, *NeoResponse) {
-// 	result, reqData := n.service.builder.GetOrCreateUniqueRelationship(index, key, value, source, target)
-// 	return result, n.queueRequestData(reqData)
-// }
-
 func (n *NeoBatch) GetOrCreateUniqueRelationship(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string) (*NeoRelationship, *NeoResponse) {
-	result, reqData := n.service.builder.GetOrCreateUniqueRelationship(index, key, value, source, target, relType)
+	result, reqData, err := n.service.builder.GetOrCreateUniqueRelationship(index, key, value, source, target, relType)
+	if err != nil {
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
 	return result, n.queueRequestData(reqData)
 }
-
-// func (n *NeoBatch) GetOrCreateUniqueRelationshipWithProperties(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, properties interface{}) (*NeoRelationship, *NeoResponse) {
-// 	result, reqData := n.service.builder.GetOrCreateUniqueRelationshipWithProperties(index, key, value, source, target, properties)
-// 	return result, n.queueRequestData(reqData)
-// }
 
 func (n *NeoBatch) GetOrCreateUniqueRelationshipWithProperties(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string, properties interface{}) (*NeoRelationship, *NeoResponse) {
-	result, reqData := n.service.builder.GetOrCreateUniqueRelationshipWithProperties(index, key, value, source, target, relType, properties)
+	result, reqData, err := n.service.builder.GetOrCreateUniqueRelationshipWithProperties(index, key, value, source, target, relType, properties)
+	if err != nil {
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
 	return result, n.queueRequestData(reqData)
 }
-
-// 17.11.7
-// func (n *NeoBatch) CreateUniqueRelationshipOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode) (*NeoRelationship, *NeoResponse) {
-// 	result, reqData := n.service.builder.CreateUniqueRelationshipOrFail(index, key, value, source, target)
-// 	return result, n.queueRequestData(reqData)
-// }
 
 func (n *NeoBatch) CreateUniqueRelationshipOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string) (*NeoRelationship, *NeoResponse) {
-	result, reqData := n.service.builder.CreateUniqueRelationshipOrFail(index, key, value, source, target, relType)
+	result, reqData, err := n.service.builder.CreateUniqueRelationshipOrFail(index, key, value, source, target, relType)
+	if err != nil {
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
 	return result, n.queueRequestData(reqData)
 }
 
-// func (n *NeoBatch) CreateUniqueRelationshipWithPropertiesOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, properties interface{}) (*NeoRelationship, *NeoResponse) {
-// 	result, reqData := n.service.builder.CreateUniqueRelationshipWithPropertiesOrFail(index, key, value, source, target, properties)
-// 	return result, n.queueRequestData(reqData)
-// }
-
 func (n *NeoBatch) CreateUniqueRelationshipWithPropertiesOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string, properties interface{}) (*NeoRelationship, *NeoResponse) {
-	result, reqData := n.service.builder.CreateUniqueRelationshipWithPropertiesOrFail(index, key, value, source, target, relType, properties)
+	result, reqData, err := n.service.builder.CreateUniqueRelationshipWithPropertiesOrFail(index, key, value, source, target, relType, properties)
+	if err != nil {
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
+	}
 	return result, n.queueRequestData(reqData)
 }
 
