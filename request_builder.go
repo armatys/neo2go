@@ -575,10 +575,10 @@ func (n *neoRequestBuilder) TraverseByFullPaths(traversal *NeoTraversal, start *
 
 func pagedTraverseHelper(traversal *NeoTraversal, start *NeoNode, params map[string]interface{}, result interface{}) (*neoRequestData, error) {
 	if traversal.LeaseTime > 0 {
-		params["leaseTime"] = traversal.LeaseTime
+		params["leaseTime"] = fmt.Sprintf("%d", traversal.LeaseTime)
 	}
 	if traversal.PageSize > 0 {
-		params["pageSize"] = traversal.PageSize
+		params["pageSize"] = fmt.Sprintf("%d", traversal.PageSize)
 	}
 	url, err := start.PagedTraverse.Render(params)
 	if err != nil {
@@ -589,25 +589,25 @@ func pagedTraverseHelper(traversal *NeoTraversal, start *NeoNode, params map[str
 
 func (n *neoRequestBuilder) TraverseByNodesWithPaging(traversal *NeoTraversal, start *NeoNode) (*[]*NeoNode, *neoRequestData, error) {
 	var result []*NeoNode
-	reqData, err := traverseHelper(traversal, start, map[string]interface{}{"returnType": "node"}, &result)
+	reqData, err := pagedTraverseHelper(traversal, start, map[string]interface{}{"returnType": "node"}, &result)
 	return &result, reqData, err
 }
 
 func (n *neoRequestBuilder) TraverseByRelationshipsWithPaging(traversal *NeoTraversal, start *NeoNode) (*[]*NeoRelationship, *neoRequestData, error) {
 	var result []*NeoRelationship
-	reqData, err := traverseHelper(traversal, start, map[string]interface{}{"returnType": "relationship"}, &result)
+	reqData, err := pagedTraverseHelper(traversal, start, map[string]interface{}{"returnType": "relationship"}, &result)
 	return &result, reqData, err
 }
 
 func (n *neoRequestBuilder) TraverseByPathsWithPaging(traversal *NeoTraversal, start *NeoNode) (*[]*NeoPath, *neoRequestData, error) {
 	var result []*NeoPath
-	reqData, err := traverseHelper(traversal, start, map[string]interface{}{"returnType": "path"}, &result)
+	reqData, err := pagedTraverseHelper(traversal, start, map[string]interface{}{"returnType": "path"}, &result)
 	return &result, reqData, err
 }
 
 func (n *neoRequestBuilder) TraverseByFullPathsWithPaging(traversal *NeoTraversal, start *NeoNode) (*[]*NeoFullPath, *neoRequestData, error) {
 	var result []*NeoFullPath
-	reqData, err := traverseHelper(traversal, start, map[string]interface{}{"returnType": "fullpath"}, &result)
+	reqData, err := pagedTraverseHelper(traversal, start, map[string]interface{}{"returnType": "fullpath"}, &result)
 	return &result, reqData, err
 }
 

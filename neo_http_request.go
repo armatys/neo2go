@@ -9,7 +9,7 @@ import (
 var versionHeader string
 
 func init() {
-	versionHeader = fmt.Sprintf("neo2go v.%d", Version)
+	versionHeader = fmt.Sprintf("neo2go version %d", Version)
 }
 
 type NeoHttpRequest struct {
@@ -30,7 +30,7 @@ func NewNeoHttpRequest(method, urlStr string, bodyBuf *bytes.Buffer) (*NeoHttpRe
 	}
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("X-Stream", "true")
-	req.Header.Set("User-Agent", "neo2go v.%d")
+	req.Header.Set("User-Agent", versionHeader)
 	if bodyBuf != nil {
 		req.Header.Set("Content-Type", "application/json")
 	}

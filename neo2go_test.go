@@ -730,13 +730,13 @@ func TestPathFinder(t *testing.T) {
 	}
 
 	if path.Length != 1 {
-		t.Error("Expected the path length to be 1, but is %d", path.Length)
+		t.Errorf("Expected the path length to be 1, but is %d", path.Length)
 	}
 	if len(path.Nodes) != 2 || path.Nodes[0] != start.Self.String() || path.Nodes[1] != target.Self.String() {
-		t.Error("Expected %v for path nodes, but got %v", []string{start.Self.String(), target.Self.String()}, path.Nodes)
+		t.Errorf("Expected %v for path nodes, but got %v", []string{start.Self.String(), target.Self.String()}, path.Nodes)
 	}
 	if len(path.Relationships) != 1 || path.Relationships[0] != rel.Self.String() {
-		t.Error("Expected %v for path relationships, but got %v", []string{rel.Self.String()}, path.Relationships)
+		t.Errorf("Expected %v for path relationships, but got %v", []string{rel.Self.String()}, path.Relationships)
 	}
 
 	resp = service.DeleteRelationship(rel)
@@ -774,19 +774,19 @@ func TestPathsFinder(t *testing.T) {
 	}
 
 	if len(paths) != 1 {
-		t.Error("Expected to get 1 path, but got %d", len(paths))
+		t.Errorf("Expected to get 1 path, but got %d", len(paths))
 	}
 
 	path := paths[0]
 
 	if path.Length != 1 {
-		t.Error("Expected the path length to be 1, but is %d", path.Length)
+		t.Errorf("Expected the path length to be 1, but is %d", path.Length)
 	}
 	if len(path.Nodes) != 2 || path.Nodes[0] != start.Self.String() || path.Nodes[1] != target.Self.String() {
-		t.Error("Expected %v for path nodes, but got %v", []string{start.Self.String(), target.Self.String()}, path.Nodes)
+		t.Errorf("Expected %v for path nodes, but got %v", []string{start.Self.String(), target.Self.String()}, path.Nodes)
 	}
 	if len(path.Relationships) != 1 || path.Relationships[0] != rel.Self.String() {
-		t.Error("Expected %v for path relationships, but got %v", []string{rel.Self.String()}, path.Relationships)
+		t.Errorf("Expected %v for path relationships, but got %v", []string{rel.Self.String()}, path.Relationships)
 	}
 
 	resp = service.DeleteRelationship(rel)
@@ -826,11 +826,11 @@ func TestTraverseByNodes(t *testing.T) {
 	traversal.ReturnFilter = NewNeoReturnFilterAllButStartNode()
 	nodes, resp := service.TraverseByNodes(traversal, start)
 	if !resp.Ok() || resp.StatusCode != 200 {
-		t.Error("Unexpected server response (%d): %v", resp.StatusCode, resp.NeoError)
+		t.Errorf("Unexpected server response (%d): %v", resp.StatusCode, resp.NeoError)
 	}
 
 	if len(nodes) != 2 {
-		t.Error("Expected to get just 2 nodes, but got %d", len(nodes))
+		t.Errorf("Expected to get just 2 nodes, but got %d", len(nodes))
 	}
 
 	resp = service.DeleteRelationship(rel1)
@@ -875,19 +875,19 @@ func TestTraverseByRelationships(t *testing.T) {
 	traversal.MaxDepth = 5
 	rels, resp := service.TraverseByRelationships(traversal, start)
 	if !resp.Ok() || resp.StatusCode != 200 {
-		t.Error("Unexpected server response (%d): %v", resp.StatusCode, resp.NeoError)
+		t.Errorf("Unexpected server response (%d): %v", resp.StatusCode, resp.NeoError)
 	}
 
 	if len(rels) != 2 {
-		t.Error("Expected to get just 2 relationships, but got %d", len(rels))
+		t.Errorf("Expected to get just 2 relationships, but got %d", len(rels))
 	}
 
 	if rels[0].Self.String() != rel1.Self.String() {
-		t.Error("Expected to get the same relationship (%v), but got %v", rel1.Self.String(), rels[0].Self.String())
+		t.Errorf("Expected to get the same relationship (%v), but got %v", rel1.Self.String(), rels[0].Self.String())
 	}
 
 	if rels[1].Self.String() != rel2.Self.String() {
-		t.Error("Expected to get the same relationship (%v), but got %v", rel2.Self.String(), rels[1].Self.String())
+		t.Errorf("Expected to get the same relationship (%v), but got %v", rel2.Self.String(), rels[1].Self.String())
 	}
 
 	resp = service.DeleteRelationship(rel1)
@@ -932,11 +932,11 @@ func TestTraverseByPaths(t *testing.T) {
 	traversal.MaxDepth = 5
 	paths, resp := service.TraverseByPaths(traversal, start)
 	if !resp.Ok() || resp.StatusCode != 200 {
-		t.Error("Unexpected server response (%d): %v", resp.StatusCode, resp.NeoError)
+		t.Errorf("Unexpected server response (%d): %v", resp.StatusCode, resp.NeoError)
 	}
 
 	if len(paths) != 2 {
-		t.Error("Expected to get just 2 paths, but got %d", len(paths))
+		t.Errorf("Expected to get just 2 paths, but got %d", len(paths))
 	}
 
 	resp = service.DeleteRelationship(rel1)
@@ -981,12 +981,79 @@ func TestTraverseByFullPaths(t *testing.T) {
 	traversal.MaxDepth = 5
 	paths, resp := service.TraverseByFullPaths(traversal, start)
 	if !resp.Ok() || resp.StatusCode != 200 {
-		t.Error("Unexpected server response (%d): %v", resp.StatusCode, resp.NeoError)
+		t.Errorf("Unexpected server response (%d): %v", resp.StatusCode, resp.NeoError)
 	}
 
 	if len(paths) != 2 {
-		t.Error("Expected to get just 2 paths, but got %d", len(paths))
+		t.Errorf("Expected to get just 2 paths, but got %d", len(paths))
 	}
+
+	resp = service.DeleteRelationship(rel1)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteRelationship(rel2)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(start)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(middle)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(target)
+	checkResponseSucceeded(t, resp, 204)
+}
+
+func TestPagedTraverseByNodes(t *testing.T) {
+	service := NewGraphDatabaseService()
+	resp := service.Connect(databaseAddress)
+	if !responseHasSucceededWithCode(resp, 200) {
+		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
+	}
+
+	start, resp := service.CreateNode()
+	checkResponseSucceeded(t, resp, 201)
+
+	middle, resp := service.CreateNode()
+	checkResponseSucceeded(t, resp, 201)
+
+	target, resp := service.CreateNode()
+	checkResponseSucceeded(t, resp, 201)
+
+	rel1, resp := service.CreateRelationshipWithType(start, middle, "likes")
+	checkResponseSucceeded(t, resp, 201)
+
+	rel2, resp := service.CreateRelationshipWithType(middle, target, "likes")
+	checkResponseSucceeded(t, resp, 201)
+
+	traversal := &NeoTraversal{}
+	traversal.MaxDepth = 5
+	traversal.ReturnFilter = NewNeoReturnFilterAllButStartNode()
+
+	// TODO paged traversal seems not supported, when used with streaming
+	// traversal.PageSize = 1
+	// _, _, resp = service.TraverseByNodesWithPaging(traversal, start)
+	// if !resp.Ok() || resp.StatusCode != 200 {
+	// 	t.Errorf("Unexpected server response (%d): %v", resp.StatusCode, resp.NeoError)
+	// }
+
+	// if len(nodes) != 1 {
+	// 	t.Errorf("Expected to get just 1 node, but got %d", len(nodes))
+	// }
+
+	// nodes, resp = service.TraverseByNodesGetNextPage(traverser)
+	// if !resp.Ok() || resp.StatusCode != 200 {
+	// 	t.Errorf("Unexpected server response (%d): %v", resp.StatusCode, resp.NeoError)
+	// }
+
+	// if len(nodes) != 1 {
+	// 	t.Errorf("Expected to get just 1 node, but got %d", len(nodes))
+	// }
+
+	// nodes, resp = service.TraverseByNodesGetNextPage(traverser)
+	// if resp.Ok() || resp.StatusCode != 404 {
+	// 	t.Errorf("Unexpected server response (%d): %v", resp.StatusCode, resp.NeoError)
+	// }
 
 	resp = service.DeleteRelationship(rel1)
 	checkResponseSucceeded(t, resp, 204)

@@ -151,7 +151,7 @@ func (n *NeoIndex) setBatchId(bid NeoBatchId) {
 }
 
 type NeoCodeSnippet struct {
-	Body     string `json:"body"`
+	Body     string `json:"body,omitempty"`
 	Language string `json:"language"`
 	Name     string `json:"name,omitempty"`
 }
