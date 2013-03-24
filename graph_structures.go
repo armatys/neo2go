@@ -153,6 +153,7 @@ func (n *NeoIndex) setBatchId(bid NeoBatchId) {
 type NeoCodeSnippet struct {
 	Body     string `json:"body"`
 	Language string `json:"language"`
+	Name     string `json:"name,omitempty"`
 }
 
 type NeoTraversalOrder uint8
@@ -220,6 +221,14 @@ type NeoTraversalRelationship struct {
 	Type      string                `json:"type"`
 }
 
+func NewNeoReturnFilterAll() *NeoCodeSnippet {
+	return &NeoCodeSnippet{Name: "all", Language: "builtin"}
+}
+
+func NewNeoReturnFilterAllButStartNode() *NeoCodeSnippet {
+	return &NeoCodeSnippet{Name: "all_but_start_node", Language: "builtin"}
+}
+
 type NeoTraversal struct {
 	LeaseTime      uint32                      `json:"-"`
 	PageSize       uint32                      `json:"-"`
@@ -275,10 +284,18 @@ func (n NeoGraphAlgorithm) MarshalJSON() ([]byte, error) {
 }
 
 type NeoPathFinderSpec struct {
-	CostProperty  string                    `json:"cost_property"`
-	DefaultCost   float64                   `json:"default_cost"`
+	CostProperty  string                    `json:"cost_property,omitempty"`
+	DefaultCost   float64                   `json:"default_cost,omitempty"`
 	MaxDepth      uint32                    `json:"max_depth"`
 	Relationships *NeoTraversalRelationship `json:"relationships,omitempty"`
 	Algorithm     NeoGraphAlgorithm         `json:"algorithm"`
-	to            string                    `json:"to"`
+	To            string                    `json:"to"`
+}
+
+func NewNeoPathFinderSpecWithRelationships(rels *NeoTraversalRelationship) *NeoPathFinderSpec {
+	spec := new(NeoPathFinderSpec)
+	spec.MaxDepth = 1
+	spec.Algorithm = NeoShortestPath
+	spec.Relationships = rels
+	return spec
 }

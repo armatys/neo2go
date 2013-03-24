@@ -706,3 +706,145 @@ func TestCreateUniqueRelationshipOrFail(t *testing.T) {
 	resp = service.DeleteNode(target)
 	checkResponseSucceeded(t, resp, 204)
 }
+
+func TestPathFinder(t *testing.T) {
+	service := NewGraphDatabaseService()
+	resp := service.Connect(databaseAddress)
+	if !responseHasSucceededWithCode(resp, 200) {
+		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
+	}
+
+	start, resp := service.CreateNode()
+	checkResponseSucceeded(t, resp, 201)
+
+	target, resp := service.CreateNode()
+	checkResponseSucceeded(t, resp, 201)
+
+	rel, resp := service.CreateRelationshipWithType(start, target, "likes")
+	checkResponseSucceeded(t, resp, 201)
+
+	spec := NewNeoPathFinderSpecWithRelationships(&NeoTraversalRelationship{Type: "likes", Direction: NeoTraversalOut})
+	path, resp := service.FindPathFromNode(start, target, spec)
+	if !resp.Ok() || resp.StatusCode != 200 {
+		t.Fatalf("Unexpected response (%d): %v", resp.StatusCode, resp.NeoError)
+	}
+
+	if path.Length != 1 {
+		t.Error("Expected the path length to be 1, but is %d", path.Length)
+	}
+	if len(path.Nodes) != 2 || path.Nodes[0] != start.Self.String() || path.Nodes[1] != target.Self.String() {
+		t.Error("Expected %v for path nodes, but got %v", []string{start.Self.String(), target.Self.String()}, path.Nodes)
+	}
+	if len(path.Relationships) != 1 || path.Relationships[0] != rel.Self.String() {
+		t.Error("Expected %v for path relationships, but got %v", []string{rel.Self.String()}, path.Relationships)
+	}
+
+	resp = service.DeleteRelationship(rel)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(start)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(target)
+	checkResponseSucceeded(t, resp, 204)
+}
+
+func TestPathsFinder(t *testing.T) {
+	service := NewGraphDatabaseService()
+	resp := service.Connect(databaseAddress)
+	if !responseHasSucceededWithCode(resp, 200) {
+		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
+	}
+
+	start, resp := service.CreateNode()
+	checkResponseSucceeded(t, resp, 201)
+
+	target, resp := service.CreateNode()
+	checkResponseSucceeded(t, resp, 201)
+
+	rel, resp := service.CreateRelationshipWithPropertiesAndType(start, target, map[string]int{"cost": 1}, "likes")
+	checkResponseSucceeded(t, resp, 201)
+
+	spec := NewNeoPathFinderSpecWithRelationships(&NeoTraversalRelationship{Type: "likes", Direction: NeoTraversalOut})
+	spec.Algorithm = NeoDijkstra
+	spec.CostProperty = "cost"
+	paths, resp := service.FindPathsFromNode(start, target, spec)
+	if !resp.Ok() || resp.StatusCode != 200 {
+		t.Fatalf("Unexpected response (%d): %v", resp.StatusCode, resp.NeoError)
+	}
+
+	if len(paths) != 1 {
+		t.Error("Expected to get 1 path, but got %d", len(paths))
+	}
+
+	path := paths[0]
+
+	if path.Length != 1 {
+		t.Error("Expected the path length to be 1, but is %d", path.Length)
+	}
+	if len(path.Nodes) != 2 || path.Nodes[0] != start.Self.String() || path.Nodes[1] != target.Self.String() {
+		t.Error("Expected %v for path nodes, but got %v", []string{start.Self.String(), target.Self.String()}, path.Nodes)
+	}
+	if len(path.Relationships) != 1 || path.Relationships[0] != rel.Self.String() {
+		t.Error("Expected %v for path relationships, but got %v", []string{rel.Self.String()}, path.Relationships)
+	}
+
+	resp = service.DeleteRelationship(rel)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(start)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(target)
+	checkResponseSucceeded(t, resp, 204)
+}
+
+func TestTraverseByNodes(t *testing.T) {
+	service := NewGraphDatabaseService()
+	resp := service.Connect(databaseAddress)
+	if !responseHasSucceededWithCode(resp, 200) {
+		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
+	}
+
+	start, resp := service.CreateNode()
+	checkResponseSucceeded(t, resp, 201)
+
+	middle, resp := service.CreateNode()
+	checkResponseSucceeded(t, resp, 201)
+
+	target, resp := service.CreateNode()
+	checkResponseSucceeded(t, resp, 201)
+
+	rel1, resp := service.CreateRelationshipWithType(start, middle, "likes")
+	checkResponseSucceeded(t, resp, 201)
+
+	rel2, resp := service.CreateRelationshipWithType(middle, target, "likes")
+	checkResponseSucceeded(t, resp, 201)
+
+	traversal := &NeoTraversal{}
+	traversal.MaxDepth = 5
+	traversal.ReturnFilter = NewNeoReturnFilterAllButStartNode()
+	nodes, resp := service.TraverseByNodes(traversal, start)
+	if !resp.Ok() || resp.StatusCode != 200 {
+		t.Error("Unexpected server response (%d): %v", resp.StatusCode, resp.NeoError)
+	}
+
+	if len(nodes) != 2 {
+		t.Error("Expected to get just 2 nodes, but got %d", len(nodes))
+	}
+
+	resp = service.DeleteRelationship(rel1)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteRelationship(rel2)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(start)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(middle)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(target)
+	checkResponseSucceeded(t, resp, 204)
+}

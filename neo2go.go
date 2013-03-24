@@ -620,7 +620,7 @@ func (g *GraphDatabaseService) execute_(neoRequest *NeoHttpRequest, neoRequestEr
 				return NewLocalErrorResponse(expectedStatusCode, err)
 			}
 		} else if len(ctype) == 0 {
-			//return NewLocalErrorResponse(expectedStatusCode, fmt.Errorf("Server did not return a content-type for this response."))
+			return NewLocalErrorResponse(expectedStatusCode, fmt.Errorf("Server did not return a content-type for this response."))
 		} else {
 			err := fmt.Errorf("Server has returned a response with unsupported content-type (%s)", ctype)
 			return NewLocalErrorResponse(expectedStatusCode, err)
