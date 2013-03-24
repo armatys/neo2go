@@ -197,7 +197,7 @@ func TestSimpleRelationships(t *testing.T) {
 		t.Fatalf(resp.NeoError.Error())
 	}
 
-	_, resp = service.CreateRelationshipWithType(source, target, "likes")
+	rel1, resp := service.CreateRelationshipWithType(source, target, "likes")
 	if !resp.Ok() {
 		t.Fatalf("Error creating relationship: %v", resp.NeoError.Error())
 	}
@@ -258,12 +258,22 @@ func TestSimpleRelationships(t *testing.T) {
 		t.Logf("Expected at 2 relationship types, but got: %d", len(relTypes))
 	}
 
+	resp = service.DeleteRelationship(rel1)
+	if !resp.Ok() {
+		t.Fatalf("Error deleting relationship: %v", resp.NeoError.Error())
+	}
 	resp = service.DeleteRelationship(rel)
 	if !resp.Ok() {
 		t.Fatalf("Error deleting relationship: %v", resp.NeoError.Error())
 	}
-	service.DeleteNode(source)
-	service.DeleteNode(target)
+	resp = service.DeleteNode(source)
+	if !resp.Ok() {
+		t.Fatalf("Unexpected response (%v): %v", resp.StatusCode, resp.NeoError)
+	}
+	resp = service.DeleteNode(target)
+	if !resp.Ok() {
+		t.Fatalf("Unexpected response (%v): %v", resp.StatusCode, resp.NeoError)
+	}
 }
 
 func TestSimpleRelationships2(t *testing.T) {
@@ -321,9 +331,9 @@ func TestSimpleRelationships2(t *testing.T) {
 	}
 
 	batch := service.Batch()
+	batch.DeleteRelationship(rel)
 	batch.DeleteNode(source)
 	batch.DeleteNode(target)
-	batch.DeleteRelationship(rel)
 	resp = batch.Commit()
 	if !resp.Ok() {
 		t.Fatalf("Could not execute batch (deletion): %v", resp.NeoError.Error())
@@ -586,6 +596,108 @@ func TestFindExactRelationshipMatches(t *testing.T) {
 	checkResponseSucceeded(t, resp, 204)
 
 	resp = service.DeleteRelationship(rel)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(source)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(target)
+	checkResponseSucceeded(t, resp, 204)
+}
+
+func TestCreateUniqueRelationship(t *testing.T) {
+	service := NewGraphDatabaseService()
+	resp := service.Connect(databaseAddress)
+	checkResponseSucceeded(t, resp, 200)
+
+	indexName := "test-r"
+	index, resp := service.CreateRelationshipIndex(indexName)
+	checkResponseSucceeded(t, resp, 201)
+
+	source, resp := service.CreateNode()
+	checkResponseSucceeded(t, resp, 201)
+
+	target, resp := service.CreateNode()
+	checkResponseSucceeded(t, resp, 201)
+
+	createdRel, resp := service.GetOrCreateUniqueRelationship(index, "name", "text-value", source, target, "rel-type")
+	if !resp.Created() || resp.StatusCode != 201 {
+		t.Fatalf("Unexpected response %d: %v", resp.StatusCode, resp.NeoError)
+	}
+
+	fetchedRel, resp := service.GetOrCreateUniqueRelationship(index, "name", "text-value", source, target, "rel-type")
+	if !resp.Ok() || resp.StatusCode != 200 {
+		t.Fatalf("Unexpected response %d: %v", resp.StatusCode, resp.NeoError)
+	}
+
+	if createdRel.Self.String() != fetchedRel.Self.String() {
+		t.Fatalf("Expected to get the same nodes, but got (created): %v and (fetched): %v", createdRel.Self.String(), fetchedRel.Self.String())
+	}
+
+	rels, resp := service.FindRelationshipByExactMatch(index, "name", "text-value")
+	checkResponseSucceeded(t, resp, 200)
+
+	if len(rels) != 1 {
+		t.Fatalf("Expected to get 1 relationships but got %d", len(rels))
+	}
+
+	if rels[0].Self.String() != createdRel.Self.String() {
+		t.Fatalf("Expected to get the same rel but got (create) %v and (by exact match) %v", createdRel.Self.String(), rels[0].Self.String())
+	}
+
+	resp = service.DeleteIndex(index)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteRelationship(createdRel)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(source)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(target)
+	checkResponseSucceeded(t, resp, 204)
+}
+
+func TestCreateUniqueRelationshipOrFail(t *testing.T) {
+	service := NewGraphDatabaseService()
+	resp := service.Connect(databaseAddress)
+	checkResponseSucceeded(t, resp, 200)
+
+	indexName := "test-r"
+	index, resp := service.CreateRelationshipIndex(indexName)
+	checkResponseSucceeded(t, resp, 201)
+
+	source, resp := service.CreateNode()
+	checkResponseSucceeded(t, resp, 201)
+
+	target, resp := service.CreateNode()
+	checkResponseSucceeded(t, resp, 201)
+
+	createdRel, resp := service.CreateUniqueRelationshipOrFail(index, "name", "text-value", source, target, "likes")
+	if !resp.Created() || resp.StatusCode != 201 {
+		t.Fatalf("Unexpected response %d: %v", resp.StatusCode, resp.NeoError)
+	}
+
+	_, resp = service.CreateUniqueRelationshipOrFail(index, "name", "text-value", source, target, "likes")
+	if resp.Created() || resp.Ok() || resp.StatusCode == 201 {
+		t.Fatalf("Unexpected response %d: %v", resp.StatusCode, resp.NeoError)
+	}
+
+	rels, resp := service.FindRelationshipByExactMatch(index, "name", "text-value")
+	checkResponseSucceeded(t, resp, 200)
+
+	if len(rels) != 1 {
+		t.Fatalf("Expected to get 1 relationships but got %d", len(rels))
+	}
+
+	if rels[0].Self.String() != createdRel.Self.String() {
+		t.Fatalf("Expected to get the same rel but got (create) %v and (by exact match) %v", createdRel.Self.String(), rels[0].Self.String())
+	}
+
+	resp = service.DeleteIndex(index)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteRelationship(createdRel)
 	checkResponseSucceeded(t, resp, 204)
 
 	resp = service.DeleteNode(source)
