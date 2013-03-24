@@ -848,3 +848,158 @@ func TestTraverseByNodes(t *testing.T) {
 	resp = service.DeleteNode(target)
 	checkResponseSucceeded(t, resp, 204)
 }
+
+func TestTraverseByRelationships(t *testing.T) {
+	service := NewGraphDatabaseService()
+	resp := service.Connect(databaseAddress)
+	if !responseHasSucceededWithCode(resp, 200) {
+		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
+	}
+
+	start, resp := service.CreateNode()
+	checkResponseSucceeded(t, resp, 201)
+
+	middle, resp := service.CreateNode()
+	checkResponseSucceeded(t, resp, 201)
+
+	target, resp := service.CreateNode()
+	checkResponseSucceeded(t, resp, 201)
+
+	rel1, resp := service.CreateRelationshipWithType(start, middle, "likes")
+	checkResponseSucceeded(t, resp, 201)
+
+	rel2, resp := service.CreateRelationshipWithType(middle, target, "likes")
+	checkResponseSucceeded(t, resp, 201)
+
+	traversal := &NeoTraversal{}
+	traversal.MaxDepth = 5
+	rels, resp := service.TraverseByRelationships(traversal, start)
+	if !resp.Ok() || resp.StatusCode != 200 {
+		t.Error("Unexpected server response (%d): %v", resp.StatusCode, resp.NeoError)
+	}
+
+	if len(rels) != 2 {
+		t.Error("Expected to get just 2 relationships, but got %d", len(rels))
+	}
+
+	if rels[0].Self.String() != rel1.Self.String() {
+		t.Error("Expected to get the same relationship (%v), but got %v", rel1.Self.String(), rels[0].Self.String())
+	}
+
+	if rels[1].Self.String() != rel2.Self.String() {
+		t.Error("Expected to get the same relationship (%v), but got %v", rel2.Self.String(), rels[1].Self.String())
+	}
+
+	resp = service.DeleteRelationship(rel1)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteRelationship(rel2)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(start)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(middle)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(target)
+	checkResponseSucceeded(t, resp, 204)
+}
+
+func TestTraverseByPaths(t *testing.T) {
+	service := NewGraphDatabaseService()
+	resp := service.Connect(databaseAddress)
+	if !responseHasSucceededWithCode(resp, 200) {
+		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
+	}
+
+	start, resp := service.CreateNode()
+	checkResponseSucceeded(t, resp, 201)
+
+	middle, resp := service.CreateNode()
+	checkResponseSucceeded(t, resp, 201)
+
+	target, resp := service.CreateNode()
+	checkResponseSucceeded(t, resp, 201)
+
+	rel1, resp := service.CreateRelationshipWithType(start, middle, "likes")
+	checkResponseSucceeded(t, resp, 201)
+
+	rel2, resp := service.CreateRelationshipWithType(middle, target, "likes")
+	checkResponseSucceeded(t, resp, 201)
+
+	traversal := &NeoTraversal{}
+	traversal.MaxDepth = 5
+	paths, resp := service.TraverseByPaths(traversal, start)
+	if !resp.Ok() || resp.StatusCode != 200 {
+		t.Error("Unexpected server response (%d): %v", resp.StatusCode, resp.NeoError)
+	}
+
+	if len(paths) != 2 {
+		t.Error("Expected to get just 2 paths, but got %d", len(paths))
+	}
+
+	resp = service.DeleteRelationship(rel1)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteRelationship(rel2)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(start)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(middle)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(target)
+	checkResponseSucceeded(t, resp, 204)
+}
+
+func TestTraverseByFullPaths(t *testing.T) {
+	service := NewGraphDatabaseService()
+	resp := service.Connect(databaseAddress)
+	if !responseHasSucceededWithCode(resp, 200) {
+		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
+	}
+
+	start, resp := service.CreateNode()
+	checkResponseSucceeded(t, resp, 201)
+
+	middle, resp := service.CreateNode()
+	checkResponseSucceeded(t, resp, 201)
+
+	target, resp := service.CreateNode()
+	checkResponseSucceeded(t, resp, 201)
+
+	rel1, resp := service.CreateRelationshipWithType(start, middle, "likes")
+	checkResponseSucceeded(t, resp, 201)
+
+	rel2, resp := service.CreateRelationshipWithType(middle, target, "likes")
+	checkResponseSucceeded(t, resp, 201)
+
+	traversal := &NeoTraversal{}
+	traversal.MaxDepth = 5
+	paths, resp := service.TraverseByFullPaths(traversal, start)
+	if !resp.Ok() || resp.StatusCode != 200 {
+		t.Error("Unexpected server response (%d): %v", resp.StatusCode, resp.NeoError)
+	}
+
+	if len(paths) != 2 {
+		t.Error("Expected to get just 2 paths, but got %d", len(paths))
+	}
+
+	resp = service.DeleteRelationship(rel1)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteRelationship(rel2)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(start)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(middle)
+	checkResponseSucceeded(t, resp, 204)
+
+	resp = service.DeleteNode(target)
+	checkResponseSucceeded(t, resp, 204)
+}
