@@ -88,11 +88,6 @@ func (g *GraphDatabaseService) CreateRelationshipWithType(source *NeoNode, targe
 	return result, g.executeFromRequestData(reqData)
 }
 
-func (g *GraphDatabaseService) CreateRelationshipWithProperties(source *NeoNode, target *NeoNode, properties interface{}) (*NeoRelationship, *NeoResponse) {
-	result, reqData := g.builder.CreateRelationshipWithProperties(source, target, properties)
-	return result, g.executeFromRequestData(reqData)
-}
-
 func (g *GraphDatabaseService) CreateRelationshipWithPropertiesAndType(source *NeoNode, target *NeoNode, properties interface{}, relType string) (*NeoRelationship, *NeoResponse) {
 	result, reqData := g.builder.CreateRelationshipWithPropertiesAndType(source, target, properties, relType)
 	return result, g.executeFromRequestData(reqData)

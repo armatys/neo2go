@@ -114,12 +114,6 @@ func (n *NeoBatch) CreateRelationshipWithType(source *NeoNode, target *NeoNode, 
 	return result, resp
 }
 
-func (n *NeoBatch) CreateRelationshipWithProperties(source *NeoNode, target *NeoNode, properties interface{}) (*NeoRelationship, *NeoResponse) {
-	result, reqData := n.service.builder.CreateRelationshipWithProperties(source, target, properties)
-	resp := n.queueRequestDataWithResult(reqData, result)
-	return result, resp
-}
-
 func (n *NeoBatch) CreateRelationshipWithPropertiesAndType(source *NeoNode, target *NeoNode, properties interface{}, relType string) (*NeoRelationship, *NeoResponse) {
 	result, reqData := n.service.builder.CreateRelationshipWithPropertiesAndType(source, target, properties, relType)
 	resp := n.queueRequestDataWithResult(reqData, result)
