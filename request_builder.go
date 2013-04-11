@@ -84,7 +84,7 @@ func (n *neoRequestBuilder) createRelationshipHelper(source *NeoNode, bodyMap ma
 
 func (n *neoRequestBuilder) CreateRelationshipWithType(source *NeoNode, target *NeoNode, relType string) (*NeoRelationship, *neoRequestData) {
 	bodyMap := map[string]interface{}{
-		"to":   target.Self.String(),
+		"to":   target.SelfOrBatchId(),
 		"type": relType,
 	}
 	return n.createRelationshipHelper(source, bodyMap)
@@ -92,7 +92,7 @@ func (n *neoRequestBuilder) CreateRelationshipWithType(source *NeoNode, target *
 
 func (n *neoRequestBuilder) CreateRelationshipWithPropertiesAndType(source *NeoNode, target *NeoNode, properties interface{}, relType string) (*NeoRelationship, *neoRequestData) {
 	bodyMap := map[string]interface{}{
-		"to":   target.Self.String(),
+		"to":   target.SelfOrBatchId(),
 		"type": relType,
 		"data": properties,
 	}

@@ -78,6 +78,15 @@ func (n *NeoNode) IdOrBatchId() string {
 	return ""
 }
 
+func (n *NeoNode) SelfOrBatchId() string {
+	if n.Self != nil {
+		return n.Self.String()
+	} else if n.batchId > 0 {
+		return fmt.Sprintf("{%d}", n.batchId)
+	}
+	return ""
+}
+
 func (n *NeoNode) setBatchId(bid NeoBatchId) {
 	n.batchId = bid
 

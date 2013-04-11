@@ -494,9 +494,9 @@ func (n *NeoBatch) Commit() *NeoResponse {
 		n.responses[i].StatusCode = resultElem.Status
 		n.responses[i].ExpectedCode = n.requests[i].expectedStatus
 
-		if resultElem.Status > 0 && resultElem.Status != n.requests[i].expectedStatus {
+		if resultElem.Status > 0 && resultElem.Status != n.requests[i].expectedStatus && resultElem.Status != 201 {
 			neoResponse.StatusCode = 600
-			neoResponse.NeoError = fmt.Errorf("The batch operation #%v has failed.", n.requests[i].batchId)
+			neoResponse.NeoError = fmt.Errorf("The batch operation #%v has failed with status %d.\n", n.requests[i].batchId, resultElem.Status)
 		}
 	}
 
