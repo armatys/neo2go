@@ -13,7 +13,7 @@ var _ GraphIndexer = (*NeoBatch)(nil)
 var batchIdRegExp *regexp.Regexp
 
 func init() {
-	batchIdRegExp = regexp.MustCompile(`^{([0-9]+)}$`)
+	batchIdRegExp = regexp.MustCompile(`^{([0-9]+)}.*$`)
 }
 
 type NeoBatchId uint32
@@ -232,13 +232,13 @@ func (n *NeoBatch) DeletePropertyWithKeyForRelationship(rel *NeoRelationship, ke
 // 17.10.1 - Nodes
 func (n *NeoBatch) CreateNodeIndex(name string) (*NeoIndex, *NeoResponse) {
 	result, reqData := n.service.builder.CreateNodeIndex(name)
-	return result, n.queueRequestData(reqData)
+	return result, n.queueRequestDataWithResult(reqData, result)
 }
 
 // 17.10.2
 func (n *NeoBatch) CreateNodeIndexWithConfiguration(name string, config interface{}) (*NeoIndex, *NeoResponse) {
 	result, reqData := n.service.builder.CreateNodeIndexWithConfiguration(name, config)
-	return result, n.queueRequestData(reqData)
+	return result, n.queueRequestDataWithResult(reqData, result)
 }
 
 // 17.10.3
@@ -262,7 +262,7 @@ func (n *NeoBatch) AddNodeToIndex(index *NeoIndex, node *NeoNode, key, value str
 	if err != nil {
 		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
-	return result, n.queueRequestData(reqData)
+	return result, n.queueRequestDataWithResult(reqData, result)
 }
 
 // 17.10.6
@@ -313,13 +313,13 @@ func (n *NeoBatch) FindNodeByQuery(index *NeoIndex, query string) ([]*NeoNode, *
 // 17.10.1 - Relationships
 func (n *NeoBatch) CreateRelationshipIndex(name string) (*NeoIndex, *NeoResponse) {
 	result, reqData := n.service.builder.CreateRelationshipIndex(name)
-	return result, n.queueRequestData(reqData)
+	return result, n.queueRequestDataWithResult(reqData, result)
 }
 
 // 17.10.2
 func (n *NeoBatch) CreateRelationshipIndexWithConfiguration(name string, config interface{}) (*NeoIndex, *NeoResponse) {
 	result, reqData := n.service.builder.CreateRelationshipIndexWithConfiguration(name, config)
-	return result, n.queueRequestData(reqData)
+	return result, n.queueRequestDataWithResult(reqData, result)
 }
 
 // 17.10.4
@@ -334,7 +334,7 @@ func (n *NeoBatch) AddRelationshipToIndex(index *NeoIndex, rel *NeoRelationship,
 	if err != nil {
 		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
-	return result, n.queueRequestData(reqData)
+	return result, n.queueRequestDataWithResult(reqData, result)
 }
 
 // 17.10.6
@@ -388,7 +388,7 @@ func (n *NeoBatch) GetOrCreateUniqueNode(index *NeoIndex, key, value string) (*N
 	if err != nil {
 		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
-	return result, n.queueRequestData(reqData)
+	return result, n.queueRequestDataWithResult(reqData, result)
 }
 
 func (n *NeoBatch) GetOrCreateUniqueNodeWithProperties(index *NeoIndex, key, value string, properties interface{}) (*NeoNode, *NeoResponse) {
@@ -396,7 +396,7 @@ func (n *NeoBatch) GetOrCreateUniqueNodeWithProperties(index *NeoIndex, key, val
 	if err != nil {
 		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
-	return result, n.queueRequestData(reqData)
+	return result, n.queueRequestDataWithResult(reqData, result)
 }
 
 // 17.11.3
@@ -405,7 +405,7 @@ func (n *NeoBatch) CreateUniqueNodeOrFail(index *NeoIndex, key, value string) (*
 	if err != nil {
 		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
-	return result, n.queueRequestData(reqData)
+	return result, n.queueRequestDataWithResult(reqData, result)
 }
 
 func (n *NeoBatch) CreateUniqueNodeWithPropertiesOrFail(index *NeoIndex, key, value string, properties interface{}) (*NeoNode, *NeoResponse) {
@@ -413,7 +413,7 @@ func (n *NeoBatch) CreateUniqueNodeWithPropertiesOrFail(index *NeoIndex, key, va
 	if err != nil {
 		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
-	return result, n.queueRequestData(reqData)
+	return result, n.queueRequestDataWithResult(reqData, result)
 }
 
 // 17.11.5
@@ -422,7 +422,7 @@ func (n *NeoBatch) GetOrCreateUniqueRelationship(index *NeoIndex, key, value str
 	if err != nil {
 		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
-	return result, n.queueRequestData(reqData)
+	return result, n.queueRequestDataWithResult(reqData, result)
 }
 
 func (n *NeoBatch) GetOrCreateUniqueRelationshipWithProperties(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string, properties interface{}) (*NeoRelationship, *NeoResponse) {
@@ -430,7 +430,7 @@ func (n *NeoBatch) GetOrCreateUniqueRelationshipWithProperties(index *NeoIndex, 
 	if err != nil {
 		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
-	return result, n.queueRequestData(reqData)
+	return result, n.queueRequestDataWithResult(reqData, result)
 }
 
 func (n *NeoBatch) CreateUniqueRelationshipOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string) (*NeoRelationship, *NeoResponse) {
@@ -438,7 +438,7 @@ func (n *NeoBatch) CreateUniqueRelationshipOrFail(index *NeoIndex, key, value st
 	if err != nil {
 		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
-	return result, n.queueRequestData(reqData)
+	return result, n.queueRequestDataWithResult(reqData, result)
 }
 
 func (n *NeoBatch) CreateUniqueRelationshipWithPropertiesOrFail(index *NeoIndex, key, value string, source *NeoNode, target *NeoNode, relType string, properties interface{}) (*NeoRelationship, *NeoResponse) {
@@ -446,7 +446,7 @@ func (n *NeoBatch) CreateUniqueRelationshipWithPropertiesOrFail(index *NeoIndex,
 	if err != nil {
 		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
-	return result, n.queueRequestData(reqData)
+	return result, n.queueRequestDataWithResult(reqData, result)
 }
 
 func (n *NeoBatch) Commit() *NeoResponse {
