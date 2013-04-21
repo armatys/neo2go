@@ -22,6 +22,9 @@ func NewLocalErrorResponse(expectedCode int, err error) *NeoResponse {
 }
 
 func (n *NeoResponse) Ok() bool {
+	if n.ExpectedCode == 200 {
+		return n.StatusCode >= 200 && n.StatusCode < 300
+	}
 	return n.ExpectedCode == n.StatusCode
 }
 
