@@ -24,14 +24,20 @@ func init() {
 }
 
 type GraphDatabaseService struct {
-	client  *http.Client
-	builder *neoRequestBuilder
+	client         *http.Client
+	builder        *neoRequestBuilder
+	maxConnChannel chan int
 }
 
 func NewGraphDatabaseService() *GraphDatabaseService {
+	return NewGraphDatabaseServiceWithMaxConn(10)
+}
+
+func NewGraphDatabaseServiceWithMaxConn(maxConn uint) *GraphDatabaseService {
 	service := GraphDatabaseService{
-		client:  &http.Client{},
-		builder: &neoRequestBuilder{new(NeoServiceRoot), &UrlTemplate{}},
+		client:         &http.Client{},
+		builder:        &neoRequestBuilder{new(NeoServiceRoot), &UrlTemplate{}},
+		maxConnChannel: make(chan int, maxConn),
 	}
 	return &service
 }
@@ -581,7 +587,9 @@ func (g *GraphDatabaseService) execute_(neoRequest *NeoHttpRequest, neoRequestEr
 		return NewLocalErrorResponse(expectedStatusCode, neoRequestErr)
 	}
 
+	g.maxConnChannel <- 1
 	resp, err := g.client.Do(neoRequest.Request)
+	_ = <-g.maxConnChannel
 	if err != nil {
 		return NewLocalErrorResponse(expectedStatusCode, err)
 	}
