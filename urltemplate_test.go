@@ -126,6 +126,62 @@ func TestRenderingWithNoParameters(t *testing.T) {
 	}
 }
 
+func TestRenderingWithPlainString(t *testing.T) {
+	tpl := new(UrlTemplate)
+	tpl.UnmarshalJSON([]byte(`"http://localhost:7474/db/data/node/1/paged/traverse/"`))
+	s, err := tpl.Render(nil)
+	expected := "http://localhost:7474/db/data/node/1/paged/traverse/"
+	if err != nil {
+		t.Fatalf("Unexpected error: '%v'", err)
+	}
+
+	if s != expected {
+		t.Fatalf("Expected to render '%v', but got '%v'", expected, s)
+	}
+}
+
+func TestRenderingWithPlainStringAndArguments(t *testing.T) {
+	tpl := new(UrlTemplate)
+	tpl.UnmarshalJSON([]byte(`"http://localhost:7474/db/data/node/1/paged/traverse/"`))
+	s, err := tpl.Render(map[string]interface{}{"name": "test"})
+	expected := "http://localhost:7474/db/data/node/1/paged/traverse/"
+	if err != nil {
+		t.Fatalf("Unexpected error: '%v'", err)
+	}
+
+	if s != expected {
+		t.Fatalf("Expected to render '%v', but got '%v'", expected, s)
+	}
+}
+
+func TestRenderingWithPlainStringWithBatchArgument(t *testing.T) {
+	tpl := new(UrlTemplate)
+	tpl.UnmarshalJSON([]byte(`"{1}/paged/traverse/"`))
+	s, err := tpl.Render(nil)
+	expected := "{1}/paged/traverse/"
+	if err != nil {
+		t.Fatalf("Unexpected error: '%v'", err)
+	}
+
+	if s != expected {
+		t.Fatalf("Expected to render '%v', but got '%v'", expected, s)
+	}
+}
+
+func TestRenderingWithStringAndBatchArgument(t *testing.T) {
+	tpl := new(UrlTemplate)
+	tpl.UnmarshalJSON([]byte(`"{1}/paged/traverse/{returnType}{?pageSize,leaseTime}"`))
+	s, err := tpl.Render(map[string]interface{}{"returnType": "node", "leaseTime": "100"})
+	expected := "{1}/paged/traverse/node?leaseTime=100"
+	if err != nil {
+		t.Fatalf("Unexpected error: '%v'", err)
+	}
+
+	if s != expected {
+		t.Fatalf("Expected to render '%v', but got '%v'", expected, s)
+	}
+}
+
 func TestRenderingWithQueryParam(t *testing.T) {
 	tpl := new(UrlTemplate)
 	tpl.UnmarshalJSON([]byte(`"http://localhost:7474/db/data/node/1/paged/traverse/{returnType}{?pageSize,leaseTime}"`))

@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-var paramsRe, listParamRe *regexp.Regexp
+var paramsRe, listParamRe, batchParamRe *regexp.Regexp
 
 type urlParameter struct {
 	// Only used for list parameters.
@@ -30,6 +30,7 @@ type UrlTemplate struct {
 
 func NewUrlTemplate(url string) *UrlTemplate {
 	u := new(UrlTemplate)
+	u.sections = make([]interface{}, 0)
 	u.template = url
 	u.parse()
 	return u
@@ -37,9 +38,19 @@ func NewUrlTemplate(url string) *UrlTemplate {
 
 func (u *UrlTemplate) parse() {
 	indices := u.paramIndices()
+	if len(indices) == 0 {
+		u.sections = append(u.sections, [2]int{0, len(u.template)})
+		return
+	}
+
 	prevIndex := 0
 
 	for _, indexPair := range indices {
+		if batchParamRe.MatchString(u.template[indexPair[0]:indexPair[1]]) {
+			u.sections = append(u.sections, [2]int{indexPair[0], indexPair[1]})
+			prevIndex = indexPair[1]
+			continue
+		}
 		if indexPair[0] > prevIndex {
 			u.sections = append(u.sections, [2]int{prevIndex, indexPair[0]})
 		}
@@ -54,6 +65,9 @@ func (u *UrlTemplate) parse() {
 		} else {
 			u.parseNamedParams(s)
 		}
+	}
+	if prevIndex < len(u.template) {
+		u.sections = append(u.sections, [2]int{prevIndex, len(u.template)})
 	}
 }
 
@@ -167,6 +181,7 @@ func (u *UrlTemplate) UnmarshalJSON(data []byte) error {
 }
 
 func init() {
-	paramsRe = regexp.MustCompile("{[^}]+}")
+	paramsRe = regexp.MustCompile(`{[^}]+}`)
 	listParamRe = regexp.MustCompile(`^-list\|([^\|]+)\|([^\s]+)$`)
+	batchParamRe = regexp.MustCompile(`{[0-9]+}`)
 }
