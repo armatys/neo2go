@@ -147,7 +147,7 @@ type NeoIndex struct {
 func (n *NeoIndex) setBatchId(bid NeoBatchId) {
 	n.batchId = bid
 
-	setTemplateIfNil(&n.Template, fmt.Sprintf(`{%v}`, bid))
+	setTemplateIfNil(&n.Template, fmt.Sprintf(`{%v}/{key}/{value}`, bid))
 }
 
 type NeoCodeSnippet struct {
