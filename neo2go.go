@@ -132,22 +132,22 @@ func (g *GraphDatabaseService) SetPropertyForRelationship(rel *NeoRelationship, 
 	return g.executeFromRequestData(reqData)
 }
 
-func (g *GraphDatabaseService) GetRelationshipsForNode(node *NeoNode, direction NeoTraversalDirection) ([]*NeoRelationship, *NeoResponse) {
+func (g *GraphDatabaseService) GetRelationshipsForNode(node *NeoNode, direction NeoTraversalDirection) (*[]*NeoRelationship, *NeoResponse) {
 	result, reqData := g.builder.GetRelationshipsForNode(node, direction)
-	return *result, g.executeFromRequestData(reqData)
+	return result, g.executeFromRequestData(reqData)
 }
 
-func (g *GraphDatabaseService) GetRelationshipsWithTypesForNode(node *NeoNode, direction NeoTraversalDirection, relTypes []string) ([]*NeoRelationship, *NeoResponse) {
+func (g *GraphDatabaseService) GetRelationshipsWithTypesForNode(node *NeoNode, direction NeoTraversalDirection, relTypes []string) (*[]*NeoRelationship, *NeoResponse) {
 	result, reqData, err := g.builder.GetRelationshipsWithTypesForNode(node, direction, relTypes)
 	if err != nil {
-		return *result, NewLocalErrorResponse(reqData.expectedStatus, err)
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
-	return *result, g.executeFromRequestData(reqData)
+	return result, g.executeFromRequestData(reqData)
 }
 
-func (g *GraphDatabaseService) GetRelationshipTypes() ([]string, *NeoResponse) {
+func (g *GraphDatabaseService) GetRelationshipTypes() (*[]string, *NeoResponse) {
 	result, reqData := g.builder.GetRelationshipTypes()
-	return *result, g.executeFromRequestData(reqData)
+	return result, g.executeFromRequestData(reqData)
 }
 
 func (g *GraphDatabaseService) SetPropertyForNode(node *NeoNode, propertyKey string, propertyValue interface{}) *NeoResponse {
@@ -228,9 +228,9 @@ func (g *GraphDatabaseService) DeleteIndex(index *NeoIndex) *NeoResponse {
 }
 
 // 17.10.4
-func (g *GraphDatabaseService) GetNodeIndexes() (map[string]*NeoIndex, *NeoResponse) {
+func (g *GraphDatabaseService) GetNodeIndexes() (*map[string]*NeoIndex, *NeoResponse) {
 	result, reqData := g.builder.GetNodeIndexes()
-	return *result, g.executeFromRequestData(reqData)
+	return result, g.executeFromRequestData(reqData)
 }
 
 // 17.10.5
@@ -270,21 +270,21 @@ func (g *GraphDatabaseService) DeleteAllIndexEntriesForNodeKeyAndValue(index *Ne
 }
 
 // 17.10.9
-func (g *GraphDatabaseService) FindNodeByExactMatch(index *NeoIndex, key, value string) ([]*NeoNode, *NeoResponse) {
+func (g *GraphDatabaseService) FindNodeByExactMatch(index *NeoIndex, key, value string) (*[]*NeoNode, *NeoResponse) {
 	result, reqData, err := g.builder.FindNodeByExactMatch(index, key, value)
 	if err != nil {
-		return *result, NewLocalErrorResponse(reqData.expectedStatus, err)
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
-	return *result, g.executeFromRequestData(reqData)
+	return result, g.executeFromRequestData(reqData)
 }
 
 // 17.10.10
-func (g *GraphDatabaseService) FindNodeByQuery(index *NeoIndex, query string) ([]*NeoNode, *NeoResponse) {
+func (g *GraphDatabaseService) FindNodeByQuery(index *NeoIndex, query string) (*[]*NeoNode, *NeoResponse) {
 	result, reqData, err := g.builder.FindNodeByQuery(index, query)
 	if err != nil {
-		return *result, NewLocalErrorResponse(reqData.expectedStatus, err)
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
-	return *result, g.executeFromRequestData(reqData)
+	return result, g.executeFromRequestData(reqData)
 }
 
 // 17.10.1 - Relationships
@@ -300,9 +300,9 @@ func (g *GraphDatabaseService) CreateRelationshipIndexWithConfiguration(name str
 }
 
 // 17.10.4
-func (g *GraphDatabaseService) GetRelationshipIndexes() (map[string]*NeoIndex, *NeoResponse) {
+func (g *GraphDatabaseService) GetRelationshipIndexes() (*map[string]*NeoIndex, *NeoResponse) {
 	result, reqData := g.builder.GetRelationshipIndexes()
-	return *result, g.executeFromRequestData(reqData)
+	return result, g.executeFromRequestData(reqData)
 }
 
 // 17.10.5
@@ -342,21 +342,21 @@ func (g *GraphDatabaseService) DeleteAllIndexEntriesForRelationshipKeyAndValue(i
 }
 
 // 17.10.9
-func (g *GraphDatabaseService) FindRelationshipByExactMatch(index *NeoIndex, key, value string) ([]*NeoRelationship, *NeoResponse) {
+func (g *GraphDatabaseService) FindRelationshipByExactMatch(index *NeoIndex, key, value string) (*[]*NeoRelationship, *NeoResponse) {
 	result, reqData, err := g.builder.FindRelationshipByExactMatch(index, key, value)
 	if err != nil {
-		return *result, NewLocalErrorResponse(reqData.expectedStatus, err)
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
-	return *result, g.executeFromRequestData(reqData)
+	return result, g.executeFromRequestData(reqData)
 }
 
 // 17.10.10
-func (g *GraphDatabaseService) FindRelationshipByQuery(index *NeoIndex, query string) ([]*NeoRelationship, *NeoResponse) {
+func (g *GraphDatabaseService) FindRelationshipByQuery(index *NeoIndex, query string) (*[]*NeoRelationship, *NeoResponse) {
 	result, reqData, err := g.builder.FindRelationshipByQuery(index, query)
 	if err != nil {
-		return *result, NewLocalErrorResponse(reqData.expectedStatus, err)
+		return result, NewLocalErrorResponse(reqData.expectedStatus, err)
 	}
-	return *result, g.executeFromRequestData(reqData)
+	return result, g.executeFromRequestData(reqData)
 }
 
 // 17.11.1

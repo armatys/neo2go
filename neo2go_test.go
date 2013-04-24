@@ -241,8 +241,8 @@ func TestSimpleRelationships(t *testing.T) {
 		t.Fatalf("Could not get node relationships: %v", resp.NeoError.Error())
 	}
 
-	if len(rels) != 1 {
-		t.Fatalf("Expected to get 1-element array of relationships but got %d elements.", len(rels))
+	if len(*rels) != 1 {
+		t.Fatalf("Expected to get 1-element array of relationships but got %d elements.", len(*rels))
 	}
 
 	relTypes, resp := service.GetRelationshipTypes()
@@ -250,12 +250,12 @@ func TestSimpleRelationships(t *testing.T) {
 		t.Fatalf("Could not get relationship types: %v", resp.NeoError.Error())
 	}
 
-	if len(relTypes) < 2 {
-		t.Fatalf("Expected at least 2 relationship types, but got: %d", len(relTypes))
+	if len(*relTypes) < 2 {
+		t.Fatalf("Expected at least 2 relationship types, but got: %d", len(*relTypes))
 	}
 
-	if len(relTypes) != 2 {
-		t.Logf("Expected at 2 relationship types, but got: %d", len(relTypes))
+	if len(*relTypes) != 2 {
+		t.Logf("Expected at 2 relationship types, but got: %d", len(*relTypes))
 	}
 
 	resp = service.DeleteRelationship(rel1)
@@ -369,7 +369,7 @@ func TestCreateDeleteNodeIndex(t *testing.T) {
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Expected 200 response, but got error: %v", resp.NeoError)
 	}
-	if indexes[indexName] == nil {
+	if (*indexes)[indexName] == nil {
 		t.Fatalf("Expected to get a '%v' index but got nil.", indexName)
 	}
 
@@ -391,8 +391,8 @@ func TestFindExactNodeNoMatches(t *testing.T) {
 	nodes, resp := service.FindNodeByExactMatch(index, "name", "text-value")
 	checkResponseSucceeded(t, resp, 200)
 
-	if len(nodes) > 0 {
-		t.Fatalf("Expected to get 0 nodes but got %d", len(nodes))
+	if len(*nodes) > 0 {
+		t.Fatalf("Expected to get 0 nodes but got %d", len(*nodes))
 	}
 
 	resp = service.DeleteIndex(index)
@@ -420,8 +420,8 @@ func TestFindExactNodeMatches(t *testing.T) {
 	nodes, resp := service.FindNodeByExactMatch(index, "name", "text-value")
 	checkResponseSucceeded(t, resp, 200)
 
-	if len(nodes) != 1 {
-		t.Fatalf("Expected to get 1 nodes but got %d", len(nodes))
+	if len(*nodes) != 1 {
+		t.Fatalf("Expected to get 1 nodes but got %d", len(*nodes))
 	}
 
 	resp = service.DeleteIndex(index)
@@ -457,12 +457,12 @@ func TestCreateUniqueNode(t *testing.T) {
 	nodes, resp := service.FindNodeByExactMatch(index, "name", "text-value")
 	checkResponseSucceeded(t, resp, 200)
 
-	if len(nodes) != 1 {
-		t.Fatalf("Expected to get 1 nodes but got %d", len(nodes))
+	if len(*nodes) != 1 {
+		t.Fatalf("Expected to get 1 nodes but got %d", len(*nodes))
 	}
 
-	if nodes[0].Self.String() != createdNode.Self.String() {
-		t.Fatalf("Expected to get the same node but got (create) %v and (by exact match) %v", createdNode.Self.String(), nodes[0].Self.String())
+	if (*nodes)[0].Self.String() != createdNode.Self.String() {
+		t.Fatalf("Expected to get the same node but got (create) %v and (by exact match) %v", createdNode.Self.String(), (*nodes)[0].Self.String())
 	}
 
 	resp = service.DeleteIndex(index)
@@ -494,12 +494,12 @@ func TestCreateUniqueNodeOrFail(t *testing.T) {
 	nodes, resp := service.FindNodeByExactMatch(index, "name", "text-value")
 	checkResponseSucceeded(t, resp, 200)
 
-	if len(nodes) != 1 {
-		t.Fatalf("Expected to get 1 nodes but got %d", len(nodes))
+	if len(*nodes) != 1 {
+		t.Fatalf("Expected to get 1 nodes but got %d", len(*nodes))
 	}
 
-	if nodes[0].Self.String() != createdNode.Self.String() {
-		t.Fatalf("Expected to get the same node but got (create) %v and (by exact match) %v", createdNode.Self.String(), nodes[0].Self.String())
+	if (*nodes)[0].Self.String() != createdNode.Self.String() {
+		t.Fatalf("Expected to get the same node but got (create) %v and (by exact match) %v", createdNode.Self.String(), (*nodes)[0].Self.String())
 	}
 
 	resp = service.DeleteIndex(index)
@@ -525,7 +525,7 @@ func TestCreateDeleteRelationshipIndex(t *testing.T) {
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Expected 200 response, but got error: %v", resp.NeoError)
 	}
-	if indexes[indexName] == nil {
+	if (*indexes)[indexName] == nil {
 		t.Fatalf("Expected to get a '%v' index but got nil.", indexName)
 	}
 
@@ -551,8 +551,8 @@ func TestFindExactRelationshipNoMatches(t *testing.T) {
 	rels, resp := service.FindRelationshipByExactMatch(index, "name", "text-value")
 	checkResponseSucceeded(t, resp, 200)
 
-	if len(rels) > 0 {
-		t.Fatalf("Expected to get 0 nodes but got %d", len(rels))
+	if len(*rels) > 0 {
+		t.Fatalf("Expected to get 0 nodes but got %d", len(*rels))
 	}
 
 	resp = service.DeleteIndex(index)
@@ -588,8 +588,8 @@ func TestFindExactRelationshipMatches(t *testing.T) {
 	rels, resp := service.FindRelationshipByExactMatch(index, "name", "text-value")
 	checkResponseSucceeded(t, resp, 200)
 
-	if len(rels) != 1 {
-		t.Fatalf("Expected to get 1 relationships but got %d", len(rels))
+	if len(*rels) != 1 {
+		t.Fatalf("Expected to get 1 relationships but got %d", len(*rels))
 	}
 
 	resp = service.DeleteIndex(index)
@@ -637,12 +637,12 @@ func TestCreateUniqueRelationship(t *testing.T) {
 	rels, resp := service.FindRelationshipByExactMatch(index, "name", "text-value")
 	checkResponseSucceeded(t, resp, 200)
 
-	if len(rels) != 1 {
-		t.Fatalf("Expected to get 1 relationships but got %d", len(rels))
+	if len(*rels) != 1 {
+		t.Fatalf("Expected to get 1 relationships but got %d", len(*rels))
 	}
 
-	if rels[0].Self.String() != createdRel.Self.String() {
-		t.Fatalf("Expected to get the same rel but got (create) %v and (by exact match) %v", createdRel.Self.String(), rels[0].Self.String())
+	if (*rels)[0].Self.String() != createdRel.Self.String() {
+		t.Fatalf("Expected to get the same rel but got (create) %v and (by exact match) %v", createdRel.Self.String(), (*rels)[0].Self.String())
 	}
 
 	resp = service.DeleteIndex(index)
@@ -686,12 +686,12 @@ func TestCreateUniqueRelationshipOrFail(t *testing.T) {
 	rels, resp := service.FindRelationshipByExactMatch(index, "name", "text-value")
 	checkResponseSucceeded(t, resp, 200)
 
-	if len(rels) != 1 {
-		t.Fatalf("Expected to get 1 relationships but got %d", len(rels))
+	if len(*rels) != 1 {
+		t.Fatalf("Expected to get 1 relationships but got %d", len(*rels))
 	}
 
-	if rels[0].Self.String() != createdRel.Self.String() {
-		t.Fatalf("Expected to get the same rel but got (create) %v and (by exact match) %v", createdRel.Self.String(), rels[0].Self.String())
+	if (*rels)[0].Self.String() != createdRel.Self.String() {
+		t.Fatalf("Expected to get the same rel but got (create) %v and (by exact match) %v", createdRel.Self.String(), (*rels)[0].Self.String())
 	}
 
 	resp = service.DeleteIndex(index)

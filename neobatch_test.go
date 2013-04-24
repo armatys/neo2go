@@ -109,3 +109,31 @@ func TestBatchDeleteNonExistentAndCreate(t *testing.T) {
 		t.Fatalf("Batch did return an error: %v", resp.NeoError)
 	}
 }
+
+func TestBatchGetNodeIndexes(t *testing.T) {
+	service := NewGraphDatabaseService()
+	resp := service.Connect(databaseAddress)
+	if !responseHasSucceededWithCode(resp, 200) {
+		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
+	}
+
+	batch := service.Batch()
+
+	index, _ := batch.CreateNodeIndex("test")
+	indexMap, _ := batch.GetNodeIndexes()
+
+	resp = batch.Commit()
+
+	if !responseHasSucceededWithCode(resp, 200) {
+		t.Fatalf("Batch did return an error (%d; %v): %v", resp.StatusCode, resp.Ok(), resp.NeoError)
+	}
+
+	if len(*indexMap) < 1 {
+		t.Fatalf("Excepted to get at least 1 index, but got %d: %v", len(*indexMap), *indexMap)
+	}
+
+	resp = service.DeleteIndex(index)
+	if !responseHasSucceededWithCode(resp, 204) {
+		t.Fatalf("Could not delete the index [%d]: %v", resp.StatusCode, resp.NeoError)
+	}
+}

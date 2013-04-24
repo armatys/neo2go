@@ -63,13 +63,13 @@ type Grapher interface {
 	// Relationship for nodes
 
 	// 17.6.9 - 17.6.11
-	GetRelationshipsForNode(node *NeoNode, direction NeoTraversalDirection) ([]*NeoRelationship, *NeoResponse)
+	GetRelationshipsForNode(node *NeoNode, direction NeoTraversalDirection) (*[]*NeoRelationship, *NeoResponse)
 	// 17.6.12
-	GetRelationshipsWithTypesForNode(node *NeoNode, direction NeoTraversalDirection, relTypes []string) ([]*NeoRelationship, *NeoResponse)
+	GetRelationshipsWithTypesForNode(node *NeoNode, direction NeoTraversalDirection, relTypes []string) (*[]*NeoRelationship, *NeoResponse)
 
 	// ==============
 	// Others
 
 	// 17.7.1
-	GetRelationshipTypes() ([]string, *NeoResponse)
+	GetRelationshipTypes() (*[]string, *NeoResponse)
 }

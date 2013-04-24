@@ -95,6 +95,10 @@ func (n *NeoNode) setBatchId(bid NeoBatchId) {
 	setTemplateIfNil(&n.Traverse, fmt.Sprintf(`{%v}/traverse/{returnType}`, bid))
 }
 
+func (n *NeoNode) String() string {
+	return fmt.Sprintf("<Node id:%d>", n.Id())
+}
+
 type NeoRelationship struct {
 	Data       interface{}
 	Extensions map[string]interface{}
