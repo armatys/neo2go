@@ -42,7 +42,7 @@ type NeoNode struct {
 	AllRelationships           *UrlTemplate           `json:"all_relationships"`
 	AllTypedRelationships      *UrlTemplate           `json:"all_typed_relationships"`
 	CreateRelationship         *UrlTemplate           `json:"create_relationship"`
-	Data                       interface{}            `json:"data"`
+	Data                       map[string]interface{} `json:"data"`
 	Extensions                 map[string]interface{} `json:"extensions"`
 	IncomingRelationships      *UrlTemplate           `json:"incoming_relationships"`
 	IncomingTypedRelationships *UrlTemplate           `json:"incoming_typed_relationships"`
@@ -100,7 +100,7 @@ func (n *NeoNode) String() string {
 }
 
 type NeoRelationship struct {
-	Data       interface{}
+	Data       map[string]interface{}
 	Extensions map[string]interface{}
 	Start      *UrlTemplate
 	Property   *UrlTemplate
