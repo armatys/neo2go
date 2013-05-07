@@ -302,13 +302,9 @@ func TestSimpleRelationships2(t *testing.T) {
 		t.Fatalf("Expected 200 code but got: %d", resp.StatusCode)
 	}
 
-	if v, ok := rel.Data.(map[string]interface{}); ok {
-		expected := "two"
-		if v["one"] != expected {
-			t.Fatalf("Expected the property value to be `%v`, but got: `%v`", expected, v["one"])
-		}
-	} else {
-		t.Fatalf("Could not convert properties to map[string]string")
+	expected := "two"
+	if rel.Data["one"] != expected {
+		t.Fatalf("Expected the property value to be `%v`, but got: `%v`", expected, rel.Data["one"])
 	}
 
 	resp = service.ReplacePropertiesForRelationship(rel, &map[string]string{"three": "four"})
@@ -321,7 +317,7 @@ func TestSimpleRelationships2(t *testing.T) {
 	if !resp.Ok() {
 		t.Fatalf("Error getting relationship properties: %v", resp.NeoError.Error())
 	}
-	expected := "four"
+	expected = "four"
 	if props["three"] != expected {
 		t.Fatalf("Expected the property value to be `%v`, but got: `%v`", expected, props["three"])
 	}
@@ -1030,30 +1026,29 @@ func TestPagedTraverseByNodes(t *testing.T) {
 	traversal.MaxDepth = 5
 	traversal.ReturnFilter = NewNeoReturnFilterAllButStartNode()
 
-	// TODO paged traversal seems not supported, when used with streaming
-	// traversal.PageSize = 1
-	// _, _, resp = service.TraverseByNodesWithPaging(traversal, start)
-	// if !resp.Ok() || resp.StatusCode != 200 {
-	// 	t.Errorf("Unexpected server response (%d): %v", resp.StatusCode, resp.NeoError)
-	// }
+	traversal.PageSize = 1
+	traverser, nodes, resp := service.TraverseByNodesWithPaging(traversal, start)
+	if resp.Ok() && resp.StatusCode == 200 {
+		if len(nodes) != 1 {
+			t.Fatalf("Expected to get just 1 node, but got %d", len(nodes))
+		}
 
-	// if len(nodes) != 1 {
-	// 	t.Errorf("Expected to get just 1 node, but got %d", len(nodes))
-	// }
+		nodes, resp = service.TraverseByNodesGetNextPage(traverser)
+		if !resp.Ok() || resp.StatusCode != 200 {
+			t.Fatalf("Unexpected server response (%d): %v", resp.StatusCode, resp.NeoError)
+		}
 
-	// nodes, resp = service.TraverseByNodesGetNextPage(traverser)
-	// if !resp.Ok() || resp.StatusCode != 200 {
-	// 	t.Errorf("Unexpected server response (%d): %v", resp.StatusCode, resp.NeoError)
-	// }
+		if len(nodes) != 1 {
+			t.Fatalf("Expected to get just 1 node, but got %d", len(nodes))
+		}
 
-	// if len(nodes) != 1 {
-	// 	t.Errorf("Expected to get just 1 node, but got %d", len(nodes))
-	// }
-
-	// nodes, resp = service.TraverseByNodesGetNextPage(traverser)
-	// if resp.Ok() || resp.StatusCode != 404 {
-	// 	t.Errorf("Unexpected server response (%d): %v", resp.StatusCode, resp.NeoError)
-	// }
+		nodes, resp = service.TraverseByNodesGetNextPage(traverser)
+		if resp.Ok() || resp.StatusCode != 404 {
+			t.Fatalf("Unexpected server response (%d): %v", resp.StatusCode, resp.NeoError)
+		}
+	} else {
+		t.Errorf("Unexpected server response (%d): %v", resp.StatusCode, resp.NeoError)
+	}
 
 	resp = service.DeleteRelationship(rel1)
 	checkResponseSucceeded(t, resp, 204)

@@ -137,3 +137,42 @@ func TestBatchGetNodeIndexes(t *testing.T) {
 		t.Fatalf("Could not delete the index [%d]: %v", resp.StatusCode, resp.NeoError)
 	}
 }
+
+func TestBatchSetNodeProperty(t *testing.T) {
+	service := NewGraphDatabaseService()
+	resp := service.Connect(databaseAddress)
+	if !responseHasSucceededWithCode(resp, 200) {
+		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
+	}
+
+	v1, v2 := "John", "Alice"
+	node, resp := service.CreateNodeWithProperties(map[string]string{"name": v1})
+	if !responseHasSucceededWithCode(resp, 201) {
+		t.Fatalf("Cannot create node (%d; %v): %v", resp.StatusCode, resp.Ok(), resp.NeoError)
+	}
+
+	if v, ok := node.Data["name"].(string); ok {
+		if v != v1 {
+			t.Fatalf("Invalid node property value: expected %v but got %v.")
+		}
+	} else {
+		t.Fatalf("Invalid node property value: cannot convert to string (%v)", node.Data["name"])
+	}
+
+	batch := service.Batch()
+	node2, _ := batch.GetNode(node.Self.String())
+	batch.SetPropertyForNode(node2, "name", v2)
+	resp = batch.Commit()
+
+	if !responseHasSucceededWithCode(resp, 200) {
+		t.Fatalf("Batch did return an error (%d; %v): %v", resp.StatusCode, resp.Ok(), resp.NeoError)
+	}
+
+	if v, ok := node2.Data["name"].(string); ok {
+		if v != v1 {
+			t.Fatalf("Invalid node2 property value: expected %v but got %v.")
+		}
+	} else {
+		t.Fatalf("Invalid node2 property value: cannot convert to string (%v)", node2.Data["name"])
+	}
+}
