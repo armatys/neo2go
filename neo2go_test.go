@@ -302,9 +302,14 @@ func TestSimpleRelationships2(t *testing.T) {
 		t.Fatalf("Expected 200 code but got: %d", resp.StatusCode)
 	}
 
+	var data map[string]interface{}
+	if err := rel.ParseData(&data); err != nil {
+		t.Fatalf("Expected to get a map[string]interface{}, but could not convert")
+	}
+
 	expected := "two"
-	if rel.Data["one"] != expected {
-		t.Fatalf("Expected the property value to be `%v`, but got: `%v`", expected, rel.Data["one"])
+	if data["one"] != expected {
+		t.Fatalf("Expected the property value to be `%v`, but got: `%v`", expected, data["one"])
 	}
 
 	resp = service.ReplacePropertiesForRelationship(rel, &map[string]string{"three": "four"})

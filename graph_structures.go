@@ -1,6 +1,7 @@
 package neo2go
 
 import (
+	"encoding/json"
 	"fmt"
 	"path"
 	"strconv"
@@ -56,6 +57,14 @@ type NeoNode struct {
 	batchId                    NeoBatchId
 }
 
+func (n *NeoNode) ParseData(result interface{}) error {
+	bytes, err := json.Marshal(n.Data)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(bytes, result)
+}
+
 func (n *NeoNode) Id() int64 {
 	if n.Self != nil {
 		selfUri := n.Self.String()
@@ -100,15 +109,23 @@ func (n *NeoNode) String() string {
 }
 
 type NeoRelationship struct {
-	Data       map[string]interface{}
-	Extensions map[string]interface{}
-	Start      *UrlTemplate
-	Property   *UrlTemplate
-	Self       *UrlTemplate
-	Properties *UrlTemplate
-	Type       string
-	End        *UrlTemplate
+	Data       map[string]interface{} `json:"data"`
+	Extensions map[string]interface{} `json:"extensions"`
+	Start      *UrlTemplate           `json:"start"`
+	Property   *UrlTemplate           `json:"property"`
+	Self       *UrlTemplate           `json:"self"`
+	Properties *UrlTemplate           `json:"properties"`
+	Type       string                 `json:"type"`
+	End        *UrlTemplate           `json:"end"`
 	batchId    NeoBatchId
+}
+
+func (n *NeoRelationship) ParseData(result interface{}) error {
+	bytes, err := json.Marshal(n.Data)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(bytes, result)
 }
 
 func (n *NeoRelationship) Id() int64 {

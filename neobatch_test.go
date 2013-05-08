@@ -151,12 +151,17 @@ func TestBatchSetNodeProperty(t *testing.T) {
 		t.Fatalf("Cannot create node (%d; %v): %v", resp.StatusCode, resp.Ok(), resp.NeoError)
 	}
 
-	if v, ok := node.Data["name"].(string); ok {
+	var data map[string]interface{}
+	if err := node.ParseData(&data); err != nil {
+		t.Fatalf("Expected to get a map[string]interface{}, but could not convert")
+	}
+
+	if v, ok := data["name"].(string); ok {
 		if v != v1 {
 			t.Fatalf("Invalid node property value: expected %v but got %v.")
 		}
 	} else {
-		t.Fatalf("Invalid node property value: cannot convert to string (%v)", node.Data["name"])
+		t.Fatalf("Invalid node property value: cannot convert to string (%v)", data["name"])
 	}
 
 	batch := service.Batch()
@@ -168,11 +173,16 @@ func TestBatchSetNodeProperty(t *testing.T) {
 		t.Fatalf("Batch did return an error (%d; %v): %v", resp.StatusCode, resp.Ok(), resp.NeoError)
 	}
 
-	if v, ok := node2.Data["name"].(string); ok {
+	var data2 map[string]interface{}
+	if err := node2.ParseData(&data2); err != nil {
+		t.Fatalf("Expected to get a map[string]interface{}, but could not convert")
+	}
+
+	if v, ok := data2["name"].(string); ok {
 		if v != v1 {
 			t.Fatalf("Invalid node2 property value: expected %v but got %v.")
 		}
 	} else {
-		t.Fatalf("Invalid node2 property value: cannot convert to string (%v)", node2.Data["name"])
+		t.Fatalf("Invalid node2 property value: cannot convert to string (%v)", data2["name"])
 	}
 }
