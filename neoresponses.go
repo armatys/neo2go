@@ -1,13 +1,25 @@
 package neo2go
 
 type NeoError struct {
-	Message    string   `json:"message"`
-	Exception  string   `json:"exception"`
-	Stacktrace []string `json:"stacktrace"`
+	Message    string `json:"message"`
+	Exception  string `json:"exception"`
+	Stacktrace string `json:"stacktrace"`
 }
 
 func (n *NeoError) Error() string {
 	return n.Message
+}
+
+type NeoErrors struct {
+	Errors []NeoError `json:"errors"`
+}
+
+func (n *NeoErrors) Error() string {
+	s := ""
+	for _, n := range n.Errors {
+		s = s + " " + n.Error()
+	}
+	return s
 }
 
 type NeoResponse struct {
@@ -32,15 +44,24 @@ func (n *NeoResponse) Created() bool {
 	return n.StatusCode == 201
 }
 
-type NeoServiceRoot struct {
-	Node              *UrlTemplate `json:"node"`
-	ReferenceNode     *UrlTemplate `json:"reference_node"`
-	NodeIndex         *UrlTemplate `json:"node_index"`
-	RelationshipIndex *UrlTemplate `json:"relationship_index"`
+type NeoRoot struct {
+	Management *UrlTemplate `json:"management"`
+	Data       *UrlTemplate `json:"data"`
+}
+
+type NeoDataRoot struct {
+	Extensions        *UrlTemplate `json:"extensions"`
 	ExtensionsInfo    *UrlTemplate `json:"extensions_info"`
+	Node              *UrlTemplate `json:"node"`
+	NodeIndex         *UrlTemplate `json:"node_index"`
+	NodeLabels        *UrlTemplate `json:"node_labels"`
+	RelationshipIndex *UrlTemplate `json:"relationship_index"`
 	RelationshipTypes *UrlTemplate `json:"relationship_types"`
 	Batch             *UrlTemplate `json:"batch"`
 	Cypher            *UrlTemplate `json:"cypher"`
+	Indexes           *UrlTemplate `json:"indexes"`
+	Constraints       *UrlTemplate `json:"constraints"`
+	Transaction       *UrlTemplate `json:"transaction"`
 	Neo4jVersion      string       `json:"neo4j_version"`
 }
 

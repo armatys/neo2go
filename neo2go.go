@@ -2,6 +2,7 @@ package neo2go
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -24,9 +25,10 @@ func init() {
 }
 
 type GraphDatabaseService struct {
-	client         *http.Client
-	builder        *neoRequestBuilder
-	maxConnChannel chan int
+	client           *http.Client
+	builder          *neoRequestBuilder
+	maxConnChannel   chan int
+	basicAuthPayload string
 }
 
 func NewGraphDatabaseService() *GraphDatabaseService {
@@ -36,19 +38,36 @@ func NewGraphDatabaseService() *GraphDatabaseService {
 func NewGraphDatabaseServiceWithMaxConn(maxConn uint) *GraphDatabaseService {
 	service := GraphDatabaseService{
 		client:         &http.Client{},
-		builder:        &neoRequestBuilder{new(NeoServiceRoot), &UrlTemplate{}},
+		builder:        &neoRequestBuilder{root: &NeoRoot{}, dataRoot: &NeoDataRoot{}, self: &UrlTemplate{}},
 		maxConnChannel: make(chan int, maxConn),
 	}
 	return &service
 }
 
-func (g *GraphDatabaseService) Connect(url string) *NeoResponse {
-	g.builder.self.template = url
-	g.builder.self.parse()
+func (g *GraphDatabaseService) SetBasicAuth(username, password string) {
+	g.basicAuthPayload = base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
+}
 
-	reqData := g.builder.Connect()
-	req, err := g.httpRequestFromData(reqData)
-	return g.execute_(req, err, reqData.expectedStatus, reqData.result, false)
+func (g *GraphDatabaseService) Connect(url string) *NeoResponse {
+	if g.builder.root.Data == nil {
+		g.builder.self.template = url
+		g.builder.self.parse()
+
+		reqData := g.builder.getRoot()
+		req, err := g.httpRequestFromData(reqData)
+		res := g.execute_(req, err, reqData.expectedStatus, reqData.result, false)
+		if !res.Ok() {
+			return res
+		}
+	}
+
+	if g.builder.dataRoot.Neo4jVersion == "" {
+		reqData := g.builder.getDataRoot()
+		req, err := g.httpRequestFromData(reqData)
+		return g.execute_(req, err, reqData.expectedStatus, reqData.result, false)
+	}
+
+	return &NeoResponse{ExpectedCode: 200, StatusCode: 200}
 }
 
 func (g *GraphDatabaseService) Batch() *NeoBatch {
@@ -579,12 +598,16 @@ func (g *GraphDatabaseService) execute(neoRequest *NeoHttpRequest, neoRequestErr
 // If the returned NeoResponse.StatuCode contains a 6xx, it means there was a local error
 // while processing the request or response.
 func (g *GraphDatabaseService) execute_(neoRequest *NeoHttpRequest, neoRequestErr error, expectedStatusCode int, result interface{}, connRequired bool) *NeoResponse {
-	if connRequired && len(g.builder.root.Neo4jVersion) == 0 {
+	if connRequired && (g.builder.root.Data == nil || g.builder.dataRoot.Neo4jVersion == "") {
 		return NewLocalErrorResponse(expectedStatusCode, fmt.Errorf("Cannot execute the request because the client is not connected."))
 	}
 
 	if neoRequestErr != nil {
 		return NewLocalErrorResponse(expectedStatusCode, neoRequestErr)
+	}
+
+	if g.basicAuthPayload != "" {
+		neoRequest.Request.Header.Set("Authorization", "Basic "+g.basicAuthPayload)
 	}
 
 	g.maxConnChannel <- 1
@@ -605,7 +628,7 @@ func (g *GraphDatabaseService) execute_(neoRequest *NeoHttpRequest, neoRequestEr
 		neoResponse.location = locationUrl.String()
 	}
 	if resp.StatusCode >= 400 {
-		neoErr := &NeoError{}
+		neoErr := &NeoErrors{}
 		container = neoErr
 		neoResponse.NeoError = neoErr
 	} else {

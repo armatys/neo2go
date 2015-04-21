@@ -456,7 +456,7 @@ func (n *NeoBatch) Commit() *NeoResponse {
 	}
 
 	elements := make([]*neoBatchElement, len(n.requests))
-	baseUrlLength := len(n.service.builder.self.String()) - 1
+	baseUrlLength := len(n.service.builder.root.Data.String())
 	for i, reqData := range n.requests {
 		batchElem := new(neoBatchElement)
 		batchElem.Body = reqData.body
@@ -465,8 +465,8 @@ func (n *NeoBatch) Commit() *NeoResponse {
 
 		if matches := batchIdRegExp.MatchString(reqData.requestUrl); matches {
 			batchElem.To = reqData.requestUrl
-		} else if len(reqData.requestUrl) >= baseUrlLength {
-			batchElem.To = reqData.requestUrl[baseUrlLength:]
+		} else if len(reqData.requestUrl) >= baseUrlLength-1 {
+			batchElem.To = reqData.requestUrl[baseUrlLength-1:]
 		} else {
 			return NewLocalErrorResponse(expectedStatus, fmt.Errorf("Unknown/badly formatted url: %v", reqData.requestUrl))
 		}
@@ -487,7 +487,7 @@ func (n *NeoBatch) Commit() *NeoResponse {
 		results[i] = resultElem
 	}
 
-	neoRequest, err := NewNeoHttpRequest("POST", n.service.builder.root.Batch.String(), bodyBuf)
+	neoRequest, err := NewNeoHttpRequest("POST", n.service.builder.dataRoot.Batch.String(), bodyBuf)
 	neoResponse := n.service.execute(neoRequest, err, 200, &results)
 
 	for i, resultElem := range results {

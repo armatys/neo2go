@@ -5,7 +5,7 @@ import (
 )
 
 func TestEmptyBatchShouldFail(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
@@ -20,7 +20,7 @@ func TestEmptyBatchShouldFail(t *testing.T) {
 }
 
 func TestBatchCreateDelete(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
@@ -50,7 +50,7 @@ func TestBatchCreateDelete(t *testing.T) {
 }
 
 func TestBatchCreateThenDelete(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
@@ -84,7 +84,7 @@ func TestBatchCreateThenDelete(t *testing.T) {
 }
 
 func TestBatchDeleteNonExistentAndCreate(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
@@ -111,7 +111,7 @@ func TestBatchDeleteNonExistentAndCreate(t *testing.T) {
 }
 
 func TestBatchGetNodeIndexes(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
@@ -139,7 +139,7 @@ func TestBatchGetNodeIndexes(t *testing.T) {
 }
 
 func TestBatchSetNodeProperty(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())

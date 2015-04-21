@@ -6,8 +6,9 @@ import (
 )
 
 type neoRequestBuilder struct {
-	root *NeoServiceRoot
-	self *UrlTemplate
+	root     *NeoRoot
+	dataRoot *NeoDataRoot
+	self     *UrlTemplate
 }
 
 type neoRequestData struct {
@@ -30,8 +31,12 @@ func (n *neoRequestBuilder) SelfReference() string {
 	return ""
 }
 
-func (n *neoRequestBuilder) Connect() *neoRequestData {
+func (n *neoRequestBuilder) getRoot() *neoRequestData {
 	return &neoRequestData{expectedStatus: 200, method: "GET", result: n.root, requestUrl: n.SelfReference()}
+}
+
+func (n *neoRequestBuilder) getDataRoot() *neoRequestData {
+	return &neoRequestData{expectedStatus: 200, method: "GET", result: n.dataRoot, requestUrl: n.root.Data.String()}
 }
 
 func (n *neoRequestBuilder) Cypher(cql string, params map[string]interface{}) (*CypherResponse, *neoRequestData) {
@@ -40,7 +45,7 @@ func (n *neoRequestBuilder) Cypher(cql string, params map[string]interface{}) (*
 		"params": params,
 	}
 
-	url := n.root.Cypher.String()
+	url := n.dataRoot.Cypher.String()
 	cypherResp := new(CypherResponse)
 	requestData := neoRequestData{body: &bodyMap, expectedStatus: 200, method: "POST", result: cypherResp, requestUrl: url}
 	return cypherResp, &requestData
@@ -54,7 +59,7 @@ func (n *neoRequestBuilder) CreateNode() (*NeoNode, *neoRequestData) {
 
 func (n *neoRequestBuilder) CreateNodeWithProperties(properties interface{}) (*NeoNode, *neoRequestData) {
 	node := new(NeoNode)
-	url := n.root.Node.String()
+	url := n.dataRoot.Node.String()
 	requestData := neoRequestData{body: properties, expectedStatus: 201, method: "POST", result: node, requestUrl: url}
 	return node, &requestData
 }
@@ -189,7 +194,7 @@ func (n *neoRequestBuilder) GetRelationshipsWithTypesForNode(node *NeoNode, dire
 
 func (n *neoRequestBuilder) GetRelationshipTypes() (*[]string, *neoRequestData) {
 	var relTypes []string
-	url := n.root.RelationshipTypes.String()
+	url := n.dataRoot.RelationshipTypes.String()
 	requestData := neoRequestData{expectedStatus: 200, method: "GET", result: &relTypes, requestUrl: url}
 	return &relTypes, &requestData
 }
@@ -253,7 +258,7 @@ func (n *neoRequestBuilder) DeletePropertyWithKeyForRelationship(rel *NeoRelatio
 
 func (n *neoRequestBuilder) createNodeIndexHelper(params map[string]interface{}) (*NeoIndex, *neoRequestData) {
 	var index *NeoIndex = new(NeoIndex)
-	url := n.root.NodeIndex.String()
+	url := n.dataRoot.NodeIndex.String()
 	return index, &neoRequestData{body: params, expectedStatus: 201, method: "POST", result: index, requestUrl: url}
 }
 
@@ -277,7 +282,7 @@ func (n *neoRequestBuilder) DeleteIndex(index *NeoIndex) (*neoRequestData, error
 
 func (n *neoRequestBuilder) GetNodeIndexes() (*map[string]*NeoIndex, *neoRequestData) {
 	var result map[string]*NeoIndex
-	url := n.root.NodeIndex.String()
+	url := n.dataRoot.NodeIndex.String()
 	return &result, &neoRequestData{expectedStatus: 200, method: "GET", result: &result, requestUrl: url}
 }
 
@@ -337,7 +342,7 @@ func (n *neoRequestBuilder) FindNodeByQuery(index *NeoIndex, query string) (*[]*
 
 func (n *neoRequestBuilder) createRelationshipIndexHelper(params map[string]interface{}) (*NeoIndex, *neoRequestData) {
 	var index *NeoIndex = new(NeoIndex)
-	url := n.root.RelationshipIndex.String()
+	url := n.dataRoot.RelationshipIndex.String()
 	return index, &neoRequestData{body: params, expectedStatus: 201, method: "POST", result: index, requestUrl: url}
 }
 
@@ -353,7 +358,7 @@ func (n *neoRequestBuilder) CreateRelationshipIndexWithConfiguration(name string
 
 func (n *neoRequestBuilder) GetRelationshipIndexes() (*map[string]*NeoIndex, *neoRequestData) {
 	var result map[string]*NeoIndex
-	url := n.root.RelationshipIndex.String()
+	url := n.dataRoot.RelationshipIndex.String()
 	return &result, &neoRequestData{expectedStatus: 200, method: "GET", result: &result, requestUrl: url}
 }
 

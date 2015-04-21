@@ -1,16 +1,23 @@
 package neo2go
 
 import (
-	"fmt"
+	"flag"
 	"testing"
 )
 
-var _ = fmt.Println
-
 const (
-	databaseAddress                = "http://localhost:7474/db/data/"
-	databaseAddressWithInvalidPort = "http://localhost:38479/db/data/"
+	databaseAddress                = "http://localhost:7474"
+	databaseAddressWithInvalidPort = "http://localhost:38479"
 )
+
+var neo4jUsername string
+var neo4jPassword string
+
+func init() {
+	flag.StringVar(&neo4jUsername, "username", "", "Neo4j username")
+	flag.StringVar(&neo4jPassword, "password", "", "Neo4j password")
+	flag.Parse()
+}
 
 func responseHasSucceededWithCode(resp *NeoResponse, expectedStatus int) bool {
 	return ((resp.StatusCode == expectedStatus) == resp.Ok()) && resp.Ok()
@@ -26,19 +33,25 @@ func checkResponseSucceeded(t *testing.T, resp *NeoResponse, expectedStatus int)
 	}
 }
 
+func getDefaultDb() *GraphDatabaseService {
+	defaultNeoService := NewGraphDatabaseService()
+	defaultNeoService.SetBasicAuth(neo4jUsername, neo4jPassword)
+	return defaultNeoService
+}
+
 func TestConnecting(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
 	}
-	if len(service.builder.root.Neo4jVersion) == 0 {
+	if len(service.builder.dataRoot.Neo4jVersion) == 0 {
 		t.Fatalf("Expected to receive neo4j version identifier.")
 	}
 }
 
 func TestConnectingConnectionRefused(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddressWithInvalidPort)
 	if resp.NeoError == nil {
 		t.Fatalf("Connection succeeded, but should not.")
@@ -46,7 +59,7 @@ func TestConnectingConnectionRefused(t *testing.T) {
 }
 
 func TestCreateNodeWithoutConnecting(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 
 	_, resp := service.GetNode(databaseAddress + "node/1")
 	if !responseHasFailedWithCode(resp, 600) {
@@ -55,7 +68,7 @@ func TestCreateNodeWithoutConnecting(t *testing.T) {
 }
 
 func TestCreateGetDeleteNode(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
@@ -83,7 +96,7 @@ func TestCreateGetDeleteNode(t *testing.T) {
 }
 
 func TestCreateNodeWithProperties(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
@@ -111,27 +124,27 @@ func TestCreateNodeWithProperties(t *testing.T) {
 }
 
 func TestSimpleCypherQueryFail(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
 	}
 
-	_, resp = service.Cypher("START x = node(186) RETURN x.dummy", nil)
+	_, resp = service.Cypher("START x = node(28759287) RETURN x.dummy", nil)
 	if !responseHasFailedWithCode(resp, 400) {
 		t.Fatalf("Expected the cypher query to fail, but the status code was %d", resp.StatusCode)
 	}
 }
 
 func TestDeleteNonExistendNode(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
 	}
 
 	node := new(NeoNode)
-	node.Self = NewUrlTemplate(databaseAddress + "node/909090")
+	node.Self = NewUrlTemplate(service.builder.root.Data.String() + "node/909090")
 
 	resp = service.DeleteNode(node)
 	if !responseHasFailedWithCode(resp, 404) {
@@ -140,7 +153,7 @@ func TestDeleteNonExistendNode(t *testing.T) {
 }
 
 func TestSimpleCypherQuery(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
@@ -182,7 +195,7 @@ func TestSimpleCypherQuery(t *testing.T) {
 }
 
 func TestSimpleRelationships(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
@@ -277,7 +290,7 @@ func TestSimpleRelationships(t *testing.T) {
 }
 
 func TestSimpleRelationships2(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
@@ -355,7 +368,7 @@ func TestSimpleRelationships2(t *testing.T) {
 }
 
 func TestCreateDeleteNodeIndex(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
@@ -381,7 +394,7 @@ func TestCreateDeleteNodeIndex(t *testing.T) {
 }
 
 func TestFindExactNodeNoMatches(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	checkResponseSucceeded(t, resp, 200)
 
@@ -401,7 +414,7 @@ func TestFindExactNodeNoMatches(t *testing.T) {
 }
 
 func TestFindExactNodeMatches(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	checkResponseSucceeded(t, resp, 200)
 
@@ -433,7 +446,7 @@ func TestFindExactNodeMatches(t *testing.T) {
 }
 
 func TestCreateUniqueNode(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	checkResponseSucceeded(t, resp, 200)
 
@@ -474,7 +487,7 @@ func TestCreateUniqueNode(t *testing.T) {
 }
 
 func TestCreateUniqueNodeOrFail(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	checkResponseSucceeded(t, resp, 200)
 
@@ -511,7 +524,7 @@ func TestCreateUniqueNodeOrFail(t *testing.T) {
 }
 
 func TestCreateDeleteRelationshipIndex(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
@@ -537,7 +550,7 @@ func TestCreateDeleteRelationshipIndex(t *testing.T) {
 }
 
 func TestFindExactRelationshipNoMatches(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
@@ -563,7 +576,7 @@ func TestFindExactRelationshipNoMatches(t *testing.T) {
 }
 
 func TestFindExactRelationshipMatches(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	checkResponseSucceeded(t, resp, 200)
 
@@ -607,7 +620,7 @@ func TestFindExactRelationshipMatches(t *testing.T) {
 }
 
 func TestCreateUniqueRelationship(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	checkResponseSucceeded(t, resp, 200)
 
@@ -660,7 +673,7 @@ func TestCreateUniqueRelationship(t *testing.T) {
 }
 
 func TestCreateUniqueRelationshipOrFail(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	checkResponseSucceeded(t, resp, 200)
 
@@ -709,7 +722,7 @@ func TestCreateUniqueRelationshipOrFail(t *testing.T) {
 }
 
 func TestPathFinder(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
@@ -751,7 +764,7 @@ func TestPathFinder(t *testing.T) {
 }
 
 func TestPathsFinder(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
@@ -801,7 +814,7 @@ func TestPathsFinder(t *testing.T) {
 }
 
 func TestTraverseByNodes(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
@@ -851,7 +864,7 @@ func TestTraverseByNodes(t *testing.T) {
 }
 
 func TestTraverseByRelationships(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
@@ -908,7 +921,7 @@ func TestTraverseByRelationships(t *testing.T) {
 }
 
 func TestTraverseByPaths(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
@@ -957,7 +970,7 @@ func TestTraverseByPaths(t *testing.T) {
 }
 
 func TestTraverseByFullPaths(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
@@ -1006,7 +1019,7 @@ func TestTraverseByFullPaths(t *testing.T) {
 }
 
 func TestPagedTraverseByNodes(t *testing.T) {
-	service := NewGraphDatabaseService()
+	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
@@ -1033,7 +1046,7 @@ func TestPagedTraverseByNodes(t *testing.T) {
 
 	traversal.PageSize = 1
 	traverser, nodes, resp := service.TraverseByNodesWithPaging(traversal, start)
-	if resp.Ok() && resp.StatusCode == 200 {
+	if resp.Ok() {
 		if len(nodes) != 1 {
 			t.Fatalf("Expected to get just 1 node, but got %d", len(nodes))
 		}
