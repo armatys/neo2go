@@ -8,7 +8,7 @@ func TestEmptyBatchShouldFail(t *testing.T) {
 	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
-		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
+		t.Fatalf("Error while connecting: %v", resp.Err.Error())
 	}
 
 	batch := service.Batch()
@@ -23,14 +23,14 @@ func TestBatchCreateDelete(t *testing.T) {
 	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
-		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
+		t.Fatalf("Error while connecting: %v", resp.Err.Error())
 	}
 
 	batch := service.Batch()
 
 	node, resp := batch.CreateNode()
-	if resp != nil && resp.NeoError != nil {
-		t.Fatalf("Error when creating batch: %v", resp.NeoError)
+	if resp != nil && resp.Err != nil {
+		t.Fatalf("Error when creating batch: %v", resp.Err)
 	}
 	if node.batchId <= 0 {
 		t.Fatalf("The `batchId` value should be greater than 0.")
@@ -40,12 +40,12 @@ func TestBatchCreateDelete(t *testing.T) {
 	resp = batch.Commit()
 
 	if !responseHasSucceededWithCode(resp, 200) {
-		t.Fatalf("Batch did return an error (%d; %v): %v", resp.StatusCode, resp.Ok(), resp.NeoError)
+		t.Fatalf("Batch did return an error (%d; %v): %v", resp.StatusCode, resp.Ok(), resp.Err)
 	}
 
 	_, resp = service.GetNode(node.Self.String())
 	if !responseHasFailedWithCode(resp, 404) {
-		t.Fatalf("Server returned unexpected response: %v", resp.NeoError.Error())
+		t.Fatalf("Server returned unexpected response: %v", resp.Err.Error())
 	}
 }
 
@@ -53,14 +53,14 @@ func TestBatchCreateThenDelete(t *testing.T) {
 	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
-		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
+		t.Fatalf("Error while connecting: %v", resp.Err.Error())
 	}
 
 	batch := service.Batch()
 
 	node, resp := batch.CreateNode()
-	if resp != nil && resp.NeoError != nil {
-		t.Fatalf("Error when creating batch: %v", resp.NeoError)
+	if resp != nil && resp.Err != nil {
+		t.Fatalf("Error when creating batch: %v", resp.Err)
 	}
 	if node.batchId <= 0 {
 		t.Fatalf("The `batchId` value should be greater than 0.")
@@ -69,17 +69,17 @@ func TestBatchCreateThenDelete(t *testing.T) {
 	resp = batch.Commit()
 
 	if !responseHasSucceededWithCode(resp, 200) {
-		t.Fatalf("Batch did return an error: %v", resp.NeoError)
+		t.Fatalf("Batch did return an error: %v", resp.Err)
 	}
 
 	_, resp = service.GetNode(node.Self.String())
 	if !responseHasSucceededWithCode(resp, 200) {
-		t.Fatalf("Server returned unexpected response: %v", resp.NeoError.Error())
+		t.Fatalf("Server returned unexpected response: %v", resp.Err.Error())
 	}
 
 	resp = service.DeleteNode(node)
 	if !responseHasSucceededWithCode(resp, 204) {
-		t.Fatalf("Server returned unexpected response: %v", resp.NeoError.Error())
+		t.Fatalf("Server returned unexpected response: %v", resp.Err.Error())
 	}
 }
 
@@ -87,7 +87,7 @@ func TestBatchDeleteNonExistentAndCreate(t *testing.T) {
 	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
-		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
+		t.Fatalf("Error while connecting: %v", resp.Err.Error())
 	}
 
 	batch := service.Batch()
@@ -96,8 +96,8 @@ func TestBatchDeleteNonExistentAndCreate(t *testing.T) {
 	batch.DeleteNode(node0)
 
 	node, resp := batch.CreateNode()
-	if resp.NeoError != nil {
-		t.Fatalf("Error when creating batch: %v", resp.NeoError)
+	if resp.Err != nil {
+		t.Fatalf("Error when creating batch: %v", resp.Err)
 	}
 	if node.batchId <= 0 {
 		t.Fatalf("The `batchId` value should be greater than 0.")
@@ -106,7 +106,7 @@ func TestBatchDeleteNonExistentAndCreate(t *testing.T) {
 	resp = batch.Commit()
 
 	if !responseHasFailedWithCode(resp, 600) {
-		t.Fatalf("Batch did return an error: %v", resp.NeoError)
+		t.Fatalf("Batch did return an error: %v", resp.Err)
 	}
 }
 
@@ -114,7 +114,7 @@ func TestBatchGetNodeIndexes(t *testing.T) {
 	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
-		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
+		t.Fatalf("Error while connecting: %v", resp.Err.Error())
 	}
 
 	batch := service.Batch()
@@ -125,7 +125,7 @@ func TestBatchGetNodeIndexes(t *testing.T) {
 	resp = batch.Commit()
 
 	if !responseHasSucceededWithCode(resp, 200) {
-		t.Fatalf("Batch did return an error (%d; %v): %v", resp.StatusCode, resp.Ok(), resp.NeoError)
+		t.Fatalf("Batch did return an error (%d; %v): %v", resp.StatusCode, resp.Ok(), resp.Err)
 	}
 
 	if len(*indexMap) < 1 {
@@ -134,7 +134,7 @@ func TestBatchGetNodeIndexes(t *testing.T) {
 
 	resp = service.DeleteIndex(index)
 	if !responseHasSucceededWithCode(resp, 204) {
-		t.Fatalf("Could not delete the index [%d]: %v", resp.StatusCode, resp.NeoError)
+		t.Fatalf("Could not delete the index [%d]: %v", resp.StatusCode, resp.Err)
 	}
 }
 
@@ -142,13 +142,13 @@ func TestBatchSetNodeProperty(t *testing.T) {
 	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
 	if !responseHasSucceededWithCode(resp, 200) {
-		t.Fatalf("Error while connecting: %v", resp.NeoError.Error())
+		t.Fatalf("Error while connecting: %v", resp.Err.Error())
 	}
 
 	v1, v2 := "John", "Alice"
 	node, resp := service.CreateNodeWithProperties(map[string]string{"name": v1})
 	if !responseHasSucceededWithCode(resp, 201) {
-		t.Fatalf("Cannot create node (%d; %v): %v", resp.StatusCode, resp.Ok(), resp.NeoError)
+		t.Fatalf("Cannot create node (%d; %v): %v", resp.StatusCode, resp.Ok(), resp.Err)
 	}
 
 	var data map[string]interface{}
@@ -170,7 +170,7 @@ func TestBatchSetNodeProperty(t *testing.T) {
 	resp = batch.Commit()
 
 	if !responseHasSucceededWithCode(resp, 200) {
-		t.Fatalf("Batch did return an error (%d; %v): %v", resp.StatusCode, resp.Ok(), resp.NeoError)
+		t.Fatalf("Batch did return an error (%d; %v): %v", resp.StatusCode, resp.Ok(), resp.Err)
 	}
 
 	var data2 map[string]interface{}

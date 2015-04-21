@@ -1,9 +1,36 @@
 package neo2go
 
+/*
+Example error response:
+{
+	"message":"Node 43 already exists with label User and property \"email\"=[me@example.com]",
+	"exception":"CypherExecutionException",
+	"fullname":"org.neo4j.cypher.CypherExecutionException",
+	"stacktrace":[],
+	"cause":{
+		"message":"Node 43 already exists with label 0 and property 0=me@example.com",
+		"exception":"UniqueConstraintViolationKernelException",
+		"fullname":"org.neo4j.kernel.api.exceptions.schema.UniqueConstraintViolationKernelException",
+		"stacktrace":[],
+		"errors":[
+			{
+			"code":"Neo.ClientError.Schema.ConstraintViolation",
+			"message":"Node 43 already exists with label 0 and property 0=me@example.com"
+			}
+		]
+	},
+	"errors":[
+		{
+		"code":"Neo.ClientError.Schema.ConstraintViolation",
+		"message":"Node 43 already exists with label User and property \"email\"=[me@example.com]"
+		}
+	]
+}
+*/
+
 type NeoError struct {
-	Message    string `json:"message"`
-	Exception  string `json:"exception"`
-	Stacktrace string `json:"stacktrace"`
+	Message string `json:"message"`
+	Code    string `json:"code"`
 }
 
 func (n *NeoError) Error() string {
@@ -11,7 +38,9 @@ func (n *NeoError) Error() string {
 }
 
 type NeoErrors struct {
-	Errors []NeoError `json:"errors"`
+	Errors            []NeoError `json:"errors"`
+	Exception         string     `json:"exception"`
+	ExceptionFullName string     `json:"fullname"`
 }
 
 func (n *NeoErrors) Error() string {
@@ -25,7 +54,7 @@ func (n *NeoErrors) Error() string {
 type NeoResponse struct {
 	ExpectedCode int
 	StatusCode   int
-	NeoError     error
+	Err          error
 	location     string
 }
 

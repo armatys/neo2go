@@ -628,9 +628,9 @@ func (g *GraphDatabaseService) execute_(neoRequest *NeoHttpRequest, neoRequestEr
 		neoResponse.location = locationUrl.String()
 	}
 	if resp.StatusCode >= 400 {
-		neoErr := &NeoErrors{}
+		neoErr := &NeoErrors{Errors: make([]NeoError, 0)}
 		container = neoErr
-		neoResponse.NeoError = neoErr
+		neoResponse.Err = neoErr
 	} else {
 		container = result
 	}
