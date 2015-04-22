@@ -1,5 +1,9 @@
 package neo2go
 
+import (
+	"encoding/json"
+)
+
 /*
 Example error response:
 {
@@ -96,7 +100,7 @@ type NeoDataRoot struct {
 
 type CypherResponse struct {
 	Columns []string
-	Data    [][]interface{}
+	Data    [][]json.RawMessage
 }
 
 //go:generate go run struct_generator/main.go -f status_codes.json -o status_codes.go -p neo2go

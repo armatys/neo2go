@@ -43,7 +43,7 @@ type NeoNode struct {
 	AllRelationships           *UrlTemplate           `json:"all_relationships"`
 	AllTypedRelationships      *UrlTemplate           `json:"all_typed_relationships"`
 	CreateRelationship         *UrlTemplate           `json:"create_relationship"`
-	Data                       map[string]interface{} `json:"data"`
+	Data                       json.RawMessage        `json:"data"`
 	Extensions                 map[string]interface{} `json:"extensions"`
 	IncomingRelationships      *UrlTemplate           `json:"incoming_relationships"`
 	IncomingTypedRelationships *UrlTemplate           `json:"incoming_typed_relationships"`
@@ -58,11 +58,7 @@ type NeoNode struct {
 }
 
 func (n *NeoNode) ParseData(result interface{}) error {
-	bytes, err := json.Marshal(n.Data)
-	if err != nil {
-		return err
-	}
-	return json.Unmarshal(bytes, result)
+	return json.Unmarshal([]byte(n.Data), result)
 }
 
 func (n *NeoNode) Id() int64 {

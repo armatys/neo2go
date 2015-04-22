@@ -1,6 +1,7 @@
 package neo2go
 
 import (
+	"encoding/json"
 	"flag"
 	"testing"
 )
@@ -179,13 +180,14 @@ func TestSimpleCypherQuery(t *testing.T) {
 		t.Fatalf("Expected column name to have a name %v, but got %v", colName, cypherResult.Columns[0])
 	}
 
-	if value, ok := cypherResult.Data[0][0].(string); ok {
-		expectedValue := "jan"
-		if value != expectedValue {
-			t.Fatalf("Expected the value returned by Cypher to be %v, but got %v", expectedValue, value)
-		}
-	} else {
-		t.Fatalf("Expected cypher data to be a string.")
+	expectedValue := "jan"
+	var value string
+	err := json.Unmarshal(cypherResult.Data[0][0], &value)
+	if err != nil {
+		t.Fatalf("Could not decode value (expected %v, but got %v): %v\n", expectedValue, string(cypherResult.Data[0][0]), err)
+	}
+	if string(value) != expectedValue {
+		t.Fatalf("Expected the value returned by Cypher to be %v, but got %v", expectedValue, string(value))
 	}
 
 	resp = service.DeleteNode(node)
