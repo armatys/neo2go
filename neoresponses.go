@@ -98,3 +98,5 @@ type CypherResponse struct {
 	Columns []string
 	Data    [][]interface{}
 }
+
+//go:generate go run struct_generator/main.go -f status_codes.json -o status_codes.go -p neo2go
