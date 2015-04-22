@@ -40,6 +40,9 @@ func (n *neoRequestBuilder) getDataRoot() *neoRequestData {
 }
 
 func (n *neoRequestBuilder) Cypher(cql string, params map[string]interface{}) (*CypherResponse, *neoRequestData) {
+	if params == nil {
+		params = map[string]interface{}{}
+	}
 	bodyMap := map[string]interface{}{
 		"query":  cql,
 		"params": params,

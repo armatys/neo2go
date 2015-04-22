@@ -165,12 +165,17 @@ func TestBatchSetNodeProperty(t *testing.T) {
 	}
 
 	batch := service.Batch()
-	node2, _ := batch.GetNode(node.Self.String())
+	node2, _ := batch.CreateNode()
 	batch.SetPropertyForNode(node2, "name", v2)
 	resp = batch.Commit()
 
 	if !responseHasSucceededWithCode(resp, 200) {
 		t.Fatalf("Batch did return an error (%d; %v): %v", resp.StatusCode, resp.Ok(), resp.Err)
+	}
+
+	node2, resp = service.GetNode(node2.Self.String())
+	if !responseHasSucceededWithCode(resp, 200) {
+		t.Fatalf("Could not get the node (%d; %v): %v", resp.StatusCode, resp.Ok(), resp.Err)
 	}
 
 	var data2 map[string]interface{}
@@ -179,8 +184,8 @@ func TestBatchSetNodeProperty(t *testing.T) {
 	}
 
 	if v, ok := data2["name"].(string); ok {
-		if v != v1 {
-			t.Fatalf("Invalid node2 property value: expected %v but got %v.")
+		if v != v2 {
+			t.Fatalf("Invalid node2 property value: expected %v but got %v.", v2, v)
 		}
 	} else {
 		t.Fatalf("Invalid node2 property value: cannot convert to string (%v)", data2["name"])
