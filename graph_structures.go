@@ -92,6 +92,7 @@ func (n *NeoNode) setBatchId(bid NeoBatchId) {
 	setTemplateIfNil(&n.CreateRelationship, fmt.Sprintf(`{%v}/relationships`, bid))
 	setTemplateIfNil(&n.IncomingRelationships, fmt.Sprintf(`{%v}/relationships/in`, bid))
 	setTemplateIfNil(&n.IncomingTypedRelationships, fmt.Sprintf(`{%v}/relationships/in/{-list|&|types}`, bid))
+	setTemplateIfNil(&n.Labels, fmt.Sprintf(`{%v}/labels`, bid))
 	setTemplateIfNil(&n.OutgoingRelationships, fmt.Sprintf(`{%v}/relationships/out`, bid))
 	setTemplateIfNil(&n.OutgoingTypedRelationships, fmt.Sprintf(`{%v}/relationships/out/{-list|&|types}`, bid))
 	setTemplateIfNil(&n.PagedTraverse, fmt.Sprintf(`{%v}/paged/traverse/{returnType}{?pageSize,leaseTime}`, bid))
