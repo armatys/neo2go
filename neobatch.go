@@ -94,6 +94,16 @@ func (n *NeoBatch) DeleteNode(node *NeoNode) *NeoResponse {
 	return n.queueRequestData(reqData)
 }
 
+func (n *NeoBatch) AddLabel(node *NeoNode, label string) *NeoResponse {
+	reqData := n.service.builder.AddLabel(node, label)
+	return n.queueRequestData(reqData)
+}
+
+func (n *NeoBatch) AddLabels(node *NeoNode, labels []string) *NeoResponse {
+	reqData := n.service.builder.AddLabels(node, labels)
+	return n.queueRequestData(reqData)
+}
+
 func (n *NeoBatch) GetNode(uri string) (*NeoNode, *NeoResponse) {
 	result, reqData := n.service.builder.GetNode(uri)
 	resp := n.queueRequestDataWithResult(reqData, result)

@@ -47,6 +47,7 @@ type NeoNode struct {
 	Extensions                 map[string]interface{} `json:"extensions"`
 	IncomingRelationships      *UrlTemplate           `json:"incoming_relationships"`
 	IncomingTypedRelationships *UrlTemplate           `json:"incoming_typed_relationships"`
+	Labels                     *UrlTemplate           `json:"labels"`
 	OutgoingRelationships      *UrlTemplate           `json:"outgoing_relationships"`
 	OutgoingTypedRelationships *UrlTemplate           `json:"outgoing_typed_relationships"`
 	PagedTraverse              *UrlTemplate           `json:"paged_traverse"`

@@ -71,6 +71,14 @@ func (n *neoRequestBuilder) DeleteNode(node *NeoNode) *neoRequestData {
 	return &neoRequestData{expectedStatus: 204, method: "DELETE", requestUrl: node.Self.String()}
 }
 
+func (n *neoRequestBuilder) AddLabel(node *NeoNode, label string) *neoRequestData {
+	return &neoRequestData{body: label, expectedStatus: 204, method: "POST", requestUrl: node.Labels.String()}
+}
+
+func (n *neoRequestBuilder) AddLabels(node *NeoNode, labels []string) *neoRequestData {
+	return &neoRequestData{body: labels, expectedStatus: 204, method: "POST", requestUrl: node.Labels.String()}
+}
+
 func (n *neoRequestBuilder) GetNode(nodeUrl string) (*NeoNode, *neoRequestData) {
 	node := new(NeoNode)
 	requestData := neoRequestData{expectedStatus: 200, method: "GET", result: node, requestUrl: nodeUrl}

@@ -16,6 +16,12 @@ type Grapher interface {
 	DeleteNode(node *NeoNode) *NeoResponse
 
 	// ==============
+	// Node labels
+
+	AddLabel(node *NeoNode, label string) *NeoResponse
+	AddLabels(node *NeoNode, labels []string) *NeoResponse
+
+	// ==============
 	// Node properties
 
 	// ?

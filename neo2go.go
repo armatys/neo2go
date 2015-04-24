@@ -98,6 +98,16 @@ func (g *GraphDatabaseService) DeleteNode(node *NeoNode) *NeoResponse {
 	return g.executeFromRequestData(reqData)
 }
 
+func (g *GraphDatabaseService) AddLabel(node *NeoNode, label string) *NeoResponse {
+	reqData := g.builder.AddLabel(node, label)
+	return g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) AddLabels(node *NeoNode, labels []string) *NeoResponse {
+	reqData := g.builder.AddLabels(node, labels)
+	return g.executeFromRequestData(reqData)
+}
+
 func (g *GraphDatabaseService) GetNode(uri string) (*NeoNode, *NeoResponse) {
 	result, reqData := g.builder.GetNode(uri)
 	return result, g.executeFromRequestData(reqData)
