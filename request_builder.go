@@ -54,6 +54,61 @@ func (n *neoRequestBuilder) Cypher(cql string, params map[string]interface{}) (*
 	return cypherResp, &requestData
 }
 
+// Transactional Cypher
+
+func (n *neoRequestBuilder) NewCypherTransaction(requests ...*CypherTransactionRequest) (*CypherTransaction, *neoRequestData) {
+	statememts := make([]map[string]interface{}, 0, len(requests))
+	for _, req := range requests {
+		stmt := map[string]interface{}{
+			"statement":          req.cql,
+			"parameters":         req.params,
+			"resultDataContents": []string{"REST"},
+		}
+		statememts = append(statememts, stmt)
+	}
+
+	url := n.dataRoot.Transaction.String()
+	cypherTrans := new(CypherTransaction)
+	requestData := neoRequestData{body: &statememts, expectedStatus: 201, method: "POST", result: cypherTrans, requestUrl: url}
+	return cypherTrans, &requestData
+}
+
+func (n *neoRequestBuilder) ExecuteCypher(cypherTrans *CypherTransaction, requests ...*CypherTransactionRequest) (*CypherTransaction, *neoRequestData) {
+	statememts := make([]map[string]interface{}, 0, len(requests))
+	for _, req := range requests {
+		stmt := map[string]interface{}{
+			"statement":          req.cql,
+			"parameters":         req.params,
+			"resultDataContents": []string{"REST"},
+		}
+		statememts = append(statememts, stmt)
+	}
+
+	url := cypherTrans.Self.String()
+	returnedCypherTrans := new(CypherTransaction)
+	returnedCypherTrans.Self = cypherTrans.Self
+	requestData := neoRequestData{body: &statememts, expectedStatus: 200, method: "POST", result: returnedCypherTrans, requestUrl: url}
+	return returnedCypherTrans, &requestData
+}
+
+func (n *neoRequestBuilder) CommitCypher(cypherTrans *CypherTransaction, requests ...*CypherTransactionRequest) (*CypherTransaction, *neoRequestData) {
+	statememts := make([]map[string]interface{}, 0, len(requests))
+	for _, req := range requests {
+		stmt := map[string]interface{}{
+			"statement":          req.cql,
+			"parameters":         req.params,
+			"resultDataContents": []string{"REST"},
+		}
+		statememts = append(statememts, stmt)
+	}
+
+	url := cypherTrans.Commit.String()
+	returnedCypherTrans := new(CypherTransaction)
+	returnedCypherTrans.Self = cypherTrans.Self
+	requestData := neoRequestData{body: &statememts, expectedStatus: 200, method: "POST", result: returnedCypherTrans, requestUrl: url}
+	return returnedCypherTrans, &requestData
+}
+
 // Grapher
 
 func (n *neoRequestBuilder) CreateNode() (*NeoNode, *neoRequestData) {

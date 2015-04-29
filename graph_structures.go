@@ -318,3 +318,22 @@ func NewNeoPathFinderSpecWithRelationships(rels *NeoTraversalRelationship) *NeoP
 	spec.Relationships = rels
 	return spec
 }
+
+// Transactional Cypher
+
+type CypherTransactionRequest struct {
+	cql    string
+	params map[string]interface{}
+}
+
+type CypherResult struct {
+	Columns []string `json:"columns"`
+	Data    []json.RawMessage
+}
+
+type CypherTransaction struct {
+	Commit  *UrlTemplate   `json:"commit"`
+	Errors  []NeoError     `json:"errors"`
+	Self    *UrlTemplate   `json:"self"`
+	Results []CypherResult `json:"results"`
+}
