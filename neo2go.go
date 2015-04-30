@@ -83,18 +83,23 @@ func (g *GraphDatabaseService) Cypher(cql string, params map[string]interface{})
 
 // Transactional Cypher
 
+func (g *GraphDatabaseService) CypherAutoCommit(requests ...*CypherTransactionRequest) (*CypherTransaction, *NeoResponse) {
+	result, reqData := g.builder.TransactionalCypher(nil, true, requests...)
+	return result, g.executeFromRequestData(reqData)
+}
+
 func (g *GraphDatabaseService) NewCypherTransaction(requests ...*CypherTransactionRequest) (*CypherTransaction, *NeoResponse) {
-	result, reqData := g.builder.NewCypherTransaction(requests)
+	result, reqData := g.builder.TransactionalCypher(nil, false, requests...)
 	return result, g.executeFromRequestData(reqData)
 }
 
 func (g *GraphDatabaseService) ExecuteCypher(cypherTrans *CypherTransaction, requests ...*CypherTransactionRequest) (*CypherTransaction, *NeoResponse) {
-	result, reqData := g.builder.ExecuteCypher(cypherTrans, requests)
+	result, reqData := g.builder.TransactionalCypher(cypherTrans, false, requests...)
 	return result, g.executeFromRequestData(reqData)
 }
 
 func (g *GraphDatabaseService) CommitCypher(cypherTrans *CypherTransaction, requests ...*CypherTransactionRequest) (*CypherTransaction, *NeoResponse) {
-	result, reqData := g.builder.CommitCypher(cypherTrans, requests)
+	result, reqData := g.builder.TransactionalCypher(cypherTrans, true, requests...)
 	return result, g.executeFromRequestData(reqData)
 }
 
@@ -650,10 +655,7 @@ func (g *GraphDatabaseService) execute_(neoRequest *NeoHttpRequest, neoRequestEr
 	neoResponse := new(NeoResponse)
 	neoResponse.ExpectedCode = expectedStatusCode
 	neoResponse.StatusCode = resp.StatusCode
-	locationUrl, err := resp.Location()
-	if err == nil {
-		neoResponse.location = locationUrl.String()
-	}
+
 	if resp.StatusCode >= 400 {
 		neoErr := &NeoErrors{Errors: make([]NeoError, 0)}
 		container = neoErr
@@ -662,7 +664,16 @@ func (g *GraphDatabaseService) execute_(neoRequest *NeoHttpRequest, neoRequestEr
 		container = result
 	}
 
+	locationUrl, err := resp.Location()
+	if err == nil {
+		neoResponse.location = locationUrl.String()
+	}
+
 	if container != nil {
+		if selfAware, ok := container.(selfUrlAware); ok && neoResponse.location != "" {
+			selfAware.SetSelf(NewUrlTemplate(neoResponse.location))
+		}
+
 		ctype := resp.Header.Get("content-type")
 		matched := jsonContentTypeRegExp.MatchString(ctype)
 

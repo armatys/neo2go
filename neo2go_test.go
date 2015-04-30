@@ -196,6 +196,80 @@ func TestSimpleCypherQuery(t *testing.T) {
 	}
 }
 
+func TestAutoCommitCypherTransaction(t *testing.T) {
+	service := getDefaultDb()
+	resp := service.Connect(databaseAddress)
+	if !responseHasSucceededWithCode(resp, 200) {
+		t.Fatalf("Error while connecting: %v", resp.Err.Error())
+	}
+
+	req := &CypherTransactionRequest{
+		cql: `CREATE (n:User { Name: {Name} }) RETURN n`,
+		params: map[string]interface{}{
+			"Name": "Jon",
+		},
+	}
+
+	_, resp = service.CypherAutoCommit(req)
+
+	if !responseHasSucceededWithCode(resp, 200) {
+		t.Fatalf("Unexpected result %v", resp.Err)
+	}
+}
+
+func TestMultiCypherTransaction(t *testing.T) {
+	service := getDefaultDb()
+	resp := service.Connect(databaseAddress)
+	if !responseHasSucceededWithCode(resp, 200) {
+		t.Fatalf("Error while connecting: %v", resp.Err.Error())
+	}
+
+	trans, resp := service.NewCypherTransaction(&CypherTransactionRequest{
+		cql: `CREATE (n:User { Name: {Name} }) RETURN n`,
+		params: map[string]interface{}{
+			"Name": "Jon",
+		},
+	})
+
+	if !responseHasSucceededWithCode(resp, 201) {
+		t.Fatalf("Unexpected result %v", resp.Err)
+	}
+
+	result := trans.Results[0]
+	row := result.Data[0]
+	if len(row.NeoRest) != 1 {
+		t.Fatalf("Invalid number of cypher results.")
+	}
+
+	var userNode *NeoNode = new(NeoNode)
+	err := json.Unmarshal(row.NeoRest[0], userNode)
+	if err != nil {
+		t.Fatalf("Could not unmarshal cypher rest data: %v\n", err)
+	}
+
+	// Delete nodes
+	trans, resp = service.ExecuteCypher(trans, &CypherTransactionRequest{
+		cql:    `DELETE (n:User)-[r]-() DELETE n, r`,
+		params: nil,
+	})
+
+	if !responseHasSucceededWithCode(resp, 200) {
+		t.Fatalf("Unexpected result %v", resp.Err)
+	}
+
+	// Match nodes
+	_, resp = service.CommitCypher(trans, &CypherTransactionRequest{
+		cql: `MATCH (n:User { Name: {Name} }) RETURN n`,
+		params: map[string]interface{}{
+			"Name": "Jon",
+		},
+	})
+
+	if !responseHasSucceededWithCode(resp, 200) {
+		t.Fatalf("Unexpected result %v", resp.Err)
+	}
+}
+
 func TestSimpleRelationships(t *testing.T) {
 	service := getDefaultDb()
 	resp := service.Connect(databaseAddress)
@@ -267,10 +341,6 @@ func TestSimpleRelationships(t *testing.T) {
 
 	if len(*relTypes) < 2 {
 		t.Fatalf("Expected at least 2 relationship types, but got: %d", len(*relTypes))
-	}
-
-	if len(*relTypes) != 2 {
-		t.Logf("Expected at 2 relationship types, but got: %d", len(*relTypes))
 	}
 
 	resp = service.DeleteRelationship(rel1)

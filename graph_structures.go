@@ -32,6 +32,10 @@ char    16-bit unsigned   u0000 to uffff (0 to 65535)
 String  sequence of Unicode characters
 */
 
+type selfUrlAware interface {
+	SetSelf(url *UrlTemplate)
+}
+
 func setTemplateIfNil(tmpl **UrlTemplate, val string) {
 	if *tmpl == nil {
 		newTempl := NewUrlTemplate(val)
@@ -329,14 +333,21 @@ type CypherTransactionRequest struct {
 	params map[string]interface{}
 }
 
+type CypherRow struct {
+	NeoRest []json.RawMessage `json:"rest"`
+}
+
 type CypherResult struct {
-	Columns []string `json:"columns"`
-	Data    []json.RawMessage
+	Columns []string    `json:"columns"`
+	Data    []CypherRow `json:"data"`
 }
 
 type CypherTransaction struct {
 	Commit  *UrlTemplate   `json:"commit"`
-	Errors  []NeoError     `json:"errors"`
 	Self    *UrlTemplate   `json:"self"`
 	Results []CypherResult `json:"results"`
+}
+
+func (c *CypherTransaction) SetSelf(url *UrlTemplate) {
+	c.Self = url
 }
