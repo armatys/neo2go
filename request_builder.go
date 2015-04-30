@@ -60,8 +60,8 @@ func (n *neoRequestBuilder) TransactionalCypher(cypherTrans *CypherTransaction, 
 	statememts := make([]map[string]interface{}, 0, len(requests))
 	for _, req := range requests {
 		stmt := map[string]interface{}{
-			"statement":          req.cql,
-			"parameters":         req.params,
+			"statement":          req.Cql,
+			"parameters":         req.Params,
 			"resultDataContents": []string{"REST"},
 		}
 		statememts = append(statememts, stmt)

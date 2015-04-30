@@ -329,8 +329,8 @@ func NewNeoPathFinderSpecWithRelationships(rels *NeoTraversalRelationship) *NeoP
 // Transactional Cypher
 
 type CypherTransactionRequest struct {
-	cql    string
-	params map[string]interface{}
+	Cql    string
+	Params map[string]interface{}
 }
 
 type CypherRow struct {

@@ -204,8 +204,8 @@ func TestAutoCommitCypherTransaction(t *testing.T) {
 	}
 
 	req := &CypherTransactionRequest{
-		cql: `CREATE (n:User { Name: {Name} }) RETURN n`,
-		params: map[string]interface{}{
+		Cql: `CREATE (n:User { Name: {Name} }) RETURN n`,
+		Params: map[string]interface{}{
 			"Name": "Jon",
 		},
 	}
@@ -225,8 +225,8 @@ func TestMultiCypherTransaction(t *testing.T) {
 	}
 
 	trans, resp := service.NewCypherTransaction(&CypherTransactionRequest{
-		cql: `CREATE (n:User { Name: {Name} }) RETURN n`,
-		params: map[string]interface{}{
+		Cql: `CREATE (n:User { Name: {Name} }) RETURN n`,
+		Params: map[string]interface{}{
 			"Name": "Jon",
 		},
 	})
@@ -249,8 +249,8 @@ func TestMultiCypherTransaction(t *testing.T) {
 
 	// Delete nodes
 	trans, resp = service.ExecuteCypher(trans, &CypherTransactionRequest{
-		cql:    `DELETE (n:User)-[r]-() DELETE n, r`,
-		params: nil,
+		Cql:    `DELETE (n:User)-[r]-() DELETE n, r`,
+		Params: nil,
 	})
 
 	if !responseHasSucceededWithCode(resp, 200) {
@@ -259,8 +259,8 @@ func TestMultiCypherTransaction(t *testing.T) {
 
 	// Match nodes
 	_, resp = service.CommitCypher(trans, &CypherTransactionRequest{
-		cql: `MATCH (n:User { Name: {Name} }) RETURN n`,
-		params: map[string]interface{}{
+		Cql: `MATCH (n:User { Name: {Name} }) RETURN n`,
+		Params: map[string]interface{}{
 			"Name": "Jon",
 		},
 	})
