@@ -84,22 +84,25 @@ func (n *NeoNode) IdOrBatchId() string {
 	return ""
 }
 
+func (n *NeoNode) SetDefaultUrlTemplates(id string) {
+	setTemplateIfNil(&n.AllRelationships, fmt.Sprintf(`%s/relationships/all`, id))
+	setTemplateIfNil(&n.AllTypedRelationships, fmt.Sprintf(`%s/relationships/all/{-list|&|types}`, id))
+	setTemplateIfNil(&n.CreateRelationship, fmt.Sprintf(`%s/relationships`, id))
+	setTemplateIfNil(&n.IncomingRelationships, fmt.Sprintf(`%s/relationships/in`, id))
+	setTemplateIfNil(&n.IncomingTypedRelationships, fmt.Sprintf(`%s/relationships/in/{-list|&|types}`, id))
+	setTemplateIfNil(&n.Labels, fmt.Sprintf(`%s/labels`, id))
+	setTemplateIfNil(&n.OutgoingRelationships, fmt.Sprintf(`%s/relationships/out`, id))
+	setTemplateIfNil(&n.OutgoingTypedRelationships, fmt.Sprintf(`%s/relationships/out/{-list|&|types}`, id))
+	setTemplateIfNil(&n.PagedTraverse, fmt.Sprintf(`%s/paged/traverse/{returnType}{?pageSize,leaseTime}`, id))
+	setTemplateIfNil(&n.Properties, fmt.Sprintf(`%s/properties`, id))
+	setTemplateIfNil(&n.Property, fmt.Sprintf(`%s/properties/{key}`, id))
+	setTemplateIfNil(&n.Self, fmt.Sprintf(`%s`, id))
+	setTemplateIfNil(&n.Traverse, fmt.Sprintf(`%s/traverse/{returnType}`, id))
+}
+
 func (n *NeoNode) setBatchId(bid NeoBatchId) {
 	n.batchId = bid
-
-	setTemplateIfNil(&n.AllRelationships, fmt.Sprintf(`{%v}/relationships/all`, bid))
-	setTemplateIfNil(&n.AllTypedRelationships, fmt.Sprintf(`{%v}/relationships/all/{-list|&|types}`, bid))
-	setTemplateIfNil(&n.CreateRelationship, fmt.Sprintf(`{%v}/relationships`, bid))
-	setTemplateIfNil(&n.IncomingRelationships, fmt.Sprintf(`{%v}/relationships/in`, bid))
-	setTemplateIfNil(&n.IncomingTypedRelationships, fmt.Sprintf(`{%v}/relationships/in/{-list|&|types}`, bid))
-	setTemplateIfNil(&n.Labels, fmt.Sprintf(`{%v}/labels`, bid))
-	setTemplateIfNil(&n.OutgoingRelationships, fmt.Sprintf(`{%v}/relationships/out`, bid))
-	setTemplateIfNil(&n.OutgoingTypedRelationships, fmt.Sprintf(`{%v}/relationships/out/{-list|&|types}`, bid))
-	setTemplateIfNil(&n.PagedTraverse, fmt.Sprintf(`{%v}/paged/traverse/{returnType}{?pageSize,leaseTime}`, bid))
-	setTemplateIfNil(&n.Properties, fmt.Sprintf(`{%v}/properties`, bid))
-	setTemplateIfNil(&n.Property, fmt.Sprintf(`{%v}/properties/{key}`, bid))
-	setTemplateIfNil(&n.Self, fmt.Sprintf(`{%v}`, bid))
-	setTemplateIfNil(&n.Traverse, fmt.Sprintf(`{%v}/traverse/{returnType}`, bid))
+	n.SetDefaultUrlTemplates(fmt.Sprintf(`{%v}`, bid))
 }
 
 func (n *NeoNode) String() string {
