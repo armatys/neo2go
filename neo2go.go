@@ -81,6 +81,23 @@ func (g *GraphDatabaseService) Cypher(cql string, params map[string]interface{})
 	return result, g.executeFromRequestData(reqData)
 }
 
+// Transactional Cypher
+
+func (g *GraphDatabaseService) NewCypherTransaction(requests ...*CypherTransactionRequest) (*CypherTransaction, *NeoResponse) {
+	result, reqData := g.builder.NewCypherTransaction(requests)
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) ExecuteCypher(cypherTrans *CypherTransaction, requests ...*CypherTransactionRequest) (*CypherTransaction, *NeoResponse) {
+	result, reqData := g.builder.ExecuteCypher(cypherTrans, requests)
+	return result, g.executeFromRequestData(reqData)
+}
+
+func (g *GraphDatabaseService) CommitCypher(cypherTrans *CypherTransaction, requests ...*CypherTransactionRequest) (*CypherTransaction, *NeoResponse) {
+	result, reqData := g.builder.CommitCypher(cypherTrans, requests)
+	return result, g.executeFromRequestData(reqData)
+}
+
 // Grapher interface
 
 func (g *GraphDatabaseService) CreateNode() (*NeoNode, *NeoResponse) {
